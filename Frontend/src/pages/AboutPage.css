@@ -1,0 +1,310 @@
+.about-page {
+    --about-max-text: 72ch;
+}
+
+.about-subnav {
+    position: sticky;
+    top: var(--site-header-height);
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+}
+
+.about-subnav .container {
+    display: flex;
+    gap: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    overflow-x: auto;
+}
+
+.about-subnav a {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(30, 58, 95, 0.12);
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.about-subnav a:hover {
+    background: rgba(201, 168, 76, 0.14);
+    border-color: rgba(201, 168, 76, 0.25);
+}
+
+.about-band {
+    background: var(--off-white);
+}
+
+.about-gallery {
+    margin-top: 18px;
+}
+
+.about-page .section-title {
+    margin-bottom: 20px;
+}
+
+.about-page .card,
+.about-page .content-card {
+    box-shadow: var(--shadow-sm);
+}
+
+.about-page .content-card {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+}
+
+.about-history,
+.about-diocese {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 64px;
+    align-items: center;
+}
+
+.about-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 1.8vw, 1.75rem);
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 20px;
+}
+
+.history-text p,
+.diocese-text p {
+    color: var(--text-mid);
+    line-height: 1.7;
+    margin-bottom: 14px;
+    font-size: 0.92rem;
+    max-width: var(--about-max-text);
+}
+
+.history-image img,
+.diocese-image img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+/* Values */
+.value-card {
+    text-align: center;
+}
+
+.value-icon {
+    font-size: 1.8rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.value-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.value-desc {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    line-height: 1.5;
+}
+
+.about-contact-card {
+    margin-top: 18px;
+    padding: 18px 18px;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(30, 58, 95, 0.12);
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.about-contact-kicker {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 10px;
+}
+
+.about-contact-lines {
+    display: grid;
+    gap: 8px;
+    color: var(--text-mid);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.about-contact-lines strong {
+    color: var(--navy);
+}
+
+/* Staff */
+.staff-card {
+    text-align: center;
+}
+
+.staff-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--navy);
+    overflow: hidden;
+    display: block;
+    margin: 0 auto 16px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-md);
+}
+
+.staff-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.staff-role {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+}
+
+.staff-name {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    margin-bottom: 2px;
+}
+
+.staff-title {
+    font-size: 0.82rem;
+    color: var(--text-light);
+}
+
+.staff-bio {
+    margin-top: 12px;
+    font-size: 0.84rem;
+    color: var(--text-mid);
+    line-height: 1.55;
+}
+
+.about-timeline {
+    margin-top: 34px;
+    display: grid;
+    gap: 18px;
+    padding: 0;
+    list-style: none;
+}
+
+.about-timeline-item {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.about-timeline-date {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    border-radius: 999px;
+    background: rgba(30, 58, 95, 0.08);
+    color: var(--navy);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+}
+
+.about-timeline-card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.92);
+    padding: 18px 18px;
+    box-shadow: var(--shadow-sm);
+}
+
+.about-timeline-card h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.about-timeline-card p {
+    color: var(--text-mid);
+    line-height: 1.7;
+    font-size: 0.92rem;
+}
+
+.about-quote {
+    margin-top: 18px;
+}
+
+.about-page .quote-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Mission */
+.mission-banner {
+    background: var(--navy);
+    color: var(--white);
+    padding: 64px 0;
+}
+
+.mission-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.mission-quote {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 700px;
+    margin: 0 auto;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+
+    .about-history,
+    .about-diocese {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .diocese-image {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-timeline-item {
+        grid-template-columns: 1fr;
+    }
+
+    .about-timeline-date {
+        width: fit-content;
+        padding: 0 14px;
+    }
+}

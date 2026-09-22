@@ -1,0 +1,50 @@
+.topbar {
+    background: var(--navy-dark);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.78rem;
+    padding: 6px 0;
+}
+
+.topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.topbar-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255, 255, 255, 0.8);
+    transition: color var(--transition);
+}
+
+.topbar-link:hover {
+    color: var(--gold);
+}
+
+.topbar-divider {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 900px) {
+    .topbar-right {
+        gap: 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .topbar-inner {
+        justify-content: center;
+    }
+    .topbar-right {
+        display: none;
+    }
+}

@@ -1,0 +1,226 @@
+.navbar {
+    background: #fdfaf4;
+    /* Soft warm ivory cream */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 100;
+}
+
+.navbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    height: 68px;
+    margin: 0 auto;
+}
+
+/* Logo */
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.logo-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.logo-sub {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+}
+
+/* Nav links */
+.navbar-links {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 4px;
+    flex: 1;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--navy);
+    border-radius: var(--radius);
+    transition: color var(--transition), background var(--transition);
+    white-space: nowrap;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--navy);
+    background: rgba(201, 168, 76, 0.15);
+    /* Soft gold background highlight */
+}
+
+.dropdown-arrow {
+    font-size: 0.7rem;
+    opacity: 0.6;
+}
+
+/* Dropdown */
+.dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background: #fdfaf4;
+    /* Matching dropdown to navbar */
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    /* Faint gold border */
+    min-width: 200px;
+    list-style: none;
+    padding: 6px 0;
+    z-index: 200;
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-link {
+    display: block;
+    padding: 9px 16px;
+    font-size: 0.85rem;
+    color: var(--navy);
+    transition: background var(--transition), color var(--transition);
+}
+
+.dropdown-link:hover {
+    background: rgba(201, 168, 76, 0.1);
+    /* Subtle gold hover */
+    color: var(--navy);
+}
+
+/* Donate button */
+.navbar-donate {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    padding: 9px 20px;
+    box-shadow: 0 4px 12px rgba(201, 168, 76, 0.25);
+}
+
+.navbar-donate:hover {
+    box-shadow: 0 6px 16px rgba(201, 168, 76, 0.4);
+}
+
+/* Hamburger */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    padding: 4px;
+    margin-left: auto;
+}
+
+.hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--navy);
+    border-radius: 2px;
+    transition: all var(--transition);
+}
+
+/* Mobile menu */
+.mobile-menu {
+    background: #fdfaf4;
+    border-top: 1px solid rgba(201, 168, 76, 0.15);
+    padding: 8px 0 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-link {
+    display: block;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--navy);
+    transition: color var(--transition), background var(--transition);
+}
+
+.mobile-link:hover {
+    background: rgba(201, 168, 76, 0.05);
+    /* Very subtle gold on hover */
+}
+
+.mobile-sub {
+    background: rgba(30, 58, 95, 0.03);
+    /* Faint navy tint for submenu */
+}
+
+.mobile-sub-link {
+    display: block;
+    padding: 10px 32px;
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    transition: color var(--transition), background var(--transition);
+}
+
+.mobile-sub-link:hover {
+    background: rgba(201, 168, 76, 0.05);
+    color: var(--navy);
+}
+
+@media (max-width: 1200px) {
+    .navbar-inner {
+        gap: 16px;
+    }
+
+    .nav-link {
+        padding: 8px 8px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .navbar-links {
+        display: none;
+    }
+
+    .navbar-donate {
+        display: none;
+    }
+
+    .hamburger {
+        display: flex;
+    }
+}
+
+@media (min-width: 1025px) {
+    .mobile-menu {
+        display: none !important;
+    }
+}

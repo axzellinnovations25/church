@@ -1,0 +1,545 @@
+.mass-time-card {
+    text-align: left;
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 246, 241, 0.98));
+    border: 1px solid rgba(30, 58, 95, 0.08);
+    box-shadow: 0 18px 40px rgba(21, 45, 74, 0.08);
+    border-radius: 22px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    min-height: 100%;
+    position: relative;
+}
+
+/* Schedule filter + grouped layout */
+.mt-filter-bar {
+    display: inline-flex;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(30, 58, 95, 0.12);
+    background: rgba(248, 249, 250, 0.9);
+    box-shadow: inset 0 1px 2px rgba(17, 35, 62, 0.04);
+    margin: 18px auto 0;
+}
+
+.mt-filter-tab {
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.84rem;
+    color: var(--navy);
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.mt-filter-tab.active {
+    background: var(--navy);
+    color: var(--white);
+}
+
+.mt-schedule {
+    margin-top: 22px;
+    display: grid;
+    gap: 24px;
+}
+
+.mt-location-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--navy);
+    font-size: 1.35rem;
+    margin-bottom: 14px;
+}
+
+.mt-day-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.mt-day-card {
+    border: 1px solid rgba(30, 58, 95, 0.10);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 12px 28px rgba(21, 45, 74, 0.06);
+    padding: 16px;
+}
+
+.mt-day-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.mt-day-name {
+    font-weight: 900;
+    color: var(--navy);
+}
+
+.mt-day-count {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-light);
+}
+
+.mt-time-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mt-time-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: rgba(30, 58, 95, 0.07);
+    color: var(--navy);
+    font-weight: 800;
+    font-size: 0.86rem;
+    line-height: 1;
+}
+
+.mass-time-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 44px rgba(21, 45, 74, 0.12);
+    border-color: rgba(201, 168, 76, 0.26);
+}
+
+.mass-time-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gold), rgba(30, 58, 95, 0.55));
+}
+
+.mt-card-header {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: start;
+    margin-bottom: 14px;
+}
+
+.mt-card-heading {
+    min-width: 0;
+}
+
+.mt-icon-box {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(30, 58, 95, 0.08);
+    flex-shrink: 0;
+}
+
+.mt-icon-variant-1 {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.22), rgba(201, 168, 76, 0.06));
+}
+
+.mt-icon-variant-2 {
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.14), rgba(42, 79, 124, 0.04));
+}
+
+.mt-icon-variant-3 {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.16), rgba(30, 58, 95, 0.1));
+}
+
+.mt-clock {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--navy);
+}
+
+.mt-clock::before,
+.mt-clock::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+    transform-origin: bottom center;
+    background: var(--navy);
+    border-radius: 999px;
+}
+
+.mt-clock::before {
+    width: 2px;
+    height: 7px;
+    margin-left: -1px;
+}
+
+.mt-clock::after {
+    width: 2px;
+    height: 10px;
+    margin-left: -1px;
+}
+
+.mt-clock-1::before {
+    transform: rotate(0deg);
+}
+
+.mt-clock-1::after {
+    transform: rotate(55deg);
+}
+
+.mt-clock-2::before {
+    transform: rotate(30deg);
+}
+
+.mt-clock-2::after {
+    transform: rotate(120deg);
+}
+
+.mt-clock-3::before {
+    transform: rotate(-35deg);
+}
+
+.mt-clock-3::after {
+    transform: rotate(80deg);
+}
+
+.mt-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.12rem;
+    color: var(--navy);
+    margin-bottom: 8px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.mt-card-day {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(30, 58, 95, 0.07);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--navy);
+}
+
+.mt-card-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 66px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    background: rgba(201, 168, 76, 0.14);
+    color: var(--gold-dark);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.mt-card-note {
+    width: 100%;
+    font-size: 0.86rem;
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    min-height: 44px;
+}
+
+.mt-section-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 10px;
+}
+
+.mt-card-details {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text-dark);
+}
+
+.mt-time-chip {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(30, 58, 95, 0.08);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-mid);
+    box-shadow: 0 8px 18px rgba(21, 45, 74, 0.04);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.mt-time-chip::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.12);
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-32 {
+    margin-top: 32px;
+}
+
+.mt-48 {
+    margin-top: 48px;
+}
+
+.newsletter-cta {
+    margin-bottom: 24px;
+}
+
+.newsletter-link-full {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: var(--navy);
+    color: #ffffff;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition);
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.15);
+}
+
+.newsletter-link-full:hover {
+    background: var(--gold);
+    color: var(--navy);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(201, 168, 76, 0.25);
+}
+
+.newsletter-link-full span {
+    transition: transform var(--transition);
+}
+
+.newsletter-link-full:hover span {
+    transform: translateX(4px);
+}
+
+/* Sacraments */
+.bg-light-full-width {
+    background: #fdfaf5;
+    margin: 0 calc(-50vw + 50%);
+    width: 100vw;
+    padding-left: calc(50vw - 50%);
+    padding-right: calc(50vw - 50%);
+}
+
+.sacrament-card {
+    text-align: center;
+    padding: 32px;
+}
+
+.sac-icon-box {
+    width: 60px;
+    height: 60px;
+    background: rgba(201, 168, 76, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.sac-icon {
+    font-size: 1.5rem;
+    color: var(--gold);
+}
+
+.sac-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--navy);
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.sac-desc {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.btn-outline-sm {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 8px 20px;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--navy);
+    transition: all var(--transition);
+}
+
+.btn-outline-sm:hover {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: var(--white);
+}
+
+/* Info Banner */
+.info-banner {
+    background: #eef4f9;
+    border-left: 4px solid var(--navy);
+    padding: 24px 32px;
+    margin-top: 48px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.info-banner-icon {
+    font-size: 1.5rem;
+    color: var(--navy);
+}
+
+.info-banner-content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.info-banner-content p {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+}
+
+/* Service Cards */
+.service-card {
+    background: #f8fafd;
+    border: 1px solid #edf2f7;
+    box-shadow: none;
+}
+
+.service-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.service-schedule {
+    font-weight: 600;
+    color: var(--gold);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.service-desc {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+}
+
+/* Questions Section */
+.questions-section {
+    background: #fff8e7;
+    padding: 80px 0;
+    text-align: center;
+    border-top: 1px solid rgba(201, 168, 76, 0.1);
+}
+
+.questions-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 32px;
+}
+
+.btn-outline-navy {
+    background: transparent;
+    border: 1.5px solid var(--navy);
+    color: var(--navy);
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition);
+}
+
+.btn-outline-navy:hover {
+    background: var(--navy);
+    color: var(--white);
+}
+
+@media (max-width: 768px) {
+    .mt-card-header {
+        grid-template-columns: auto 1fr;
+    }
+
+    .mt-card-count {
+        grid-column: 1 / -1;
+        width: fit-content;
+    }
+
+    .questions-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-primary,
+    .btn-outline-navy {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .mt-day-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .mt-filter-bar {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .mt-day-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,142 @@
+.footer {
+    background: #1a2e4a;
+    color: rgba(255, 255, 255, 0.75);
+    padding-top: 56px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 48px;
+}
+
+/* Brand */
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.footer-logo-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.footer-logo-sub {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+}
+
+.footer-tagline {
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Columns */
+.footer-heading {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+}
+
+.footer-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.footer-list li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.footer-icon {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    margin-top: 1px;
+}
+
+.footer-list a {
+    color: rgba(255, 255, 255, 0.75);
+    transition: color var(--transition);
+}
+
+.footer-list a:hover {
+    color: var(--gold);
+}
+
+.footer-links-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.82rem;
+    margin-bottom: 20px;
+}
+
+.footer-links-list a {
+    color: rgba(255, 255, 255, 0.75);
+    transition: color var(--transition);
+}
+
+.footer-links-list a:hover {
+    color: var(--gold);
+}
+
+/* Social */
+.footer-social {
+    display: flex;
+    gap: 8px;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.75rem;
+    transition: background var(--transition), color var(--transition);
+}
+
+.social-link:hover {
+    background: var(--gold);
+    color: var(--navy);
+}
+
+/* Bottom bar */
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px 0;
+    text-align: center;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+}

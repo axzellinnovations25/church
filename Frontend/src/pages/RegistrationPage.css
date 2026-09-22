@@ -1,0 +1,306 @@
+.registration-page {
+    background: #f9f9f9;
+    min-height: 100vh;
+}
+
+.reg-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 64px 24px;
+}
+
+/* Welcome Box */
+.reg-welcome {
+    background: var(--white);
+    border: 2px solid var(--gold);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 48px;
+    box-shadow: var(--shadow-sm);
+}
+
+.reg-welcome-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--navy);
+    margin-bottom: 12px;
+}
+
+.reg-welcome p {
+    color: var(--text-mid);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Form Sections */
+.reg-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 40px;
+    margin-bottom: 32px;
+}
+
+.reg-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--navy);
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Registration Type Toggle */
+.reg-type-label {
+    display: block;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 16px;
+}
+
+.reg-type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.reg-type-card {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    background: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all var(--transition);
+}
+
+.reg-type-card:hover {
+    border-color: var(--navy-light);
+}
+
+.reg-type-card.active {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold);
+}
+
+.reg-type-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--light-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--text-mid);
+    transition: all var(--transition);
+}
+
+.reg-type-card.active .reg-type-icon {
+    background: var(--gold);
+    color: var(--white);
+}
+
+.reg-type-text {
+    font-weight: 600;
+    color: var(--text-mid);
+}
+
+.reg-type-card.active .reg-type-text {
+    color: var(--navy);
+}
+
+/* Form Fields */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.required {
+    color: #e53e3e;
+    margin-left: 4px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: var(--radius);
+    color: var(--text-dark);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color var(--transition);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--navy);
+    background: var(--white);
+}
+
+.form-input[aria-invalid="true"] {
+    border-color: #b42318;
+    background: #fff8f6;
+}
+
+.field-error {
+    display: block;
+    margin-top: 6px;
+    color: #b42318;
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+/* Radio Group */
+.radio-group {
+    display: flex;
+    gap: 24px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--text-dark);
+}
+
+/* Checkboxes */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    color: var(--text-dark);
+    line-height: 1.4;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-top: 4px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gold);
+}
+
+.checkbox-desc {
+    display: block;
+    color: var(--text-mid);
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+/* Family Children Section */
+.children-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    margin-bottom: 16px;
+}
+
+.children-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--navy);
+}
+
+.btn-add-child {
+    background: transparent;
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-add-child:hover {
+    text-decoration: underline;
+}
+
+.child-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 16px;
+    margin-bottom: 12px;
+    align-items: end;
+}
+
+.btn-remove-child {
+    color: var(--text-light);
+    font-size: 1.6rem;
+    line-height: 1;
+    padding-bottom: 8px;
+    background: transparent;
+}
+
+.btn-remove-child:hover {
+    color: #e53e3e;
+}
+
+/* Consent Box */
+.consent-box {
+    background: #fffdf5;
+    border: 1px solid var(--gold);
+    padding: 24px;
+    border-radius: var(--radius);
+    margin-top: 24px;
+}
+
+/* Action Bar */
+.reg-action-bar {
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.reg-action-buttons {
+    display: flex;
+    gap: 16px;
+}
+
+.reg-footnote {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+
+    .reg-type-grid,
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .reg-action-bar {
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+    }
+}

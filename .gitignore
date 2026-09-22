@@ -1,0 +1,42 @@
+# Logs and local command output
+*.log
+Frontend/build_*.txt
+Frontend/eslint_log.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files and credentials (keep sanitized templates)
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+# Local database copies and exports
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.dump
+*.backup
+
+# IDE
+/.idea
+/.vscode
+/.fleet
+/.zed
+
+# Laravel (root level if any)
+/node_modules
+/vendor
+/public/storage
+/storage/*.key
+/bootstrap/cache
+
+# Laravel inside backend folder
+/backend/vendor
+/backend/node_modules
+/backend/.env
+/backend/public/storage
+/backend/public/build
+/backend/.phpunit.result.cache

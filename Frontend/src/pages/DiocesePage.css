@@ -1,0 +1,116 @@
+/* DiocesePage.css */
+
+.bishop-section {
+    padding: 80px 0;
+    background-color: #fcfaf6;
+}
+
+.bishop-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.bishop-card {
+    background: var(--white);
+    padding: 10px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+.bishop-image {
+    width: 100%;
+    aspect-ratio: 3/4;
+    border-radius: var(--radius);
+    object-fit: cover;
+    object-position: center top;
+    margin-bottom: 20px;
+}
+
+.bishop-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--navy);
+    margin-bottom: 5px;
+}
+
+.bishop-title {
+    font-size: 0.9rem;
+    color: var(--gold);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.bishop-content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--navy);
+    margin-bottom: 24px;
+}
+
+.bishop-content p {
+    font-size: 1.1rem;
+    color: var(--text-mid);
+    margin-bottom: 20px;
+    line-height: 1.7;
+}
+
+.bishop-list {
+    list-style: none;
+    padding: 0;
+}
+
+.bishop-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.bishop-list li::before {
+    content: '🕊️';
+    font-size: 1.2rem;
+}
+
+.diocese-website-section {
+    padding: 100px 0;
+    background-color: var(--navy);
+    color: var(--white);
+    text-align: center;
+}
+
+.diocese-website-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.diocese-website-content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: var(--gold-light);
+}
+
+.diocese-website-content p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+@media (max-width: 992px) {
+    .bishop-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    
+    .bishop-card {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}

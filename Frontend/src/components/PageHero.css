@@ -1,0 +1,52 @@
+.page-hero {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, var(--navy-dark), var(--navy)),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 1px, rgba(255, 255, 255, 0) 1px 10px);
+    color: var(--white);
+    padding: 72px 0 64px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.page-hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 980px;
+}
+
+.page-hero-icon {
+    font-size: 2rem;
+    margin-bottom: 4px;
+    color: var(--gold);
+}
+
+.page-hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+    letter-spacing: 0;
+}
+
+.page-hero-subtitle {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.80);
+    max-width: 72ch;
+    line-height: 1.6;
+}
+
+/* Centered variant used on some pages */
+.page-hero.centered .page-hero-inner {
+    align-items: center;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .page-hero {
+        padding: 52px 0 48px;
+    }
+}

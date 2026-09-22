@@ -1,0 +1,55 @@
+.parish-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.parish-card {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.parish-icon-strip {
+    width: 100%;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--navy);
+}
+
+.parish-card-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.parish-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.parish-card-desc {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .parish-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .parish-grid {
+        grid-template-columns: 1fr;
+    }
+}

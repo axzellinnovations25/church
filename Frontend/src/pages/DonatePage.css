@@ -1,0 +1,118 @@
+.donate-card {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.donate-icon {
+    font-size: 1.8rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+}
+
+.donate-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.donate-card-desc {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    line-height: 1.5;
+    flex: 1;
+}
+
+.donate-amounts {
+    font-size: 0.78rem;
+    color: var(--text-light);
+}
+
+.donate-amounts span {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.donate-btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: auto;
+}
+
+/* Gift Aid */
+.gift-aid-card {
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    color: var(--white);
+}
+
+.gift-aid-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gold);
+}
+
+.gift-aid-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.7;
+    margin-bottom: 12px;
+}
+
+.gift-aid-how {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.gift-aid-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Other ways */
+.other-way-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.other-way-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.other-way-desc {
+    font-size: 0.85rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .gift-aid-card {
+        grid-template-columns: 1fr;
+    }
+}
