@@ -595,24 +595,38 @@ export default function AdminEventsPage() {
           </div>
 
           <div className="admin-data-table">
+            {filteredEvents.length ? (
+              <div className="admin-table-header admin-row-events" aria-hidden="true">
+                <span>Poster</span>
+                <span>Event & Group</span>
+                <span>Schedule</span>
+                <span>Location & Status</span>
+                <span className="text-right">Actions</span>
+              </div>
+            ) : null}
             {filteredEvents.map(item => (
-              <div key={item.id} className="admin-row admin-row-with-thumb">
-                {item.admin_image_url || item.image_url ? (
-                  <img
-                    className="admin-event-thumb"
-                    src={getBackendUrl(item.admin_image_url || item.image_url)}
-                    alt={item.title}
-                  />
-                ) : (
-                  <span className="admin-event-thumb admin-event-thumb-placeholder" aria-hidden="true" />
-                )}
-                <div>
-                  <strong>{titleCaseWords(item.title || '')}</strong>
-                  <span>{formatDateTime(item.start_date, item.start_time)}{item.group_name ? ` • ${titleCaseWords(item.group_name)}` : ''}</span>
+              <div key={item.id} className="admin-row admin-row-events">
+                <div className="admin-col-thumb">
+                  {item.admin_image_url || item.image_url ? (
+                    <img
+                      className="admin-event-thumb"
+                      src={getBackendUrl(item.admin_image_url || item.image_url)}
+                      alt={item.title}
+                    />
+                  ) : (
+                    <span className="admin-event-thumb admin-event-thumb-placeholder" aria-hidden="true" />
+                  )}
                 </div>
-                <div>
+                <div className="admin-col-main">
+                  <strong>{titleCaseWords(item.title || '')}</strong>
+                  {item.group_name ? <span className="admin-subtext">{titleCaseWords(item.group_name)}</span> : null}
+                </div>
+                <div className="admin-col-datetime">
+                  <span>{formatDateTime(item.start_date, item.start_time)}</span>
+                </div>
+                <div className="admin-col-meta">
                   <small>{item.location ? titleCaseWords(item.location) : 'Location not set'}</small>
-                  <span className="admin-badge">{titleCaseWords(item.status || '')}</span>
+                  <span className={`admin-badge ${item.status === 'draft' ? 'is-warning' : ''}`}>{titleCaseWords(item.status || '')}</span>
                 </div>
                 <div className="admin-row-actions">
                   <button type="button" onClick={() => editEvent(item.id)}>Edit</button>
@@ -651,144 +665,158 @@ export default function AdminEventsPage() {
         subtitle={isLoadingEventEditor ? 'Loading event...' : user?.is_main_admin ? 'Changes save directly to the backend.' : 'Group admins can create and update draft events for their own group.'}
       >
         <form className="admin-form" onSubmit={submitEvent} noValidate ref={editorRef}>
-          <label>
-            <span>Title</span>
-            <input name="title" value={eventForm.title} onChange={handleEventChange} onBlur={() => formatEventField('title', titleCaseWords)} required aria-invalid={Boolean(eventErrors.title)} />
-            <FieldHint current={titleWordCount} max={50} />
-            <FieldError errors={eventErrors} name="title" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Basic Event Details</h3>
+            <label>
+              <span>Title <span className="admin-required-star">*</span></span>
+              <input name="title" value={eventForm.title} onChange={handleEventChange} onBlur={() => formatEventField('title', titleCaseWords)} required aria-invalid={Boolean(eventErrors.title)} placeholder="e.g. Sunday Youth Mass" />
+              <FieldHint current={titleWordCount} max={50} />
+              <FieldError errors={eventErrors} name="title" />
+            </label>
 
-          <label>
-            <span>Description</span>
-            <textarea name="description" rows="4" value={eventForm.description} onChange={handleEventChange} onBlur={() => formatEventField('description', capitalizeFirst)} aria-invalid={Boolean(eventErrors.description)} />
-            <FieldHint current={descriptionWordCount} max={250} />
-            <FieldError errors={eventErrors} name="description" />
-          </label>
+            <label>
+              <span>Description</span>
+              <textarea name="description" rows="3" value={eventForm.description} onChange={handleEventChange} onBlur={() => formatEventField('description', capitalizeFirst)} aria-invalid={Boolean(eventErrors.description)} placeholder="Write a brief overview of this event..." />
+              <FieldHint current={descriptionWordCount} max={250} />
+              <FieldError errors={eventErrors} name="description" />
+            </label>
+          </div>
 
-          <label>
-            <span>{selectedEventId ? 'Event photo or poster' : 'Upload event photo or poster'}</span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleImageChange}
-              aria-invalid={Boolean(eventErrors.image)}
-            />
-            <FieldError errors={eventErrors} name="image" />
-            <p className="admin-field-hint">Large images are compressed automatically.</p>
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Event Media & Poster</h3>
+            <label>
+              <span>{selectedEventId ? 'Replace event photo or poster' : 'Upload event photo or poster'}</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleImageChange}
+                aria-invalid={Boolean(eventErrors.image)}
+              />
+              <FieldError errors={eventErrors} name="image" />
+              <p className="admin-field-hint">Supports JPG, PNG, or WebP up to 2 MB (compressed automatically).</p>
+            </label>
 
-          {selectedFile ? (
-            <div className="admin-panel">
-              <strong>Selected image</strong>
-              <p>Selected uploaded image • {formatBytes(selectedFile.size)}</p>
-            </div>
-          ) : null}
-
-          {(selectedEvent?.admin_image_url || selectedEvent?.image_url) && !selectedFile && !removeExistingImage ? (
-            <div className="admin-panel">
-              <strong>Current poster</strong>
-              <div className="admin-member-preview">
-                <img src={getBackendUrl(selectedEvent.admin_image_url || selectedEvent.image_url)} alt={selectedEvent.title} />
-                <p>Current uploaded poster • {formatBytes(selectedEvent.image_size)}</p>
+            {selectedFile ? (
+              <div className="admin-panel">
+                <strong>Selected Image</strong>
+                <p>New image ready • {formatBytes(selectedFile.size)}</p>
               </div>
-              <button type="button" className="admin-link-btn danger" onClick={removeCurrentImage}>
-                Remove current poster
-              </button>
+            ) : null}
+
+            {(selectedEvent?.admin_image_url || selectedEvent?.image_url) && !selectedFile && !removeExistingImage ? (
+              <div className="admin-panel admin-poster-preview-box">
+                <strong>Current Poster</strong>
+                <div className="admin-member-preview">
+                  <img src={getBackendUrl(selectedEvent.admin_image_url || selectedEvent.image_url)} alt={selectedEvent.title} />
+                  <p>Uploaded poster • {formatBytes(selectedEvent.image_size)}</p>
+                </div>
+                <button type="button" className="admin-link-btn danger" onClick={removeCurrentImage}>
+                  Remove current poster
+                </button>
+              </div>
+            ) : null}
+
+            {removeExistingImage ? (
+              <div className="admin-panel">
+                <strong>Poster Marked for Removal</strong>
+                <p>Save the event to finalize removing the poster from this event.</p>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Date & Schedule</h3>
+            <div className="admin-form-grid">
+              <label>
+                <span>Start date <span className="admin-required-star">*</span></span>
+                <input type="date" name="start_date" value={eventForm.start_date} onChange={handleEventChange} required aria-invalid={Boolean(eventErrors.start_date)} />
+                <FieldError errors={eventErrors} name="start_date" />
+              </label>
+
+              <label>
+                <span>End date</span>
+                <input type="date" name="end_date" value={eventForm.end_date} onChange={handleEventChange} aria-invalid={Boolean(eventErrors.end_date)} />
+                <FieldError errors={eventErrors} name="end_date" />
+              </label>
             </div>
-          ) : null}
 
-          {removeExistingImage ? (
-            <div className="admin-panel">
-              <strong>Current poster will be removed</strong>
-              <p>Save the event to remove the existing uploaded poster from this event.</p>
+            <label className="admin-checkbox">
+              <input type="checkbox" name="all_day" checked={eventForm.all_day} onChange={handleEventChange} />
+              <span>All-day event</span>
+            </label>
+
+            <div className="admin-form-grid">
+              <label>
+                <span>Start time <span className="admin-required-star">*</span></span>
+                <input type="time" name="start_time" value={eventForm.start_time} onChange={handleEventChange} readOnly={eventForm.all_day} required aria-invalid={Boolean(eventErrors.start_time)} />
+                <FieldError errors={eventErrors} name="start_time" />
+              </label>
+
+              <label>
+                <span>End time <span className="admin-required-star">*</span></span>
+                <input type="time" name="end_time" value={eventForm.end_time} onChange={handleEventChange} readOnly={eventForm.all_day} required aria-invalid={Boolean(eventErrors.end_time)} />
+                <FieldError errors={eventErrors} name="end_time" />
+              </label>
             </div>
-          ) : null}
 
-          <div className="admin-form-grid">
-            <label>
-              <span>Start date</span>
-              <input type="date" name="start_date" value={eventForm.start_date} onChange={handleEventChange} required aria-invalid={Boolean(eventErrors.start_date)} />
-              <FieldError errors={eventErrors} name="start_date" />
-            </label>
-
-            <label>
-              <span>End date</span>
-              <input type="date" name="end_date" value={eventForm.end_date} onChange={handleEventChange} aria-invalid={Boolean(eventErrors.end_date)} />
-              <FieldError errors={eventErrors} name="end_date" />
-            </label>
+            {eventForm.start_date ? (
+              <div className="admin-panel admin-preview-schedule-panel">
+                <strong>Events Already Scheduled on {formatDate(eventForm.start_date)}</strong>
+                <ul>
+                  {eventPreview.length ? eventPreview.map(item => (
+                    <li key={item.id}>
+                      {item.title} ({formatTime(item.start_time)} - {formatTime(item.end_time)})
+                    </li>
+                  )) : <li>No conflicting events scheduled on this date.</li>}
+                </ul>
+              </div>
+            ) : null}
           </div>
 
-          <label className="admin-checkbox">
-            <input type="checkbox" name="all_day" checked={eventForm.all_day} onChange={handleEventChange} />
-            <span>All-day event</span>
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Location & Visibility</h3>
+            <div className="admin-form-grid">
+              <label>
+                <span>Location</span>
+                <select value={selectedLocationOption} onChange={handleLocationSelect} aria-invalid={Boolean(eventErrors.location)}>
+                  {eventLocationOptions.map(option => (
+                    <option key={option.value || 'blank'} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {selectedLocationOption === 'Other' ? (
+                  <input
+                    name="location"
+                    value={eventForm.location}
+                    onChange={handleEventChange}
+                    onBlur={() => formatEventField('location', titleCaseWords)}
+                    placeholder="Enter custom location name"
+                    aria-invalid={Boolean(eventErrors.location)}
+                  />
+                ) : null}
+                <FieldError errors={eventErrors} name="location" />
+              </label>
 
-          <div className="admin-form-grid">
+              <label>
+                <span>Category</span>
+                <input name="category" value={eventForm.category} onChange={handleEventChange} onBlur={() => formatEventField('category', titleCaseWords)} aria-invalid={Boolean(eventErrors.category)} placeholder="e.g. Worship, Youth, Music" />
+                <FieldError errors={eventErrors} name="category" />
+              </label>
+            </div>
+
             <label>
-              <span>Start time</span>
-              <input type="time" name="start_time" value={eventForm.start_time} onChange={handleEventChange} readOnly={eventForm.all_day} required aria-invalid={Boolean(eventErrors.start_time)} />
-              <FieldError errors={eventErrors} name="start_time" />
-            </label>
-
-            <label>
-              <span>End time</span>
-              <input type="time" name="end_time" value={eventForm.end_time} onChange={handleEventChange} readOnly={eventForm.all_day} required aria-invalid={Boolean(eventErrors.end_time)} />
-              <FieldError errors={eventErrors} name="end_time" />
-            </label>
-          </div>
-
-          <div className="admin-panel">
-            <strong>Existing events on this date</strong>
-            <ul>
-              {eventPreview.length ? eventPreview.map(item => (
-                <li key={item.id}>
-                  {item.title} ({formatTime(item.start_time)} - {formatTime(item.end_time)})
-                </li>
-              )) : <li>No other events on the selected date.</li>}
-            </ul>
-          </div>
-
-          <div className="admin-form-grid">
-            <label>
-              <span>Location</span>
-              <select value={selectedLocationOption} onChange={handleLocationSelect} aria-invalid={Boolean(eventErrors.location)}>
-                {eventLocationOptions.map(option => (
-                  <option key={option.value || 'blank'} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
+              <span>Status</span>
+              <select name="status" value={eventForm.status} onChange={handleEventChange} aria-invalid={Boolean(eventErrors.status)} disabled={!user?.is_main_admin}>
+                {user?.is_main_admin ? <option value="published">Published</option> : null}
+                <option value="draft">Draft</option>
               </select>
-              {selectedLocationOption === 'Other' ? (
-                <input
-                  name="location"
-                  value={eventForm.location}
-                  onChange={handleEventChange}
-                  onBlur={() => formatEventField('location', titleCaseWords)}
-                  placeholder="Enter the event location"
-                  aria-invalid={Boolean(eventErrors.location)}
-                />
-              ) : null}
-              <FieldError errors={eventErrors} name="location" />
-            </label>
-
-            <label>
-              <span>Category</span>
-              <input name="category" value={eventForm.category} onChange={handleEventChange} onBlur={() => formatEventField('category', titleCaseWords)} aria-invalid={Boolean(eventErrors.category)} />
-              <FieldError errors={eventErrors} name="category" />
+              <FieldError errors={eventErrors} name="status" />
             </label>
           </div>
 
-          <label>
-            <span>Status</span>
-            <select name="status" value={eventForm.status} onChange={handleEventChange} aria-invalid={Boolean(eventErrors.status)} disabled={!user?.is_main_admin}>
-              {user?.is_main_admin ? <option value="published">Published</option> : null}
-              <option value="draft">Draft</option>
-            </select>
-            <FieldError errors={eventErrors} name="status" />
-          </label>
-
-          <div className="admin-actions">
+          <div className="admin-form-actions">
             <button className="btn-primary" type="submit" disabled={isSavingEvent}>
               {isSavingEvent ? 'Saving...' : selectedEventId ? 'Update Event' : 'Create Event'}
             </button>

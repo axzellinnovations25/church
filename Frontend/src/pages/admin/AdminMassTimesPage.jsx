@@ -320,15 +320,29 @@ export default function AdminMassTimesPage() {
           </div>
 
           <div className="admin-data-table">
+            {filteredMassTimes.length ? (
+              <div className="admin-table-header admin-row-mass-times" aria-hidden="true">
+                <span>Day</span>
+                <span>Time & Language</span>
+                <span>Location</span>
+                <span>Status</span>
+                <span className="text-right">Actions</span>
+              </div>
+            ) : null}
             {filteredMassTimes.map(item => (
-              <div key={item.id} className="admin-row">
-                <div>
+              <div key={item.id} className="admin-row admin-row-mass-times">
+                <div className="admin-col-day">
                   <strong>{item.day}</strong>
-                  <span>{formatTime(item.start_time)}{item.language ? ` • ${titleCaseWords(item.language)}` : ''}</span>
                 </div>
-                <div>
-                  <small>{item.location ? titleCaseWords(item.location) : 'Location not set'}</small>
-                  <span className="admin-badge">{titleCaseWords(item.status || '')}</span>
+                <div className="admin-col-main">
+                  <strong>{formatTime(item.start_time)}</strong>
+                  {item.language ? <span className="admin-subtext">{titleCaseWords(item.language)}</span> : null}
+                </div>
+                <div className="admin-col-location">
+                  <span>{item.location ? titleCaseWords(item.location) : 'Location not set'}</span>
+                </div>
+                <div className="admin-col-status">
+                  <span className={`admin-badge ${item.status === 'draft' ? 'is-warning' : ''}`}>{titleCaseWords(item.status || '')}</span>
                 </div>
                 <div className="admin-row-actions">
                   <button type="button" onClick={() => editMassTime(item.id)}>Edit</button>
@@ -357,60 +371,75 @@ export default function AdminMassTimesPage() {
         subtitle={isLoadingMassTimeEditor ? 'Loading Mass time...' : 'All clashes are checked by the backend.'}
       >
         <form className="admin-form" onSubmit={submitMassTime} noValidate ref={editorRef}>
-          <label>
-            <span>Day</span>
-            <select name="day" value={massTimeForm.day} onChange={handleMassTimeChange} required aria-invalid={Boolean(massTimeErrors.day)}>
-              <option value="">Select a day</option>
-              {DAYS.map(day => <option key={day} value={day}>{day}</option>)}
-            </select>
-            <FieldError errors={massTimeErrors} name="day" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Schedule & Day</h3>
+            <div className="admin-form-grid">
+              <label>
+                <span>Day <span className="admin-required-star">*</span></span>
+                <select name="day" value={massTimeForm.day} onChange={handleMassTimeChange} required aria-invalid={Boolean(massTimeErrors.day)}>
+                  <option value="">Select a day</option>
+                  {DAYS.map(day => <option key={day} value={day}>{day}</option>)}
+                </select>
+                <FieldError errors={massTimeErrors} name="day" />
+              </label>
 
-          <label>
-            <span>Start time</span>
-            <input type="time" name="start_time" value={massTimeForm.start_time} onChange={handleMassTimeChange} required aria-invalid={Boolean(massTimeErrors.start_time)} />
-            <FieldError errors={massTimeErrors} name="start_time" />
-          </label>
+              <label>
+                <span>Start time <span className="admin-required-star">*</span></span>
+                <input type="time" name="start_time" value={massTimeForm.start_time} onChange={handleMassTimeChange} required aria-invalid={Boolean(massTimeErrors.start_time)} />
+                <FieldError errors={massTimeErrors} name="start_time" />
+              </label>
+            </div>
 
-          <div className="admin-panel">
-            <strong>Existing Mass times</strong>
-            <ul>
-              {massPreview.length ? massPreview.map(item => (
-                <li key={item.id}>
-                  {item.language ? `${item.language} Mass` : 'Mass'} ({formatTime(item.start_time)})
-                </li>
-              )) : <li>No existing Mass times for this selection.</li>}
-            </ul>
+            {massTimeForm.day ? (
+              <div className="admin-panel admin-preview-schedule-panel">
+                <strong>Existing Mass Times on {massTimeForm.day}</strong>
+                <ul>
+                  {massPreview.length ? massPreview.map(item => (
+                    <li key={item.id}>
+                      {item.language ? `${item.language} Mass` : 'Mass'} ({formatTime(item.start_time)})
+                    </li>
+                  )) : <li>No existing Mass times scheduled for this selection.</li>}
+                </ul>
+              </div>
+            ) : null}
           </div>
 
-          <label>
-            <span>Location</span>
-            <input name="location" value={massTimeForm.location} onChange={handleMassTimeChange} onBlur={() => formatMassTimeField('location', titleCaseWords)} placeholder="e.g. Cathedral" aria-invalid={Boolean(massTimeErrors.location)} />
-            <FieldError errors={massTimeErrors} name="location" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Location & Language</h3>
+            <div className="admin-form-grid">
+              <label>
+                <span>Location</span>
+                <input name="location" value={massTimeForm.location} onChange={handleMassTimeChange} onBlur={() => formatMassTimeField('location', titleCaseWords)} placeholder="e.g. Cathedral" aria-invalid={Boolean(massTimeErrors.location)} />
+                <FieldError errors={massTimeErrors} name="location" />
+              </label>
 
-          <label>
-            <span>Language</span>
-            <input name="language" value={massTimeForm.language} onChange={handleMassTimeChange} onBlur={() => formatMassTimeField('language', titleCaseWords)} placeholder="e.g. English" aria-invalid={Boolean(massTimeErrors.language)} />
-            <FieldError errors={massTimeErrors} name="language" />
-          </label>
+              <label>
+                <span>Language</span>
+                <input name="language" value={massTimeForm.language} onChange={handleMassTimeChange} onBlur={() => formatMassTimeField('language', titleCaseWords)} placeholder="e.g. English" aria-invalid={Boolean(massTimeErrors.language)} />
+                <FieldError errors={massTimeErrors} name="language" />
+              </label>
+            </div>
+          </div>
 
-          <label>
-            <span>Notes</span>
-            <textarea name="notes" rows="4" value={massTimeForm.notes} onChange={handleMassTimeChange} onBlur={() => formatMassTimeField('notes', capitalizeFirst)} aria-invalid={Boolean(massTimeErrors.notes)} />
-            <FieldError errors={massTimeErrors} name="notes" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Notes & Status</h3>
+            <label>
+              <span>Notes / Additional Information</span>
+              <textarea name="notes" rows="3" value={massTimeForm.notes} onChange={handleMassTimeChange} onBlur={() => formatMassTimeField('notes', capitalizeFirst)} placeholder="e.g. Followed by Adoration and Confession..." aria-invalid={Boolean(massTimeErrors.notes)} />
+              <FieldError errors={massTimeErrors} name="notes" />
+            </label>
 
-          <label>
-            <span>Status</span>
-            <select name="status" value={massTimeForm.status} onChange={handleMassTimeChange} aria-invalid={Boolean(massTimeErrors.status)}>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-            <FieldError errors={massTimeErrors} name="status" />
-          </label>
+            <label>
+              <span>Status</span>
+              <select name="status" value={massTimeForm.status} onChange={handleMassTimeChange} aria-invalid={Boolean(massTimeErrors.status)}>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+              <FieldError errors={massTimeErrors} name="status" />
+            </label>
+          </div>
 
-          <div className="admin-actions">
+          <div className="admin-form-actions">
             <button className="btn-primary" type="submit" disabled={isSavingMassTime}>
               {isSavingMassTime ? 'Saving...' : selectedMassTimeId ? 'Update Mass Time' : 'Create Mass Time'}
             </button>

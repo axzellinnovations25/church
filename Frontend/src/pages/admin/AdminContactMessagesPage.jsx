@@ -139,11 +139,8 @@ export default function AdminContactMessagesPage() {
         setMessageMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
 
         const querySelected = searchParams.get('message')
-        const nextId = querySelected ? Number(querySelected) : items[0]?.id || null
-        setSelectedMessageId(nextId)
-
-        if (nextId) {
-          setSearchParams({ message: String(nextId) })
+        if (querySelected) {
+          setSelectedMessageId(Number(querySelected))
           setIsModalOpen(true)
         }
       } catch (error) {
@@ -162,7 +159,7 @@ export default function AdminContactMessagesPage() {
     return () => {
       ignore = true
     }
-  }, [searchParams, setSearchParams])
+  }, [])
 
   useEffect(() => {
     const selected = searchParams.get('message')
@@ -170,6 +167,10 @@ export default function AdminContactMessagesPage() {
     if (selected) {
       setSelectedMessageId(Number(selected))
       setIsModalOpen(true)
+    } else {
+      setSelectedMessageId(null)
+      setMessageDetail(null)
+      setIsModalOpen(false)
     }
   }, [searchParams])
 
@@ -219,6 +220,8 @@ export default function AdminContactMessagesPage() {
 
   function closeModal() {
     setIsModalOpen(false)
+    setSelectedMessageId(null)
+    setMessageDetail(null)
     setSearchParams({})
   }
 
@@ -231,15 +234,10 @@ export default function AdminContactMessagesPage() {
       const items = payload.messages || []
       setMessages(items)
       setMessageMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
-
-      const nextId = items[0]?.id || null
-      setSelectedMessageId(nextId)
-
-      if (nextId) {
-        setSearchParams({ message: String(nextId) })
-      } else {
-        setSearchParams({})
-      }
+      setSelectedMessageId(null)
+      setMessageDetail(null)
+      setIsModalOpen(false)
+      setSearchParams({})
     } catch (error) {
       setErrorMessage(error.message || 'Unable to load contact messages.')
     } finally {
@@ -252,18 +250,13 @@ export default function AdminContactMessagesPage() {
       await deleteContactMessage(id)
       const payload = await listContactMessages(messageMeta.current_page)
       const items = payload.messages || []
-      const nextSelectedId = items.find(item => item.id !== id)?.id || items[0]?.id || null
 
       setMessages(items)
       setMessageMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
-      setSelectedMessageId(nextSelectedId)
-      setMessageDetail(nextSelectedId ? null : null)
-
-      if (nextSelectedId) {
-        setSearchParams({ message: String(nextSelectedId) })
-      } else {
-        setSearchParams({})
-      }
+      setSelectedMessageId(null)
+      setMessageDetail(null)
+      setIsModalOpen(false)
+      setSearchParams({})
     } catch (error) {
       setErrorMessage(error.message || 'Unable to delete the selected message.')
     } finally {
@@ -369,24 +362,35 @@ export default function AdminContactMessagesPage() {
 
         {!isLoadingMessages ? (
           <div className="admin-data-table">
+            {filteredMessages.length ? (
+              <div className="admin-table-header admin-row-contact" aria-hidden="true">
+                <span>Subject & Sender</span>
+                <span>Category & Date</span>
+                <span>Status & Snippet</span>
+              </div>
+            ) : null}
             {filteredMessages.map(item => (
               <button
                 key={item.id}
                 type="button"
-                className={`admin-row admin-row-stack ${selectedMessageId === item.id ? 'active' : ''}`}
+                className={`admin-row admin-row-clickable admin-row-contact ${selectedMessageId === item.id ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedMessageId(item.id)
                   setSearchParams({ message: String(item.id) })
                   setIsModalOpen(true)
                 }}
               >
-                <div>
+                <div className="admin-col-main">
                   <strong>{formatDisplayText(item.subject, 'No Subject')}</strong>
-                  <span>{formatDisplayText(item.name)} • {item.email}{item.group_name ? ` • ${formatDisplayText(item.group_name)}` : ''}</span>
+                  <span className="admin-subtext">{formatDisplayText(item.name)} • {item.email}{item.group_name ? ` • ${formatDisplayText(item.group_name)}` : ''}</span>
                 </div>
-                <div>
-                  <small>{formatDateTime(item.created_at)}</small>
-                  <span>{formatStatusLabel(item.status)} • {formatCategoryLabel(item.category)} • {truncate(formatMessageCopy(item.message))}</span>
+                <div className="admin-col-meta">
+                  <small>{formatCategoryLabel(item.category)}</small>
+                  <span className="admin-subtext">{formatDateTime(item.created_at)}</span>
+                </div>
+                <div className="admin-col-snippet">
+                  <span className={`admin-badge ${item.status === 'new' ? 'is-warning' : ''}`}>{formatStatusLabel(item.status)}</span>
+                  <small className="admin-row-summary">{truncate(formatMessageCopy(item.message))}</small>
                 </div>
               </button>
             ))}

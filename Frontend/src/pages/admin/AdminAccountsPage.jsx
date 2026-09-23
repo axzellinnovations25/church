@@ -294,21 +294,32 @@ export default function AdminAccountsPage() {
       <article className="admin-surface">
         <div className="admin-section-head">
           <div>
-            <h2>Main Admin</h2>
-            <p>This account keeps full access to the whole admin area and can assign group admins.</p>
+            <h2>Main Admin Account</h2>
+            <p>This account maintains global access across all parish services and admin permissions.</p>
           </div>
-          <Link className="btn-outline" to="/dashboard/profile">Open Profile</Link>
+          <Link className="btn-outline" to="/dashboard/profile">Manage Profile</Link>
         </div>
 
         <div className="admin-data-table">
-          <div className="admin-row">
-            <div>
+          <div className="admin-table-header admin-row-accounts" aria-hidden="true">
+            <span>Admin Name & Email</span>
+            <span>Role & Access</span>
+            <span>Assigned Scope</span>
+            <span className="text-right">Actions</span>
+          </div>
+          <div className="admin-row admin-row-accounts">
+            <div className="admin-col-main">
               <strong>{formatDisplayText(user?.name, 'Main Admin')}</strong>
-              <span>{user?.email || 'No email available'}</span>
+              <span className="admin-subtext">{user?.email || 'No email available'}</span>
             </div>
-            <div>
-              <small>Role</small>
+            <div className="admin-col-status">
               <span className="admin-badge">Main Admin</span>
+            </div>
+            <div className="admin-col-group">
+              <span className="admin-subtext">All Parish Services</span>
+            </div>
+            <div className="admin-row-actions">
+              <Link className="btn-outline" to="/dashboard/profile">Edit</Link>
             </div>
           </div>
         </div>
@@ -317,7 +328,8 @@ export default function AdminAccountsPage() {
       <article className="admin-surface">
         <div className="admin-section-head">
           <div>
-            <h2>Admin Accounts</h2>
+            <h2>Group Administrators</h2>
+            <p>Review role-based group admins and manage group assignments.</p>
           </div>
           <div className="admin-actions">
             <Link className="btn-outline" to="/dashboard/groups">Manage Groups</Link>
@@ -325,53 +337,59 @@ export default function AdminAccountsPage() {
           </div>
         </div>
 
-          <div className="admin-filter-bar">
-            <input
-              type="search"
-              className="admin-filter-input"
-              placeholder="Search admin accounts..."
-              value={adminSearch}
-              onChange={event => setAdminSearch(event.target.value)}
-            />
-            <select className="admin-filter-select" value={adminAssignmentFilter} onChange={event => setAdminAssignmentFilter(event.target.value)}>
-              <option value="">All assignments</option>
-              <option value="assigned">Assigned</option>
-              <option value="not_assigned">Not assigned</option>
-            </select>
-          </div>
+        <div className="admin-filter-bar">
+          <input
+            type="search"
+            className="admin-filter-input"
+            placeholder="Search admin accounts..."
+            value={adminSearch}
+            onChange={event => setAdminSearch(event.target.value)}
+          />
+          <select className="admin-filter-select" value={adminAssignmentFilter} onChange={event => setAdminAssignmentFilter(event.target.value)}>
+            <option value="">All assignments</option>
+            <option value="assigned">Assigned</option>
+            <option value="not_assigned">Not assigned</option>
+          </select>
+        </div>
 
-          <div className="admin-data-table">
-            {filteredAdminAccounts.map(admin => {
-              const assignment = assignmentMap.get(admin.id)
+        <div className="admin-data-table">
+          {filteredAdminAccounts.length ? (
+            <div className="admin-table-header admin-row-accounts" aria-hidden="true">
+              <span>Admin Name & Email</span>
+              <span>Status</span>
+              <span>Assigned Group</span>
+              <span className="text-right">Actions</span>
+            </div>
+          ) : null}
+          {filteredAdminAccounts.map(admin => {
+            const assignment = assignmentMap.get(admin.id)
 
-              return (
-                <div key={admin.id} className="admin-row admin-account-row">
-                  <div>
-                    <strong>{formatDisplayText(admin.name)}</strong>
-                    <span>{admin.email}</span>
-                  </div>
-                  <div>
-                    <small>Status</small>
-                    <span>{assignment ? 'Assigned' : 'Not assigned'}</span>
-                  </div>
-                  <div>
-                    <small>Group</small>
-                    {assignment ? (
-                      <Link to={`/dashboard/groups?group=${assignment.groupId}`}>{formatDisplayText(assignment.groupName)}</Link>
-                    ) : (
-                      <span>None</span>
-                    )}
-                  </div>
-                  <div className="admin-row-actions">
-                    <button type="button" onClick={() => startEditAdmin(admin)}>Edit</button>
-                    <button type="button" className="danger" onClick={() => setConfirmDeleteId(admin.id)}>Delete</button>
-                  </div>
+            return (
+              <div key={admin.id} className="admin-row admin-row-accounts">
+                <div className="admin-col-main">
+                  <strong>{formatDisplayText(admin.name)}</strong>
+                  <span className="admin-subtext">{admin.email}</span>
                 </div>
-              )
-            })}
-            {!filteredAdminAccounts.length ? <p className="admin-empty">{adminAccounts.length ? 'No admin accounts match the current filters.' : 'No admin accounts exist yet.'}</p> : null}
-          </div>
-        </article>
+                <div className="admin-col-status">
+                  <span className={`admin-badge ${!assignment ? 'is-warning' : ''}`}>{assignment ? 'Assigned' : 'Not assigned'}</span>
+                </div>
+                <div className="admin-col-group">
+                  {assignment ? (
+                    <Link to={`/dashboard/groups?group=${assignment.groupId}`}>{formatDisplayText(assignment.groupName)}</Link>
+                  ) : (
+                    <span className="admin-subtext">Unassigned</span>
+                  )}
+                </div>
+                <div className="admin-row-actions">
+                  <button type="button" onClick={() => startEditAdmin(admin)}>Edit</button>
+                  <button type="button" className="danger" onClick={() => setConfirmDeleteId(admin.id)}>Delete</button>
+                </div>
+              </div>
+            )
+          })}
+          {!filteredAdminAccounts.length ? <p className="admin-empty">{adminAccounts.length ? 'No admin accounts match the current filters.' : 'No admin accounts exist yet.'}</p> : null}
+        </div>
+      </article>
 
       <AdminModal
         isOpen={isEditorOpen}
@@ -380,34 +398,42 @@ export default function AdminAccountsPage() {
         subtitle={editingAdminId ? 'Update the admin name, email, or group assignment.' : 'Create a group administrator account with secure login details and assign group access if required.'}
       >
         <form className="admin-form" onSubmit={submitAdmin} noValidate ref={editorRef}>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Account Info</h3>
             <label>
-              <span>Admin name</span>
-              <input name="name" value={adminForm.name} onChange={handleAdminChange} aria-invalid={Boolean(adminErrors.name)} />
+              <span>Admin name <span className="admin-required-star">*</span></span>
+              <input name="name" value={adminForm.name} onChange={handleAdminChange} aria-invalid={Boolean(adminErrors.name)} placeholder="e.g. John Smith" />
               {adminErrors.name ? <p className="admin-field-error">{adminErrors.name[0]}</p> : null}
             </label>
 
             <label>
-              <span>Email</span>
-              <input name="email" type="email" value={adminForm.email} onChange={handleAdminChange} aria-invalid={Boolean(adminErrors.email)} />
+              <span>Email <span className="admin-required-star">*</span></span>
+              <input name="email" type="email" value={adminForm.email} onChange={handleAdminChange} aria-invalid={Boolean(adminErrors.email)} placeholder="e.g. john@stmaryscathedral.org" />
               {adminErrors.email ? <p className="admin-field-error">{adminErrors.email[0]}</p> : null}
             </label>
+          </div>
 
-            {!editingAdminId ? (
+          {!editingAdminId ? (
+            <div className="admin-form-group">
+              <h3 className="admin-form-group-head">Security Credentials</h3>
               <div className="admin-form-grid">
                 <label>
-                  <span>Password</span>
+                  <span>Password <span className="admin-required-star">*</span></span>
                   <input name="password" type="password" value={adminForm.password} onChange={handleAdminChange} aria-invalid={Boolean(adminErrors.password)} />
                   {adminErrors.password ? <p className="admin-field-error">{adminErrors.password[0]}</p> : null}
                 </label>
 
                 <label>
-                  <span>Confirm password</span>
+                  <span>Confirm password <span className="admin-required-star">*</span></span>
                   <input name="password_confirmation" type="password" value={adminForm.password_confirmation} onChange={handleAdminChange} aria-invalid={Boolean(adminErrors.password_confirmation)} />
                   {adminErrors.password_confirmation ? <p className="admin-field-error">{adminErrors.password_confirmation[0]}</p> : null}
                 </label>
               </div>
-            ) : null}
+            </div>
+          ) : null}
 
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Group Access</h3>
             <label>
               <span>Assigned group</span>
               <select name="group_id" value={adminForm.group_id} onChange={handleAdminChange}>
@@ -417,12 +443,13 @@ export default function AdminAccountsPage() {
                 ))}
               </select>
             </label>
+          </div>
 
-            <div className="admin-actions">
-              <button className="btn-primary" type="submit" disabled={isSavingAdmin}>{isSavingAdmin ? 'Saving...' : editingAdminId ? 'Save Admin' : 'Register Admin'}</button>
-              <button className="btn-outline" type="button" onClick={closeEditor}>Cancel</button>
-            </div>
-          </form>
+          <div className="admin-form-actions">
+            <button className="btn-primary" type="submit" disabled={isSavingAdmin}>{isSavingAdmin ? 'Saving...' : editingAdminId ? 'Save Admin' : 'Register Admin'}</button>
+            <button className="btn-outline" type="button" onClick={closeEditor}>Cancel</button>
+          </div>
+        </form>
         </AdminModal>
 
       <FeedbackDialog

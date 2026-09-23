@@ -422,10 +422,18 @@ export default function AdminParishCouncilPage() {
           </div>
 
           <div className="admin-data-table">
+            {filteredMembers.length ? (
+              <div className="admin-table-header admin-row-council" aria-hidden="true">
+                <span>Photo</span>
+                <span>Name & Role</span>
+                <span>Order & Status</span>
+                <span>Actions</span>
+              </div>
+            ) : null}
             {filteredMembers.map(item => (
               <div
                 key={item.id}
-                className={`admin-row admin-row-clickable admin-row-with-thumb ${selectedMemberId === item.id ? 'active' : ''}`}
+                className={`admin-row admin-row-clickable admin-row-council ${selectedMemberId === item.id ? 'active' : ''}`}
                 role="button"
                 tabIndex={0}
                 onClick={() => selectMember(item.id)}
@@ -496,64 +504,73 @@ export default function AdminParishCouncilPage() {
         subtitle={isLoadingMemberEditor ? 'Loading council member...' : 'Member photos are uploaded to the backend and displayed on the public website.'}
       >
         <form className="admin-form" onSubmit={submitMember} noValidate ref={editorRef}>
-          <label>
-            <span>Name</span>
-            <input name="name" value={memberForm.name} onChange={handleMemberChange} onBlur={() => formatMemberField('name', titleCaseWords)} aria-invalid={Boolean(memberErrors.name)} />
-            <FieldError errors={memberErrors} name="name" />
-          </label>
-
-          <label>
-            <span>Role</span>
-            <input name="role" value={memberForm.role} onChange={handleMemberChange} onBlur={() => formatMemberField('role', titleCaseWords)} aria-invalid={Boolean(memberErrors.role)} />
-            <FieldError errors={memberErrors} name="role" />
-          </label>
-
-          <label>
-            <span>Short bio</span>
-            <textarea name="bio" rows="4" value={memberForm.bio} onChange={handleMemberChange} onBlur={() => formatMemberField('bio', capitalizeFirst)} aria-invalid={Boolean(memberErrors.bio)} />
-            <FieldError errors={memberErrors} name="bio" />
-          </label>
-
-          <div className="admin-form-grid">
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Member Details</h3>
             <label>
-              <span>Sort order</span>
-              <select name="sort_order" value={memberForm.sort_order || suggestedSortOrder} onChange={handleMemberChange}>
-                {sortOrderOptions.map(value => (
-                  <option key={value} value={value}>{value}</option>
-                ))}
-              </select>
-              <p className="admin-field-hint">Current member count: {members.length}. Choose 1 for the first person.</p>
+              <span>Name</span>
+              <input name="name" value={memberForm.name} onChange={handleMemberChange} onBlur={() => formatMemberField('name', titleCaseWords)} aria-invalid={Boolean(memberErrors.name)} />
+              <FieldError errors={memberErrors} name="name" />
             </label>
 
-            <label className="admin-checkbox">
-              <input type="checkbox" name="is_active" checked={memberForm.is_active} onChange={handleMemberChange} />
-              <span>Show on public page</span>
+            <label>
+              <span>Role</span>
+              <input name="role" value={memberForm.role} onChange={handleMemberChange} onBlur={() => formatMemberField('role', titleCaseWords)} aria-invalid={Boolean(memberErrors.role)} />
+              <FieldError errors={memberErrors} name="role" />
+            </label>
+
+            <label>
+              <span>Short bio</span>
+              <textarea name="bio" rows="4" value={memberForm.bio} onChange={handleMemberChange} onBlur={() => formatMemberField('bio', capitalizeFirst)} aria-invalid={Boolean(memberErrors.bio)} />
+              <FieldError errors={memberErrors} name="bio" />
             </label>
           </div>
 
-          <label>
-            <span>{selectedMemberId ? 'Replace photo' : 'Photo'}</span>
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} aria-invalid={Boolean(memberErrors.photo)} />
-            <p className="admin-field-hint">Large images are compressed automatically.</p>
-            <FieldError errors={memberErrors} name="photo" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Order & Visibility</h3>
+            <div className="admin-form-grid">
+              <label>
+                <span>Sort order</span>
+                <select name="sort_order" value={memberForm.sort_order || suggestedSortOrder} onChange={handleMemberChange}>
+                  {sortOrderOptions.map(value => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+                <p className="admin-field-hint">Current member count: {members.length}. Choose 1 for the first person.</p>
+              </label>
 
-          {selectedFile ? (
-            <div className="admin-panel">
-              <strong>Selected photo</strong>
-              <p>Selected uploaded photo • {formatBytes(selectedFile.size)}</p>
+              <label className="admin-checkbox">
+                <input type="checkbox" name="is_active" checked={memberForm.is_active} onChange={handleMemberChange} />
+                <span>Show on public page</span>
+              </label>
             </div>
-          ) : null}
+          </div>
 
-          {getMemberPhotoUrl(selectedMember) && !selectedFile ? (
-            <div className="admin-panel">
-              <strong>Current photo</strong>
-              <div className="admin-member-preview">
-                <img src={getBackendUrl(getMemberPhotoUrl(selectedMember))} alt={selectedMember.name} />
-                <p>{selectedMember.photo_filename || 'Current uploaded image'} • {formatBytes(selectedMember.photo_size)}</p>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Member Photo</h3>
+            <label>
+              <span>{selectedMemberId ? 'Replace photo' : 'Photo'}</span>
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} aria-invalid={Boolean(memberErrors.photo)} />
+              <p className="admin-field-hint">Large images are compressed automatically.</p>
+              <FieldError errors={memberErrors} name="photo" />
+            </label>
+
+            {selectedFile ? (
+              <div className="admin-panel">
+                <strong>Selected photo</strong>
+                <p>Selected uploaded photo • {formatBytes(selectedFile.size)}</p>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+
+            {getMemberPhotoUrl(selectedMember) && !selectedFile ? (
+              <div className="admin-panel">
+                <strong>Current photo</strong>
+                <div className="admin-member-preview">
+                  <img src={getBackendUrl(getMemberPhotoUrl(selectedMember))} alt={selectedMember.name} />
+                  <p>{selectedMember.photo_filename || 'Current uploaded image'} • {formatBytes(selectedMember.photo_size)}</p>
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           <div className="admin-actions">
             <button className="btn-primary" type="submit" disabled={isSavingMember}>

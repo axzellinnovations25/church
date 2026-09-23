@@ -607,10 +607,18 @@ export default function AdminGroupsPage() {
 
           {groups.length ? (
             <div className="admin-data-table">
+              {filteredGroups.length ? (
+                <div className="admin-table-header admin-row-groups" aria-hidden="true">
+                  <span>Group Name & Description</span>
+                  <span>Assigned Admin & Email</span>
+                  <span>Members</span>
+                  <span className="text-right">Actions</span>
+                </div>
+              ) : null}
               {filteredGroups.map(item => (
                 <div
                   key={item.id}
-                  className={`admin-row admin-row-stack admin-row-clickable ${selectedGroupId === item.id ? 'active' : ''}`}
+                  className={`admin-row admin-row-clickable admin-row-groups ${selectedGroupId === item.id ? 'active' : ''}`}
                   role="button"
                   tabIndex={0}
                   onClick={() => selectGroup(item.id)}
@@ -623,11 +631,14 @@ export default function AdminGroupsPage() {
                 >
                   <div className="admin-row-main">
                     <strong>{formatDisplayText(item.name)}</strong>
-                    <span>{item.admin_user ? `${formatDisplayText(item.admin_user.name)} • ${item.admin_user.email}` : 'No group admin assigned'}</span>
+                    <span className="admin-subtext">{formatCopy(item.description, 'No description set yet.')}</span>
                   </div>
-                  <div className="admin-row-meta">
-                    <small>{item.members_count || 0} member{item.members_count === 1 ? '' : 's'}</small>
-                    <span>{formatCopy(item.description, 'No description set yet.')} • {item.is_active ? 'Active' : 'Hidden'}</span>
+                  <div className="admin-col-meta">
+                    <strong>{item.admin_user ? formatDisplayText(item.admin_user.name) : 'Unassigned'}</strong>
+                    <span className="admin-subtext">{item.admin_user?.email || 'No admin email assigned'}</span>
+                  </div>
+                  <div className="admin-col-status">
+                    <span className="admin-badge">{item.members_count || 0} member{item.members_count === 1 ? '' : 's'}</span>
                   </div>
                   {user?.is_main_admin ? (
                     <div className="admin-row-actions">
@@ -703,14 +714,26 @@ export default function AdminGroupsPage() {
                 </div>
               ) : null}
 
+              {filteredMembers.length ? (
+                <div className="admin-table-header admin-row-group-members" aria-hidden="true">
+                  <span>Member Name & Role</span>
+                  <span>Email & Phone</span>
+                  <span>Date Joined</span>
+                  <span className="text-right">Actions</span>
+                </div>
+              ) : null}
+
               {filteredMembers.map(member => (
-                <div key={member.id} className={`admin-row ${selectedMemberId === member.id ? 'active' : ''}`}>
-                  <div>
+                <div key={member.id} className={`admin-row admin-row-group-members ${selectedMemberId === member.id ? 'active' : ''}`}>
+                  <div className="admin-row-main">
                     <strong>{formatDisplayText(member.name)}</strong>
-                    <span>{member.role ? formatDisplayText(member.role) : member.email || 'No role or email added yet.'}</span>
+                    <span className="admin-subtext">{member.role ? formatDisplayText(member.role) : 'Member'}</span>
                   </div>
-                  <div>
-                    <small>{member.phone || 'No phone added'}</small>
+                  <div className="admin-col-file">
+                    <small>{member.email || 'No email'}</small>
+                    <span className="admin-subtext">{member.phone || 'No phone'}</span>
+                  </div>
+                  <div className="admin-col-datetime">
                     <span>{formatDateTime(member.created_at)}</span>
                   </div>
                   <div className="admin-row-actions">
@@ -733,38 +756,44 @@ export default function AdminGroupsPage() {
             subtitle="Assign the role-based admin account, then use the member panel for registrations."
           >
             <form className="admin-form" onSubmit={submitGroup} noValidate ref={groupEditorRef}>
-              <label>
-                <span>Group name</span>
-                <input name="name" value={groupForm.name} onChange={handleGroupChange} onBlur={() => formatGroupField('name', titleCaseWords)} aria-invalid={Boolean(groupErrors.name)} />
-                <FieldError errors={groupErrors} name="name" />
-              </label>
+              <div className="admin-form-group">
+                <h3 className="admin-form-group-head">Group Details</h3>
+                <label>
+                  <span>Group name</span>
+                  <input name="name" value={groupForm.name} onChange={handleGroupChange} onBlur={() => formatGroupField('name', titleCaseWords)} aria-invalid={Boolean(groupErrors.name)} />
+                  <FieldError errors={groupErrors} name="name" />
+                </label>
 
-              <label>
-                <span>Description</span>
-                <textarea name="description" rows="4" value={groupForm.description} onChange={handleGroupChange} onBlur={() => formatGroupField('description', capitalizeFirst)} aria-invalid={Boolean(groupErrors.description)} />
-                <FieldError errors={groupErrors} name="description" />
-              </label>
+                <label>
+                  <span>Description</span>
+                  <textarea name="description" rows="4" value={groupForm.description} onChange={handleGroupChange} onBlur={() => formatGroupField('description', capitalizeFirst)} aria-invalid={Boolean(groupErrors.description)} />
+                  <FieldError errors={groupErrors} name="description" />
+                </label>
+              </div>
 
-              <label>
-                <span>Assigned group admin</span>
-                <select name="admin_user_id" value={groupForm.admin_user_id} onChange={handleGroupChange}>
-                  <option value="">No group admin assigned</option>
-                  {availableAdmins.map(admin => (
-                    <option
-                      key={admin.id}
-                      value={admin.id}
-                      disabled={admin.group_id !== null && String(admin.group_id) !== String(selectedGroupId || '')}
-                    >
-                      {formatDisplayText(admin.name)} ({admin.email}){admin.group_id ? ' - already assigned' : ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="admin-form-group">
+                <h3 className="admin-form-group-head">Management & Visibility</h3>
+                <label>
+                  <span>Assigned group admin</span>
+                  <select name="admin_user_id" value={groupForm.admin_user_id} onChange={handleGroupChange}>
+                    <option value="">No group admin assigned</option>
+                    {availableAdmins.map(admin => (
+                      <option
+                        key={admin.id}
+                        value={admin.id}
+                        disabled={admin.group_id !== null && String(admin.group_id) !== String(selectedGroupId || '')}
+                      >
+                        {formatDisplayText(admin.name)} ({admin.email}){admin.group_id ? ' - already assigned' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-              <label className="admin-checkbox">
-                <input type="checkbox" name="is_active" checked={groupForm.is_active} onChange={handleGroupChange} />
-                <span>Show this group as active</span>
-              </label>
+                <label className="admin-checkbox">
+                  <input type="checkbox" name="is_active" checked={groupForm.is_active} onChange={handleGroupChange} />
+                  <span>Show this group as active</span>
+                </label>
+              </div>
 
               <div className="admin-actions">
                 <button className="btn-primary" type="submit" disabled={isSavingGroup}>
@@ -784,39 +813,44 @@ export default function AdminGroupsPage() {
         >
           {selectedGroup ? (
             <form className="admin-form" onSubmit={submitMember} noValidate ref={memberEditorRef}>
-              <label>
-                <span>Member name</span>
-                <input name="name" value={memberForm.name} onChange={handleMemberChange} onBlur={() => formatMemberField('name', titleCaseWords)} disabled={!canEditPersonalDetails} aria-invalid={Boolean(memberErrors.name)} />
-                <FieldError errors={memberErrors} name="name" />
-              </label>
-
-              <div className="admin-form-grid">
+              <div className="admin-form-group">
+                <h3 className="admin-form-group-head">Member Information</h3>
                 <label>
-                  <span>Email</span>
-                  <input name="email" value={memberForm.email} onChange={handleMemberChange} disabled={!canEditPersonalDetails} aria-invalid={Boolean(memberErrors.email)} />
-                  <FieldError errors={memberErrors} name="email" />
+                  <span>Member name</span>
+                  <input name="name" value={memberForm.name} onChange={handleMemberChange} onBlur={() => formatMemberField('name', titleCaseWords)} disabled={!canEditPersonalDetails} aria-invalid={Boolean(memberErrors.name)} />
+                  <FieldError errors={memberErrors} name="name" />
                 </label>
 
-                <label>
-                  <span>Phone</span>
-                  <input name="phone" value={memberForm.phone} onChange={handleMemberChange} disabled={!canEditPersonalDetails} aria-invalid={Boolean(memberErrors.phone)} />
-                  <FieldError errors={memberErrors} name="phone" />
-                </label>
+                <div className="admin-form-grid">
+                  <label>
+                    <span>Email</span>
+                    <input name="email" value={memberForm.email} onChange={handleMemberChange} disabled={!canEditPersonalDetails} aria-invalid={Boolean(memberErrors.email)} />
+                    <FieldError errors={memberErrors} name="email" />
+                  </label>
+
+                  <label>
+                    <span>Phone</span>
+                    <input name="phone" value={memberForm.phone} onChange={handleMemberChange} disabled={!canEditPersonalDetails} aria-invalid={Boolean(memberErrors.phone)} />
+                    <FieldError errors={memberErrors} name="phone" />
+                  </label>
+                </div>
+                {!canEditPersonalDetails ? <p className="admin-field-hint">Personal details from contact messages can only be changed by the main admin. You can update group role and notes here.</p> : null}
               </div>
 
-              {!canEditPersonalDetails ? <p className="admin-field-hint">Personal details from contact messages can only be changed by the main admin. You can update group role and notes here.</p> : null}
+              <div className="admin-form-group">
+                <h3 className="admin-form-group-head">Group Role & Notes</h3>
+                <label>
+                  <span>Role in group</span>
+                  <input name="role" value={memberForm.role} onChange={handleMemberChange} onBlur={() => formatMemberField('role', titleCaseWords)} aria-invalid={Boolean(memberErrors.role)} />
+                  <FieldError errors={memberErrors} name="role" />
+                </label>
 
-              <label>
-                <span>Role in group</span>
-                <input name="role" value={memberForm.role} onChange={handleMemberChange} onBlur={() => formatMemberField('role', titleCaseWords)} aria-invalid={Boolean(memberErrors.role)} />
-                <FieldError errors={memberErrors} name="role" />
-              </label>
-
-              <label>
-                <span>Notes</span>
-                <textarea name="notes" rows="4" value={memberForm.notes} onChange={handleMemberChange} onBlur={() => formatMemberField('notes', capitalizeFirst)} aria-invalid={Boolean(memberErrors.notes)} />
-                <FieldError errors={memberErrors} name="notes" />
-              </label>
+                <label>
+                  <span>Notes</span>
+                  <textarea name="notes" rows="4" value={memberForm.notes} onChange={handleMemberChange} onBlur={() => formatMemberField('notes', capitalizeFirst)} aria-invalid={Boolean(memberErrors.notes)} />
+                  <FieldError errors={memberErrors} name="notes" />
+                </label>
+              </div>
 
               <div className="admin-actions">
                 <button className="btn-primary" type="submit" disabled={isSavingMember}>

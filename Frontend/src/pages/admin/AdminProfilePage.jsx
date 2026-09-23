@@ -213,49 +213,52 @@ export default function AdminProfilePage() {
           </div>
 
         <form className="admin-form" onSubmit={submitProfile} noValidate>
-          <div className="admin-form-grid">
-            <label htmlFor="admin-profile-name">
-              <span>Name</span>
-              <input
-                id="admin-profile-name"
-                name="name"
-                type="text"
-                value={profileForm.name}
-                onChange={handleProfileChange}
-                onBlur={() => formatProfileField('name')}
-                aria-invalid={Boolean(profileErrors.name)}
-                autoComplete="name"
-              />
-              <FieldError errors={profileErrors} name="name" />
-            </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Account Details</h3>
+            <div className="admin-form-grid">
+              <label htmlFor="admin-profile-name">
+                <span>Name</span>
+                <input
+                  id="admin-profile-name"
+                  name="name"
+                  type="text"
+                  value={profileForm.name}
+                  onChange={handleProfileChange}
+                  onBlur={() => formatProfileField('name')}
+                  aria-invalid={Boolean(profileErrors.name)}
+                  autoComplete="name"
+                />
+                <FieldError errors={profileErrors} name="name" />
+              </label>
 
-            <label htmlFor="admin-profile-email">
-              <span>Email address</span>
-              <input
-                id="admin-profile-email"
-                name="email"
-                type="email"
-                value={profileForm.email}
-                onChange={handleProfileChange}
-                aria-invalid={Boolean(profileErrors.email)}
-                autoComplete="email"
-              />
-              <FieldError errors={profileErrors} name="email" />
-            </label>
-          </div>
+              <label htmlFor="admin-profile-email">
+                <span>Email address</span>
+                <input
+                  id="admin-profile-email"
+                  name="email"
+                  type="email"
+                  value={profileForm.email}
+                  onChange={handleProfileChange}
+                  aria-invalid={Boolean(profileErrors.email)}
+                  autoComplete="email"
+                />
+                <FieldError errors={profileErrors} name="email" />
+              </label>
+            </div>
 
-          <div className="admin-detail-grid">
-            <div className="admin-detail-card">
-              <span>Current account</span>
-              <strong>{user?.name ? titleCaseWords(user.name) : 'Admin User'}</strong>
-            </div>
-            <div className="admin-detail-card">
-              <span>Login email</span>
-              <strong>{user?.email || 'Not available'}</strong>
-            </div>
-            <div className="admin-detail-card">
-              <span>Username</span>
-              <strong>{user?.email || (user?.name ? titleCaseWords(user.name) : 'Not available')}</strong>
+            <div className="admin-detail-grid">
+              <div className="admin-detail-card">
+                <span>Current account</span>
+                <strong>{user?.name ? titleCaseWords(user.name) : 'Admin User'}</strong>
+              </div>
+              <div className="admin-detail-card">
+                <span>Login email</span>
+                <strong>{user?.email || 'Not available'}</strong>
+              </div>
+              <div className="admin-detail-card">
+                <span>Username</span>
+                <strong>{user?.email || (user?.name ? titleCaseWords(user.name) : 'Not available')}</strong>
+              </div>
             </div>
           </div>
 
@@ -277,47 +280,50 @@ export default function AdminProfilePage() {
           </div>
 
           <form className="admin-form" onSubmit={submitPassword} noValidate>
-            <label htmlFor="admin-current-password">
-              <span>Current password</span>
-              <input
-                id="admin-current-password"
-                name="current_password"
-                type="password"
-                value={passwordForm.current_password}
-                onChange={handlePasswordChange}
-                aria-invalid={Boolean(passwordErrors.current_password)}
-                autoComplete="current-password"
-              />
-              <FieldError errors={passwordErrors} name="current_password" />
-            </label>
+            <div className="admin-form-group">
+              <h3 className="admin-form-group-head">Security Credentials</h3>
+              <label htmlFor="admin-current-password">
+                <span>Current password</span>
+                <input
+                  id="admin-current-password"
+                  name="current_password"
+                  type="password"
+                  value={passwordForm.current_password}
+                  onChange={handlePasswordChange}
+                  aria-invalid={Boolean(passwordErrors.current_password)}
+                  autoComplete="current-password"
+                />
+                <FieldError errors={passwordErrors} name="current_password" />
+              </label>
 
-            <label htmlFor="admin-new-password">
-              <span>New password</span>
-              <input
-                id="admin-new-password"
-                name="password"
-                type="password"
-                value={passwordForm.password}
-                onChange={handlePasswordChange}
-                aria-invalid={Boolean(passwordErrors.password)}
-                autoComplete="new-password"
-              />
-              <FieldError errors={passwordErrors} name="password" />
-            </label>
+              <label htmlFor="admin-new-password">
+                <span>New password</span>
+                <input
+                  id="admin-new-password"
+                  name="password"
+                  type="password"
+                  value={passwordForm.password}
+                  onChange={handlePasswordChange}
+                  aria-invalid={Boolean(passwordErrors.password)}
+                  autoComplete="new-password"
+                />
+                <FieldError errors={passwordErrors} name="password" />
+              </label>
 
-            <label htmlFor="admin-password-confirmation">
-              <span>Confirm new password</span>
-              <input
-                id="admin-password-confirmation"
-                name="password_confirmation"
-                type="password"
-                value={passwordForm.password_confirmation}
-                onChange={handlePasswordChange}
-                aria-invalid={Boolean(passwordErrors.password_confirmation)}
-                autoComplete="new-password"
-              />
-              <FieldError errors={passwordErrors} name="password_confirmation" />
-            </label>
+              <label htmlFor="admin-password-confirmation">
+                <span>Confirm new password</span>
+                <input
+                  id="admin-password-confirmation"
+                  name="password_confirmation"
+                  type="password"
+                  value={passwordForm.password_confirmation}
+                  onChange={handlePasswordChange}
+                  aria-invalid={Boolean(passwordErrors.password_confirmation)}
+                  autoComplete="new-password"
+                />
+                <FieldError errors={passwordErrors} name="password_confirmation" />
+              </label>
+            </div>
 
             <div className="admin-actions">
               <button className="btn-primary" type="submit" disabled={isSavingPassword}>
@@ -336,22 +342,25 @@ export default function AdminProfilePage() {
           </div>
 
           <form className="admin-form" onSubmit={requestDelete} noValidate>
-            <label htmlFor="admin-delete-password">
-              <span>Confirm password</span>
-              <input
-                id="admin-delete-password"
-                name="password"
-                type="password"
-                value={deletePassword}
-                onChange={event => {
-                  setDeletePassword(event.target.value)
-                  setDeleteErrors({})
-                }}
-                aria-invalid={Boolean(deleteErrors.password)}
-                autoComplete="current-password"
-              />
-              <FieldError errors={deleteErrors} name="password" />
-            </label>
+            <div className="admin-form-group">
+              <h3 className="admin-form-group-head">Account Removal</h3>
+              <label htmlFor="admin-delete-password">
+                <span>Confirm password</span>
+                <input
+                  id="admin-delete-password"
+                  name="password"
+                  type="password"
+                  value={deletePassword}
+                  onChange={event => {
+                    setDeletePassword(event.target.value)
+                    setDeleteErrors({})
+                  }}
+                  aria-invalid={Boolean(deleteErrors.password)}
+                  autoComplete="current-password"
+                />
+                <FieldError errors={deleteErrors} name="password" />
+              </label>
+            </div>
 
             <div className="admin-actions">
               <button className="btn-outline admin-danger-button" type="submit" disabled={isDeleting}>

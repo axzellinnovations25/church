@@ -471,14 +471,25 @@ export default function AdminNewslettersPage() {
           </div>
 
           <div className="admin-data-table">
+            {filteredNewsletters.length ? (
+              <div className="admin-table-header admin-row-newsletters" aria-hidden="true">
+                <span>Title & Date</span>
+                <span>File Info</span>
+                <span>Status</span>
+                <span className="text-right">Actions</span>
+              </div>
+            ) : null}
             {filteredNewsletters.map(item => (
-              <div key={item.id} className="admin-row">
-                <div>
+              <div key={item.id} className="admin-row admin-row-newsletters">
+                <div className="admin-col-main">
                   <strong>{item.title}</strong>
-                  <span>{formatDate(item.publication_date)} • {formatBytes(item.file_size)}</span>
+                  <span className="admin-subtext">{formatDate(item.publication_date)}</span>
                 </div>
-                <div>
+                <div className="admin-col-file">
                   <small>{item.original_filename}</small>
+                  <span className="admin-subtext">{formatBytes(item.file_size)}</span>
+                </div>
+                <div className="admin-col-status">
                   <span className={`admin-badge ${item.publishes_within_one_week ? 'is-warning' : ''}`}>{statusLabel(item)}</span>
                 </div>
                 <div className="admin-row-actions">
@@ -510,57 +521,69 @@ export default function AdminNewslettersPage() {
         subtitle={isLoadingNewsletterEditor ? 'Loading newsletter...' : selectedNewsletterId ? 'Update the title, date, status, or replace the PDF.' : 'Add a new PDF to the public newsletter archive.'}
       >
         <form className="admin-form" onSubmit={submitNewsletter} noValidate ref={editorRef}>
-          <label>
-            <span>Title</span>
-            <input name="title" value={newsletterForm.title} onChange={handleNewsletterChange} onBlur={() => formatNewsletterField('title', titleCaseWords)} aria-invalid={Boolean(newsletterErrors.title)} />
-            <FieldError errors={newsletterErrors} name="title" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Title & Date</h3>
+            <div className="admin-form-grid">
+              <label>
+                <span>Title <span className="admin-required-star">*</span></span>
+                <input name="title" value={newsletterForm.title} onChange={handleNewsletterChange} onBlur={() => formatNewsletterField('title', titleCaseWords)} aria-invalid={Boolean(newsletterErrors.title)} placeholder="e.g. 24th Sunday in Ordinary Time" />
+                <FieldError errors={newsletterErrors} name="title" />
+              </label>
 
-          <label>
-            <span>Publication date</span>
-            <input type="date" name="publication_date" value={newsletterForm.publication_date} onChange={handleNewsletterChange} aria-invalid={Boolean(newsletterErrors.publication_date)} />
-            <FieldError errors={newsletterErrors} name="publication_date" />
-          </label>
+              <label>
+                <span>Publication date <span className="admin-required-star">*</span></span>
+                <input type="date" name="publication_date" value={newsletterForm.publication_date} onChange={handleNewsletterChange} aria-invalid={Boolean(newsletterErrors.publication_date)} />
+                <FieldError errors={newsletterErrors} name="publication_date" />
+              </label>
+            </div>
+          </div>
 
-          <label>
-            <span>Description</span>
-            <textarea name="description" rows="4" value={newsletterForm.description} onChange={handleNewsletterChange} onBlur={() => formatNewsletterField('description', capitalizeFirst)} aria-invalid={Boolean(newsletterErrors.description)} />
-            <FieldError errors={newsletterErrors} name="description" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">PDF File Attachment</h3>
+            <label>
+              <span>{selectedNewsletterId ? 'Replace PDF file' : 'PDF file'} <span className="admin-required-star">*</span></span>
+              <input ref={fileInputRef} type="file" accept="application/pdf,.pdf" onChange={handleFileChange} aria-invalid={Boolean(newsletterErrors.pdf)} />
+              <p className="admin-field-hint">PDF format only, up to 20 MB.</p>
+              <FieldError errors={newsletterErrors} name="pdf" />
+            </label>
 
-          <label>
-            <span>Status</span>
-            <select name="status" value={newsletterForm.status} onChange={handleNewsletterChange} aria-invalid={Boolean(newsletterErrors.status)}>
-              <option value="published" disabled={isFutureDate(newsletterForm.publication_date)}>Published</option>
-              <option value="draft">Draft</option>
-            </select>
-            {isFutureDate(newsletterForm.publication_date) ? (
-              <p className="admin-field-hint">Future newsletters must stay as drafts. They will publish automatically on the publication date, and alerts begin 7 days before publication.</p>
+            {selectedFile ? (
+              <div className="admin-panel">
+                <strong>Selected PDF</strong>
+                <p>{selectedFile.name} • {formatBytes(selectedFile.size)}</p>
+              </div>
             ) : null}
-            <FieldError errors={newsletterErrors} name="status" />
-          </label>
 
-          <label>
-            <span>{selectedNewsletterId ? 'Replace PDF' : 'PDF file'}</span>
-            <input ref={fileInputRef} type="file" accept="application/pdf,.pdf" onChange={handleFileChange} aria-invalid={Boolean(newsletterErrors.pdf)} />
-            <FieldError errors={newsletterErrors} name="pdf" />
-          </label>
+            {selectedNewsletter && !selectedFile ? (
+              <div className="admin-panel">
+                <strong>Current PDF</strong>
+                <p>{selectedNewsletter.original_filename} • {formatBytes(selectedNewsletter.file_size)}</p>
+              </div>
+            ) : null}
+          </div>
 
-          {selectedFile ? (
-            <div className="admin-panel">
-              <strong>Selected PDF</strong>
-              <p>{selectedFile.name} • {formatBytes(selectedFile.size)}</p>
-            </div>
-          ) : null}
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Description & Status</h3>
+            <label>
+              <span>Description</span>
+              <textarea name="description" rows="3" value={newsletterForm.description} onChange={handleNewsletterChange} onBlur={() => formatNewsletterField('description', capitalizeFirst)} aria-invalid={Boolean(newsletterErrors.description)} placeholder="Optional brief summary of readings and notices..." />
+              <FieldError errors={newsletterErrors} name="description" />
+            </label>
 
-          {selectedNewsletter && !selectedFile ? (
-            <div className="admin-panel">
-              <strong>Current PDF</strong>
-              <p>{selectedNewsletter.original_filename} - {formatBytes(selectedNewsletter.file_size)}</p>
-            </div>
-          ) : null}
+            <label>
+              <span>Status</span>
+              <select name="status" value={newsletterForm.status} onChange={handleNewsletterChange} aria-invalid={Boolean(newsletterErrors.status)}>
+                <option value="published" disabled={isFutureDate(newsletterForm.publication_date)}>Published</option>
+                <option value="draft">Draft</option>
+              </select>
+              {isFutureDate(newsletterForm.publication_date) ? (
+                <p className="admin-field-hint">Future newsletters must stay as drafts. They will publish automatically on the publication date.</p>
+              ) : null}
+              <FieldError errors={newsletterErrors} name="status" />
+            </label>
+          </div>
 
-          <div className="admin-actions">
+          <div className="admin-form-actions">
             <button className="btn-primary" type="submit" disabled={isSavingNewsletter}>
               {isSavingNewsletter ? 'Saving...' : selectedNewsletterId ? 'Update Newsletter' : 'Create Newsletter'}
             </button>

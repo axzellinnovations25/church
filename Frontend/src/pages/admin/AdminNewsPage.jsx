@@ -408,20 +408,33 @@ export default function AdminNewsPage() {
           </div>
 
           <div className="admin-data-table">
+            {filteredNews.length ? (
+              <div className="admin-table-header admin-row-news" aria-hidden="true">
+                <span>Image</span>
+                <span>Headline & Info</span>
+                <span>Summary</span>
+                <span>Status</span>
+                <span className="text-right">Actions</span>
+              </div>
+            ) : null}
             {filteredNews.map(item => (
-              <div key={item.id} className="admin-row admin-row-with-thumb admin-row-news">
-                {item.image_url ? (
-                  <img className="admin-event-thumb" src={getBackendUrl(item.image_url)} alt={item.title} />
-                ) : (
-                  <span className="admin-event-thumb admin-event-thumb-placeholder" aria-hidden="true" />
-                )}
+              <div key={item.id} className="admin-row admin-row-news">
+                <div className="admin-col-thumb">
+                  {item.image_url ? (
+                    <img className="admin-event-thumb" src={getBackendUrl(item.image_url)} alt={item.title} />
+                  ) : (
+                    <span className="admin-event-thumb admin-event-thumb-placeholder" aria-hidden="true" />
+                  )}
+                </div>
                 <div className="admin-row-main">
                   <strong>{item.title}</strong>
-                  <span>{formatDate(item.published_at)} • {formatTypeLabel(item.type)}</span>
+                  <span className="admin-subtext">{formatDate(item.published_at)} • {formatTypeLabel(item.type)}</span>
                 </div>
                 <div className="admin-row-meta">
                   <small className="admin-row-summary">{item.summary || 'No summary added yet.'}</small>
-                  <span className="admin-badge">{formatTypeLabel(item.status)}</span>
+                </div>
+                <div className="admin-col-status">
+                  <span className={`admin-badge ${item.status === 'draft' ? 'is-warning' : ''}`}>{formatTypeLabel(item.status)}</span>
                 </div>
                 <div className="admin-row-actions">
                   <button type="button" onClick={() => editNewsPost(item.id)}>Edit</button>
@@ -450,93 +463,102 @@ export default function AdminNewsPage() {
         subtitle={isLoadingEditor ? 'Loading news post...' : 'Add the headline, image, and details for the public news page.'}
       >
         <form className="admin-form" onSubmit={submitNews} noValidate ref={editorRef}>
-          <label>
-            <span>Title</span>
-            <input name="title" value={newsForm.title} onChange={handleNewsChange} onBlur={() => formatNewsField('title', titleCaseWords)} aria-invalid={Boolean(newsErrors.title)} />
-            <FieldHint current={countWords(newsForm.title)} max={newsWordLimits.title} />
-            <FieldError errors={newsErrors} name="title" />
-          </label>
-
-          <div className="admin-form-grid">
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Headline & Category</h3>
             <label>
-              <span>Type</span>
-              <select name="type" value={newsForm.type} onChange={handleNewsChange} aria-invalid={Boolean(newsErrors.type)}>
-                <option value="news">News</option>
-                <option value="announcement">Announcement</option>
-              </select>
-              <FieldError errors={newsErrors} name="type" />
+              <span>Title <span className="admin-required-star">*</span></span>
+              <input name="title" value={newsForm.title} onChange={handleNewsChange} onBlur={() => formatNewsField('title', titleCaseWords)} aria-invalid={Boolean(newsErrors.title)} placeholder="e.g. Annual Cathedral Restoration Update" />
+              <FieldHint current={countWords(newsForm.title)} max={newsWordLimits.title} />
+              <FieldError errors={newsErrors} name="title" />
+            </label>
+
+            <div className="admin-form-grid">
+              <label>
+                <span>Type</span>
+                <select name="type" value={newsForm.type} onChange={handleNewsChange} aria-invalid={Boolean(newsErrors.type)}>
+                  <option value="news">News</option>
+                  <option value="announcement">Announcement</option>
+                </select>
+                <FieldError errors={newsErrors} name="type" />
+              </label>
+
+              <label>
+                <span>Publish date</span>
+                <input type="date" name="published_at" value={newsForm.published_at} onChange={handleNewsChange} aria-invalid={Boolean(newsErrors.published_at)} />
+                <FieldError errors={newsErrors} name="published_at" />
+              </label>
+            </div>
+          </div>
+
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Content & Summary</h3>
+            <label>
+              <span>Summary</span>
+              <textarea name="summary" rows="2" value={newsForm.summary} onChange={handleNewsChange} onBlur={() => formatNewsField('summary', capitalizeFirst)} aria-invalid={Boolean(newsErrors.summary)} placeholder="Brief summary to show in previews..." />
+              <FieldHint current={countWords(newsForm.summary)} max={newsWordLimits.summary} />
+              <FieldError errors={newsErrors} name="summary" />
             </label>
 
             <label>
-              <span>Publish date</span>
-              <input type="date" name="published_at" value={newsForm.published_at} onChange={handleNewsChange} aria-invalid={Boolean(newsErrors.published_at)} />
-              <FieldError errors={newsErrors} name="published_at" />
+              <span>News details</span>
+              <textarea name="content" rows="6" value={newsForm.content} onChange={handleNewsChange} onBlur={() => formatNewsField('content', capitalizeFirst)} aria-invalid={Boolean(newsErrors.content)} placeholder="Full body content for the news announcement..." />
+              <FieldHint current={countWords(newsForm.content)} max={newsWordLimits.content} />
+              <FieldError errors={newsErrors} name="content" />
             </label>
           </div>
 
-          <label>
-            <span>Summary</span>
-            <textarea name="summary" rows="3" value={newsForm.summary} onChange={handleNewsChange} onBlur={() => formatNewsField('summary', capitalizeFirst)} aria-invalid={Boolean(newsErrors.summary)} />
-            <FieldHint current={countWords(newsForm.summary)} max={newsWordLimits.summary} />
-            <FieldError errors={newsErrors} name="summary" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Status & Image</h3>
+            <label>
+              <span>Status</span>
+              <select name="status" value={newsForm.status} onChange={handleNewsChange} aria-invalid={Boolean(newsErrors.status)}>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+              <FieldError errors={newsErrors} name="status" />
+            </label>
 
-          <label>
-            <span>News details</span>
-            <textarea name="content" rows="7" value={newsForm.content} onChange={handleNewsChange} onBlur={() => formatNewsField('content', capitalizeFirst)} aria-invalid={Boolean(newsErrors.content)} />
-            <FieldHint current={countWords(newsForm.content)} max={newsWordLimits.content} />
-            <FieldError errors={newsErrors} name="content" />
-          </label>
+            <label>
+              <span>{selectedNewsId ? 'Replace image' : 'Image'}</span>
+              <input ref={fileInputRef} className="admin-file-input-hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} aria-invalid={Boolean(newsErrors.image)} />
+              <button className="btn-outline" type="button" onClick={() => fileInputRef.current?.click()}>
+                Choose Image
+              </button>
+              <p className="admin-field-hint">JPG, PNG, or WebP. Large images are compressed automatically.</p>
+              <FieldError errors={newsErrors} name="image" />
+            </label>
 
-          <label>
-            <span>Status</span>
-            <select name="status" value={newsForm.status} onChange={handleNewsChange} aria-invalid={Boolean(newsErrors.status)}>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </select>
-            <FieldError errors={newsErrors} name="status" />
-          </label>
-
-          <label>
-            <span>{selectedNewsId ? 'Replace image' : 'Image'}</span>
-            <input ref={fileInputRef} className="admin-file-input-hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} aria-invalid={Boolean(newsErrors.image)} />
-            <button className="btn-outline" type="button" onClick={() => fileInputRef.current?.click()}>
-              Choose Image
-            </button>
-            <p className="admin-field-hint">JPG, PNG, or WebP. Large images are compressed automatically.</p>
-            <FieldError errors={newsErrors} name="image" />
-          </label>
-
-          {selectedFile ? (
-            <div className="admin-panel">
-              <strong>Selected image</strong>
-              <p>Selected uploaded image • {formatBytes(selectedFile.size)}</p>
-            </div>
-          ) : null}
-
-          {selectedNewsPost?.image_url && !selectedFile && !removeCurrentImage ? (
-            <div className="admin-panel">
-              <strong>Current image</strong>
-              <div className="admin-member-preview">
-                <img src={getBackendUrl(selectedNewsPost.image_url)} alt={selectedNewsPost.title} />
+            {selectedFile ? (
+              <div className="admin-panel">
+                <strong>Selected image</strong>
+                <p>Selected uploaded image • {formatBytes(selectedFile.size)}</p>
               </div>
-              <p>Current uploaded image • {formatBytes(selectedNewsPost.image_size)}</p>
-              <button type="button" className="admin-link-btn danger" onClick={() => setRemoveCurrentImage(true)}>
-                Remove current image
-              </button>
-            </div>
-          ) : null}
+            ) : null}
 
-          {removeCurrentImage ? (
-            <div className="admin-panel">
-              <strong>Current image will be removed</strong>
-              <button type="button" className="admin-link-btn" onClick={() => setRemoveCurrentImage(false)}>
-                Keep current image
-              </button>
-            </div>
-          ) : null}
+            {selectedNewsPost?.image_url && !selectedFile && !removeCurrentImage ? (
+              <div className="admin-panel">
+                <strong>Current image</strong>
+                <div className="admin-member-preview">
+                  <img src={getBackendUrl(selectedNewsPost.image_url)} alt={selectedNewsPost.title} />
+                </div>
+                <p>Current uploaded image • {formatBytes(selectedNewsPost.image_size)}</p>
+                <button type="button" className="admin-link-btn danger" onClick={() => setRemoveCurrentImage(true)}>
+                  Remove current image
+                </button>
+              </div>
+            ) : null}
 
-          <div className="admin-actions">
+            {removeCurrentImage ? (
+              <div className="admin-panel">
+                <strong>Current image will be removed</strong>
+                <button type="button" className="admin-link-btn" onClick={() => setRemoveCurrentImage(false)}>
+                  Keep current image
+                </button>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="admin-form-actions">
             <button className="btn-primary" type="submit" disabled={isSavingNews}>
               {isSavingNews ? 'Saving...' : selectedNewsId ? 'Update News Post' : 'Create News Post'}
             </button>

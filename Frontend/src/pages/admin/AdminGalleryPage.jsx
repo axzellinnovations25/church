@@ -410,10 +410,18 @@ export default function AdminGalleryPage() {
           </div>
 
           <div className="admin-data-table">
+            {filteredImages.length ? (
+              <div className="admin-table-header admin-row-gallery" aria-hidden="true">
+                <span>Photo</span>
+                <span>Title & Caption</span>
+                <span>Order & Status</span>
+                <span className="text-right">Actions</span>
+              </div>
+            ) : null}
             {filteredImages.map(item => (
               <div
                 key={item.id}
-                className={`admin-row admin-row-clickable admin-row-with-thumb ${selectedImageId === item.id ? 'active' : ''}`}
+                className={`admin-row admin-row-clickable admin-row-gallery ${selectedImageId === item.id ? 'active' : ''}`}
                 role="button"
                 tabIndex={0}
                 onClick={() => selectImage(item.id)}
@@ -424,22 +432,24 @@ export default function AdminGalleryPage() {
                   }
                 }}
               >
-                {getGalleryImageUrl(item) ? (
-                  <img
-                    className="admin-event-thumb"
-                    src={getBackendUrl(getGalleryImageUrl(item))}
-                    alt={item.title}
-                  />
-                ) : (
-                  <span className="admin-event-thumb admin-event-thumb-placeholder" aria-hidden="true" />
-                )}
-                <div>
-                  <strong>{titleCaseWords(item.title || '')}</strong>
-                  <span>{item.caption || 'No caption added'}</span>
+                <div className="admin-col-thumb">
+                  {getGalleryImageUrl(item) ? (
+                    <img
+                      className="admin-event-thumb"
+                      src={getBackendUrl(getGalleryImageUrl(item))}
+                      alt={item.title}
+                    />
+                  ) : (
+                    <span className="admin-event-thumb admin-event-thumb-placeholder" aria-hidden="true" />
+                  )}
                 </div>
-                <div>
+                <div className="admin-col-main">
+                  <strong>{titleCaseWords(item.title || '')}</strong>
+                  <span className="admin-subtext">{item.caption || 'No caption added'}</span>
+                </div>
+                <div className="admin-col-meta">
                   <small>Sort order: {item.sort_order}</small>
-                  <span className="admin-badge">{item.is_active ? 'Visible' : 'Hidden'}</span>
+                  <span className={`admin-badge ${!item.is_active ? 'is-warning' : ''}`}>{item.is_active ? 'Visible' : 'Hidden'}</span>
                 </div>
                 <div className="admin-row-actions">
                   <button type="button" onClick={event => {
@@ -484,60 +494,66 @@ export default function AdminGalleryPage() {
         subtitle={isLoadingEditor ? 'Loading photo...' : 'Uploaded photos are served from the backend and shown on the public website.'}
       >
         <form className="admin-form" onSubmit={submitGalleryImage} noValidate ref={editorRef}>
-          <label>
-            <span>Title</span>
-            <input name="title" value={galleryForm.title} onChange={handleGalleryChange} onBlur={() => formatGalleryField('title', titleCaseWords)} aria-invalid={Boolean(galleryErrors.title)} />
-            <FieldError errors={galleryErrors} name="title" />
-          </label>
-
-          <label>
-            <span>Caption</span>
-            <textarea name="caption" rows="4" value={galleryForm.caption} onChange={handleGalleryChange} onBlur={() => formatGalleryField('caption', capitalizeFirst)} aria-invalid={Boolean(galleryErrors.caption)} />
-            <FieldError errors={galleryErrors} name="caption" />
-          </label>
-
-          <div className="admin-form-grid">
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Photo & Title</h3>
             <label>
-              <span>Sort order</span>
-              <select name="sort_order" value={galleryForm.sort_order || '1'} onChange={handleGalleryChange} aria-invalid={Boolean(galleryErrors.sort_order)}>
-                {sortOrderOptions.map(value => (
-                  <option key={value} value={value}>{value}</option>
-                ))}
-              </select>
-              <FieldError errors={galleryErrors} name="sort_order" />
+              <span>Title <span className="admin-required-star">*</span></span>
+              <input name="title" value={galleryForm.title} onChange={handleGalleryChange} onBlur={() => formatGalleryField('title', titleCaseWords)} aria-invalid={Boolean(galleryErrors.title)} placeholder="e.g. Cathedral Altar & Nave" />
+              <FieldError errors={galleryErrors} name="title" />
             </label>
 
-            <label className="admin-checkbox">
-              <input type="checkbox" name="is_active" checked={galleryForm.is_active} onChange={handleGalleryChange} />
-              <span>Show on public gallery</span>
+            <label>
+              <span>{selectedImageId ? 'Replace photo' : 'Photo file'} <span className="admin-required-star">*</span></span>
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jfif" onChange={handleFileChange} aria-invalid={Boolean(galleryErrors.image)} />
+              <p className="admin-field-hint">Supports JPG, PNG, WebP or JFIF up to 2 MB (compressed automatically).</p>
+              <FieldError errors={galleryErrors} name="image" />
             </label>
+
+            {selectedFile ? (
+              <div className="admin-panel">
+                <strong>Selected photo</strong>
+                <p>New image ready • {formatBytes(selectedFile.size)}</p>
+              </div>
+            ) : null}
+
+            {getGalleryImageUrl(selectedImage) && !selectedFile ? (
+              <div className="admin-panel admin-poster-preview-box">
+                <strong>Current photo</strong>
+                <div className="admin-member-preview">
+                  <img src={getBackendUrl(getGalleryImageUrl(selectedImage))} alt={selectedImage.title} />
+                  <p>{selectedImage.image_filename || 'Current uploaded image'} • {formatBytes(selectedImage.image_size)}</p>
+                </div>
+              </div>
+            ) : null}
           </div>
 
-          <label>
-            <span>{selectedImageId ? 'Replace photo' : 'Photo'}</span>
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jfif" onChange={handleFileChange} aria-invalid={Boolean(galleryErrors.image)} />
-            <p className="admin-field-hint">Large images are compressed automatically.</p>
-            <FieldError errors={galleryErrors} name="image" />
-          </label>
+          <div className="admin-form-group">
+            <h3 className="admin-form-group-head">Caption & Display Settings</h3>
+            <label>
+              <span>Caption</span>
+              <textarea name="caption" rows="3" value={galleryForm.caption} onChange={handleGalleryChange} onBlur={() => formatGalleryField('caption', capitalizeFirst)} aria-invalid={Boolean(galleryErrors.caption)} placeholder="Optional description for gallery lightbox view..." />
+              <FieldError errors={galleryErrors} name="caption" />
+            </label>
 
-          {selectedFile ? (
-            <div className="admin-panel">
-              <strong>Selected photo</strong>
-              <p>Selected uploaded photo - {formatBytes(selectedFile.size)}</p>
+            <div className="admin-form-grid">
+              <label>
+                <span>Sort order</span>
+                <select name="sort_order" value={galleryForm.sort_order || '1'} onChange={handleGalleryChange} aria-invalid={Boolean(galleryErrors.sort_order)}>
+                  {sortOrderOptions.map(value => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+                <FieldError errors={galleryErrors} name="sort_order" />
+              </label>
+
+              <label className="admin-checkbox">
+                <input type="checkbox" name="is_active" checked={galleryForm.is_active} onChange={handleGalleryChange} />
+                <span>Show on public gallery</span>
+              </label>
             </div>
-          ) : null}
+          </div>
 
-          {getGalleryImageUrl(selectedImage) && !selectedFile ? (
-            <div className="admin-panel">
-              <strong>Current photo</strong>
-              <div className="admin-member-preview">
-                <img src={getBackendUrl(getGalleryImageUrl(selectedImage))} alt={selectedImage.title} />
-                <p>{selectedImage.image_filename || 'Current uploaded image'} - {formatBytes(selectedImage.image_size)}</p>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="admin-actions">
+          <div className="admin-form-actions">
             <button className="btn-primary" type="submit" disabled={isSavingImage}>
               {isSavingImage ? 'Saving...' : selectedImageId ? 'Update Photo' : 'Upload Photo'}
             </button>

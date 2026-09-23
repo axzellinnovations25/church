@@ -556,11 +556,17 @@ export default function AdminRegistrationsPage() {
           </div>
 
           <div className="admin-data-table">
+            {filteredRegistrations.length ? (
+              <div className="admin-table-header admin-row-registrations" aria-hidden="true">
+                <span>Member & ID</span>
+                <span>Contact & Registration Type</span>
+              </div>
+            ) : null}
             {filteredRegistrations.map(item => (
               <button
                 key={item.id}
                 type="button"
-                className={`admin-row admin-row-clickable ${selectedRegistrationId === item.id ? 'active' : ''}`}
+                className={`admin-row admin-row-clickable admin-row-registrations ${selectedRegistrationId === item.id ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedRegistrationId(item.id)
                   setSearchParams({ selected: String(item.id) })
@@ -683,81 +689,89 @@ export default function AdminRegistrationsPage() {
 
         {registrationDetail && isEditingRegistration ? (
           <form className="admin-form" onSubmit={saveRegistration} noValidate>
-            <div className="admin-form-grid">
-              <label>
-                <span>Full name</span>
-                <input name="full_name" value={registrationForm.full_name} onChange={handleRegistrationChange} onBlur={() => formatRegistrationField('full_name')} aria-invalid={Boolean(registrationErrors.full_name)} />
-                <FieldError errors={registrationErrors} name="full_name" />
-              </label>
+            <div className="admin-form-group">
+              <h3 className="admin-form-group-head">Member Information</h3>
+              <div className="admin-form-grid">
+                <label>
+                  <span>Full name</span>
+                  <input name="full_name" value={registrationForm.full_name} onChange={handleRegistrationChange} onBlur={() => formatRegistrationField('full_name')} aria-invalid={Boolean(registrationErrors.full_name)} />
+                  <FieldError errors={registrationErrors} name="full_name" />
+                </label>
 
-              <label>
-                <span>Email</span>
-                <input type="email" name="email" value={registrationForm.email} onChange={handleRegistrationChange} aria-invalid={Boolean(registrationErrors.email)} />
-                <FieldError errors={registrationErrors} name="email" />
-              </label>
-            </div>
-
-            <div className="admin-form-grid">
-              <label>
-                <span>Phone</span>
-                <input name="phone" value={registrationForm.phone} onChange={handleRegistrationChange} aria-invalid={Boolean(registrationErrors.phone)} />
-                <FieldError errors={registrationErrors} name="phone" />
-              </label>
-
-              <label>
-                <span>Partner name</span>
-                <input name="partner_name" value={registrationForm.partner_name} onChange={handleRegistrationChange} onBlur={() => formatRegistrationField('partner_name')} aria-invalid={Boolean(registrationErrors.partner_name)} />
-                <FieldError errors={registrationErrors} name="partner_name" />
-              </label>
-            </div>
-
-            <div className="admin-panel">
-              <strong>Children</strong>
-              <p className="admin-panel-copy">Add or remove children here when the family registration needs extra people attached to it.</p>
-              <div className="admin-children-list">
-                {registrationForm.children.map((child, index) => {
-                  const ageStatus = getChildAgeStatus(child.date_of_birth)
-
-                  return (
-                    <div key={index} className={`admin-child-row ${ageStatus.tone !== 'child' ? `is-${ageStatus.tone}` : ''}`}>
-                      <div>
-                        <span className="admin-child-field-label">Child name</span>
-                        <input placeholder="Child name" value={child.child_name} onChange={event => handleChildChange(index, 'child_name', event.target.value)} onBlur={() => formatChildField(index, 'child_name')} aria-invalid={Boolean(registrationErrors[`children.${index}.child_name`])} />
-                        <FieldError errors={registrationErrors} name={`children.${index}.child_name`} />
-                      </div>
-                      <div>
-                        <span className="admin-child-field-label">Date of birth</span>
-                        <input type="date" value={child.date_of_birth} onChange={event => handleChildChange(index, 'date_of_birth', event.target.value)} aria-invalid={Boolean(registrationErrors[`children.${index}.date_of_birth`])} />
-                        <FieldError errors={registrationErrors} name={`children.${index}.date_of_birth`} />
-                      </div>
-                      <button type="button" className="admin-link-btn danger" onClick={() => setConfirmRemoveChildIndex(index)}>
-                        Remove
-                      </button>
-                      {ageStatus.tone === 'adult' || ageStatus.tone === 'soon' ? <p className="admin-child-age-note">{ageStatus.label}</p> : null}
-                    </div>
-                  )
-                })}
+                <label>
+                  <span>Email</span>
+                  <input type="email" name="email" value={registrationForm.email} onChange={handleRegistrationChange} aria-invalid={Boolean(registrationErrors.email)} />
+                  <FieldError errors={registrationErrors} name="email" />
+                </label>
               </div>
-              <button type="button" className="admin-link-btn" onClick={addChildRow}>Add child</button>
+
+              <div className="admin-form-grid">
+                <label>
+                  <span>Phone</span>
+                  <input name="phone" value={registrationForm.phone} onChange={handleRegistrationChange} aria-invalid={Boolean(registrationErrors.phone)} />
+                  <FieldError errors={registrationErrors} name="phone" />
+                </label>
+
+                <label>
+                  <span>Partner name</span>
+                  <input name="partner_name" value={registrationForm.partner_name} onChange={handleRegistrationChange} onBlur={() => formatRegistrationField('partner_name')} aria-invalid={Boolean(registrationErrors.partner_name)} />
+                  <FieldError errors={registrationErrors} name="partner_name" />
+                </label>
+              </div>
             </div>
 
-            <div className="admin-check-grid">
-              <label className="admin-checkbox">
-                <input type="checkbox" name="volunteering" checked={registrationForm.volunteering} onChange={handleRegistrationChange} />
-                <span>Volunteering</span>
-              </label>
-              <label className="admin-checkbox">
-                <input type="checkbox" name="parish_groups" checked={registrationForm.parish_groups} onChange={handleRegistrationChange} />
-                <span>Parish groups</span>
-              </label>
-              <label className="admin-checkbox">
-                <input type="checkbox" name="sacramental_preparation" checked={registrationForm.sacramental_preparation} onChange={handleRegistrationChange} />
-                <span>Sacramental preparation</span>
-              </label>
-              <label className="admin-checkbox">
-                <input type="checkbox" name="weekly_newsletter" checked={registrationForm.weekly_newsletter} onChange={handleRegistrationChange} />
-                <span>Weekly newsletter</span>
-              </label>
+            <div className="admin-form-group">
+              <h3 className="admin-form-group-head">Children Records</h3>
+              <div className="admin-panel">
+                <p className="admin-panel-copy">Add or remove children here when the family registration needs extra people attached to it.</p>
+                <div className="admin-children-list">
+                  {registrationForm.children.map((child, index) => {
+                    const ageStatus = getChildAgeStatus(child.date_of_birth)
+
+                    return (
+                      <div key={index} className={`admin-child-row ${ageStatus.tone !== 'child' ? `is-${ageStatus.tone}` : ''}`}>
+                        <div>
+                          <span className="admin-child-field-label">Child name</span>
+                          <input placeholder="Child name" value={child.child_name} onChange={event => handleChildChange(index, 'child_name', event.target.value)} onBlur={() => formatChildField(index, 'child_name')} aria-invalid={Boolean(registrationErrors[`children.${index}.child_name`])} />
+                          <FieldError errors={registrationErrors} name={`children.${index}.child_name`} />
+                        </div>
+                        <div>
+                          <span className="admin-child-field-label">Date of birth</span>
+                          <input type="date" value={child.date_of_birth} onChange={event => handleChildChange(index, 'date_of_birth', event.target.value)} aria-invalid={Boolean(registrationErrors[`children.${index}.date_of_birth`])} />
+                          <FieldError errors={registrationErrors} name={`children.${index}.date_of_birth`} />
+                        </div>
+                        <button type="button" className="admin-link-btn danger" onClick={() => setConfirmRemoveChildIndex(index)}>
+                          Remove
+                        </button>
+                        {ageStatus.tone === 'adult' || ageStatus.tone === 'soon' ? <p className="admin-child-age-note">{ageStatus.label}</p> : null}
+                      </div>
+                    )
+                  })}
+                </div>
+                <button type="button" className="admin-link-btn" onClick={addChildRow}>Add child</button>
+              </div>
+            </div>
+
+            <div className="admin-form-group">
+              <h3 className="admin-form-group-head">Parish Interests</h3>
+              <div className="admin-check-grid">
+                <label className="admin-checkbox">
+                  <input type="checkbox" name="volunteering" checked={registrationForm.volunteering} onChange={handleRegistrationChange} />
+                  <span>Volunteering</span>
+                </label>
+                <label className="admin-checkbox">
+                  <input type="checkbox" name="parish_groups" checked={registrationForm.parish_groups} onChange={handleRegistrationChange} />
+                  <span>Parish groups</span>
+                </label>
+                <label className="admin-checkbox">
+                  <input type="checkbox" name="sacramental_preparation" checked={registrationForm.sacramental_preparation} onChange={handleRegistrationChange} />
+                  <span>Sacramental preparation</span>
+                </label>
+                <label className="admin-checkbox">
+                  <input type="checkbox" name="weekly_newsletter" checked={registrationForm.weekly_newsletter} onChange={handleRegistrationChange} />
+                  <span>Weekly newsletter</span>
+                </label>
+              </div>
             </div>
 
             <div className="admin-actions">
