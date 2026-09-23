@@ -4,6 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  VITE_BACKEND_ORIGIN = "https://church-2m8b.onrender.com"
 
 [[redirects]]
   from = "/*"
