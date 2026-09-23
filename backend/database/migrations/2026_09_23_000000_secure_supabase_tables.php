@@ -22,23 +22,6 @@ return new class extends Migration
                 REVOKE ALL PRIVILEGES ON SEQUENCES FROM anon, authenticated;
             ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
                 REVOKE ALL PRIVILEGES ON FUNCTIONS FROM anon, authenticated;
-
-            DO $security$
-            DECLARE
-                table_record record;
-            BEGIN
-                FOR table_record IN
-                    SELECT tablename
-                    FROM pg_tables
-                    WHERE schemaname = 'public'
-                LOOP
-                    EXECUTE format(
-                        'ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY',
-                        table_record.tablename
-                    );
-                END LOOP;
-            END
-            $security$;
             SQL);
     }
 

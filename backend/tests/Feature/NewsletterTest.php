@@ -70,6 +70,14 @@ class NewsletterTest extends TestCase
 
     public function test_public_newsletter_api_only_returns_published_newsletters(): void
     {
+        $directory = storage_path('app/private/newsletters');
+
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        file_put_contents(storage_path('app/private/newsletters/published.pdf'), 'PDF content');
+
         Newsletter::create([
             'title' => 'Published Newsletter',
             'publication_date' => '2026-03-29',

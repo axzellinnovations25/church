@@ -21,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
 )
 
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+
         $middleware->alias([
             'main_admin' => \App\Http\Middleware\EnsureMainAdmin::class,
         ]);
