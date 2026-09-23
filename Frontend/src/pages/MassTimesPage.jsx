@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import PageHero from '../components/PageHero'
-import { getBackendUrl } from '../lib/auth'
+import { publicQueries } from '../lib/publicData'
 import './MassTimesPage.css'
 
 const confessionTimes = [
@@ -27,15 +28,8 @@ const prayerSchedule = [
 ]
 
 export default function MassTimesPage() {
-    const [massTimes, setMassTimes] = useState([])
+    const { data: massTimes = [] } = useQuery(publicQueries.massTimes)
     const [locationFilter, setLocationFilter] = useState('all')
-
-    useEffect(() => {
-        fetch(getBackendUrl('/api/v1/mass-times'))
-            .then(res => res.json())
-            .then(data => setMassTimes(Array.isArray(data?.data) ? data.data : []))
-            .catch(err => console.log('Error loading mass times:', err))
-    }, [])
 
     const normalized = massTimes
         .map(item => ({

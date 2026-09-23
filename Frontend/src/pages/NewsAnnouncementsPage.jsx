@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { NewsHero, NewsIntro, NewsGrid, NewsCTA, SubscribeSection } from '../components/news/NewsEventsSections'
-import { getBackendUrl } from '../lib/auth'
+import { useQuery } from '@tanstack/react-query'
+import { publicQueries } from '../lib/publicData'
 
 function formatDate(value) {
     if (!value) {
@@ -32,48 +33,8 @@ function toArticle(newsPost) {
 }
 
 export default function NewsAnnouncementsPage() {
-    const [newsPosts, setNewsPosts] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [errorMessage, setErrorMessage] = useState('')
-
-    useEffect(() => {
-        let ignore = false
-
-        async function loadNews() {
-            setIsLoading(true)
-            setErrorMessage('')
-
-            try {
-                const response = await fetch(getBackendUrl('/api/v1/news'))
-                const payload = await response.json()
-
-                if (ignore) {
-                    return
-                }
-
-                if (!response.ok || !Array.isArray(payload?.data)) {
-                    throw new Error(payload?.message || 'News posts could not be loaded.')
-                }
-
-                setNewsPosts(payload.data)
-            } catch (error) {
-                if (!ignore) {
-                    setErrorMessage(error.message || 'News posts could not be loaded.')
-                    setNewsPosts([])
-                }
-            } finally {
-                if (!ignore) {
-                    setIsLoading(false)
-                }
-            }
-        }
-
-        loadNews()
-
-        return () => {
-            ignore = true
-        }
-    }, [])
+    const { data: newsPosts = [], isPending: isLoading, error } = useQuery(publicQueries.news)
+    const errorMessage = error?.message || ''
 
     const articles = useMemo(() => newsPosts.map(toArticle), [newsPosts])
     const recentPosts = articles.slice(0, 3)

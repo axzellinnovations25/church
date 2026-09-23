@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { ParishHero, ParishIntro, ParishInfoCards, ParishCTA, RelatedParishLinks } from '../components/parish/ParishSections'
-import { getBackendUrl } from '../lib/auth'
+import { useQuery } from '@tanstack/react-query'
+import { publicQueries } from '../lib/publicData'
 
 const groupIcons = ['Choir', 'Prayer', 'Youth', 'Faith', 'Care', 'Serve']
 
@@ -23,37 +24,7 @@ const fallbackCards = [
 ]
 
 export default function ParishGroupsPage() {
-  const [groups, setGroups] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let ignore = false
-
-    async function loadGroups() {
-      try {
-        const response = await fetch(getBackendUrl('/api/v1/groups'))
-        const payload = await response.json()
-
-        if (!ignore && response.ok && Array.isArray(payload.data)) {
-          setGroups(payload.data)
-        }
-      } catch {
-        if (!ignore) {
-          setGroups([])
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    loadGroups()
-
-    return () => {
-      ignore = true
-    }
-  }, [])
+  const { data: groups = [], isPending: isLoading } = useQuery(publicQueries.groups)
 
   const groupCards = useMemo(() => {
     if (!groups.length) {

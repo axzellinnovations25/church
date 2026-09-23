@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { NewsHero, NewsIntro, EventsList, NewsCTA } from '../components/news/NewsEventsSections'
-import { getBackendUrl } from '../lib/auth'
+import { publicQueries } from '../lib/publicData'
 
 function formatEventDateParts(dateString) {
     if (!dateString) {
@@ -72,48 +73,8 @@ function compareEventDateDesc(left, right) {
 }
 
 export default function EventsCalendarPage() {
-    const [events, setEvents] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [errorMessage, setErrorMessage] = useState('')
-
-    useEffect(() => {
-        let ignore = false
-
-        async function loadEvents() {
-            setIsLoading(true)
-            setErrorMessage('')
-
-            try {
-                const response = await fetch(getBackendUrl('/api/v1/events'))
-                const payload = await response.json()
-
-                if (ignore) {
-                    return
-                }
-
-                if (!response.ok || !Array.isArray(payload?.data)) {
-                    throw new Error(payload?.message || 'The event calendar could not be loaded.')
-                }
-
-                setEvents(payload.data)
-            } catch (error) {
-                if (!ignore) {
-                    setErrorMessage(error.message || 'The event calendar could not be loaded.')
-                    setEvents([])
-                }
-            } finally {
-                if (!ignore) {
-                    setIsLoading(false)
-                }
-            }
-        }
-
-        loadEvents()
-
-        return () => {
-            ignore = true
-        }
-    }, [])
+    const { data: events = [], isPending: isLoading, error } = useQuery(publicQueries.events)
+    const errorMessage = error?.message || ''
 
     const upcomingEvents = useMemo(() => events.filter(isUpcoming).map(toCalendarEvent), [events])
     const pastEvents = useMemo(() => events.filter(event => !isUpcoming(event)).sort(compareEventDateDesc).map(toCalendarEvent), [events])

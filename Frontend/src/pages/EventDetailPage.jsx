@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import PageHero from '../components/PageHero'
 import { getBackendUrl } from '../lib/auth'
+import { eventQuery, publicQueries } from '../lib/publicData'
 import './EventDetailPage.css'
 
 function formatEventDate(dateString) {
@@ -55,50 +56,15 @@ function buildSchedule(event) {
 
 export default function EventDetailPage() {
   const { eventId } = useParams()
-  const [event, setEvent] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    let ignore = false
-
-    async function loadEvent() {
-      try {
-        setLoading(true)
-        setError('')
-
-        const response = await fetch(getBackendUrl(`/api/v1/events/${eventId}`))
-        const payload = await response.json()
-
-        if (ignore) {
-          return
-        }
-
-        if (!response.ok || !payload?.data) {
-          setEvent(null)
-          setError(payload?.message || 'We could not find that event.')
-          return
-        }
-
-        setEvent(payload.data)
-      } catch {
-        if (!ignore) {
-          setEvent(null)
-          setError('The event details could not be loaded right now.')
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false)
-        }
-      }
-    }
-
-    loadEvent()
-
-    return () => {
-      ignore = true
-    }
-  }, [eventId])
+  const queryClient = useQueryClient()
+  const cachedEvent = queryClient
+    .getQueryData(publicQueries.events.queryKey)
+    ?.find(item => String(item.id) === String(eventId))
+  const { data: event = null, isPending: loading, error: queryError } = useQuery({
+    ...eventQuery(eventId),
+    placeholderData: cachedEvent,
+  })
+  const error = queryError?.message || ''
 
   return (
     <div className="event-detail-page">

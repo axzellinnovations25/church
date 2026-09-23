@@ -1,13 +1,14 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getBackendUrl } from '../lib/auth'
+import { useQuery } from '@tanstack/react-query'
 import './HomePage.css'
 
 import churchIcon from '../assets/icons/church_sketch.png'
 import bibleIcon from '../assets/icons/bible_sketch.png'
 import doveIcon from '../assets/icons/dove_sketch.png'
 import PhotoGallery from '../components/PhotoGallery'
-import { fetchGalleryImages, galleryImages } from '../lib/galleryImages'
+import { galleryImages } from '../lib/galleryImages'
+import { publicQueries } from '../lib/publicData'
 
 const publicAsset = (path) => encodeURI(`${import.meta.env.BASE_URL}${path}`)
 
@@ -93,79 +94,15 @@ function formatTime(timeString) {
 
 export default function HomePage() {
   const [heroIdx, setHeroIdx] = useState(0)
-  const [homeMassTimes, setHomeMassTimes] = useState([])
-  const [homeNewsPosts, setHomeNewsPosts] = useState([])
-  const [homeGalleryImages, setHomeGalleryImages] = useState(galleryImages)
+  const { data: massTimes = [] } = useQuery(publicQueries.massTimes)
+  const { data: newsPosts = [] } = useQuery(publicQueries.news)
+  const { data: homeGalleryImages = galleryImages } = useQuery(publicQueries.gallery)
+  const homeMassTimes = massTimes.slice(0, 6)
+  const homeNewsPosts = newsPosts.slice(0, 3)
 
   useEffect(() => {
     const timer = setInterval(() => setHeroIdx((i) => (i + 1) % heroSlides.length), 5000)
     return () => clearInterval(timer)
-  }, [])
-
-  useEffect(() => {
-    let ignore = false
-
-    async function loadGalleryImages() {
-      const images = await fetchGalleryImages()
-
-      if (!ignore) {
-        setHomeGalleryImages(images)
-      }
-    }
-
-    loadGalleryImages()
-
-    return () => {
-      ignore = true
-    }
-  }, [])
-
-  useEffect(() => {
-    let ignore = false
-
-    async function loadHomeData() {
-      try {
-        const massTimesResponse = await fetch(getBackendUrl('/api/v1/mass-times'))
-        const massTimesPayload = await massTimesResponse.json()
-
-        if (ignore) {
-          return
-        }
-
-        if (massTimesResponse.ok && Array.isArray(massTimesPayload.data)) {
-          setHomeMassTimes(massTimesPayload.data.slice(0, 6))
-        }
-      } catch {
-        if (!ignore) {
-          setHomeMassTimes([])
-        }
-      }
-
-      try {
-        const newsResponse = await fetch(getBackendUrl('/api/v1/news'))
-        const newsPayload = await newsResponse.json()
-
-        if (ignore) {
-          return
-        }
-
-        if (newsResponse.ok && Array.isArray(newsPayload.data)) {
-          setHomeNewsPosts(newsPayload.data.slice(0, 3))
-        } else {
-          setHomeNewsPosts([])
-        }
-      } catch {
-        if (!ignore) {
-          setHomeNewsPosts([])
-        }
-      }
-    }
-
-    loadHomeData()
-
-    return () => {
-      ignore = true
-    }
   }, [])
 
   const groupedMassTimes = homeMassTimes

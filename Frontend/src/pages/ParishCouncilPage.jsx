@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
 import { ParishHero, ParishIntro, ParishMembers, ParishCTA, RelatedParishLinks } from '../components/parish/ParishSections'
+import { useQuery } from '@tanstack/react-query'
 import { getBackendUrl } from '../lib/auth'
+import { publicQueries } from '../lib/publicData'
 
 const responsibilities = [
     { title: 'Pastoral Parish Council', content: 'The PPC supports the spiritual and practical life of the parish in consultation with the Parish Priest and wider community.' },
@@ -9,35 +10,7 @@ const responsibilities = [
 ]
 
 export default function ParishCouncilPage() {
-    const [councilMembers, setCouncilMembers] = useState([])
-    const [isLoadingMembers, setIsLoadingMembers] = useState(true)
-
-    useEffect(() => {
-        let ignore = false
-
-        async function loadMembers() {
-            try {
-                const response = await fetch(getBackendUrl('/api/v1/parish-council-members'))
-                const payload = await response.json()
-
-                if (!ignore && response.ok && Array.isArray(payload.data)) {
-                    setCouncilMembers(payload.data)
-                }
-            } catch (error) {
-                console.log('Error loading parish council members:', error)
-            } finally {
-                if (!ignore) {
-                    setIsLoadingMembers(false)
-                }
-            }
-        }
-
-        loadMembers()
-
-        return () => {
-            ignore = true
-        }
-    }, [])
+    const { data: councilMembers = [], isPending: isLoadingMembers } = useQuery(publicQueries.councilMembers)
 
     return (
         <div className="parish-page">

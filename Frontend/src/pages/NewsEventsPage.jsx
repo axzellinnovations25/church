@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import PageHero from '../components/PageHero'
 import { getBackendUrl } from '../lib/auth'
+import { publicQueries } from '../lib/publicData'
 import './NewsEventsPage.css'
 
 function formatDateLabel(dateString) {
@@ -43,58 +44,14 @@ function formatTimeLabel(startTime, endTime) {
 }
 
 export default function NewsEventsPage() {
-  const [events, setEvents] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  useEffect(() => {
-    let ignore = false
-
-    async function loadEvents() {
-      setIsLoading(true)
-      setErrorMessage('')
-
-      try {
-        const response = await fetch(getBackendUrl('/api/v1/events'))
-        const payload = await response.json()
-
-        if (ignore) {
-          return
-        }
-
-        if (!response.ok || !Array.isArray(payload?.data)) {
-          throw new Error(payload?.message || 'Published events could not be loaded.')
-        }
-
-        setEvents(payload.data.filter(event => {
-          if (!event.start_date) {
-            return true
-          }
-
-          const today = new Date()
-          const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-          const eventDate = new Date(`${event.start_date}T00:00:00`)
-
-          return eventDate >= startOfToday
-        }))
-      } catch (error) {
-        if (!ignore) {
-          setErrorMessage(error.message || 'Published events could not be loaded.')
-          setEvents([])
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    loadEvents()
-
-    return () => {
-      ignore = true
-    }
-  }, [])
+  const { data: allEvents = [], isPending: isLoading, error } = useQuery(publicQueries.events)
+  const errorMessage = error?.message || ''
+  const events = allEvents.filter(event => {
+    if (!event.start_date) return true
+    const today = new Date()
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    return new Date(`${event.start_date}T00:00:00`) >= startOfToday
+  })
 
   return (
     <div className="news-events-page">

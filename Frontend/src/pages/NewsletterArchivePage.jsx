@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { NewsHero, NewsIntro, NewsCTA } from '../components/news/NewsEventsSections'
+import { useQuery } from '@tanstack/react-query'
 import { getBackendUrl } from '../lib/auth'
+import { publicQueries } from '../lib/publicData'
 
 function formatDate(value) {
     if (!value) {
@@ -15,37 +17,9 @@ function formatDate(value) {
 }
 
 export default function NewsletterArchivePage() {
-    const [newsletters, setNewsletters] = useState([])
     const [query, setQuery] = useState('')
     const [year, setYear] = useState('')
-    const [isLoading, setIsLoading] = useState(true)
-
-    useEffect(() => {
-        let ignore = false
-
-        async function loadNewsletters() {
-            try {
-                const response = await fetch(getBackendUrl('/api/v1/newsletters'))
-                const payload = await response.json()
-
-                if (!ignore && response.ok && Array.isArray(payload.data)) {
-                    setNewsletters(payload.data)
-                }
-            } catch (error) {
-                console.log('Error loading newsletter archive:', error)
-            } finally {
-                if (!ignore) {
-                    setIsLoading(false)
-                }
-            }
-        }
-
-        loadNewsletters()
-
-        return () => {
-            ignore = true
-        }
-    }, [])
+    const { data: newsletters = [], isPending: isLoading } = useQuery(publicQueries.newsletters)
 
     const years = useMemo(() => (
         Array.from(new Set(newsletters.map(item => String(new Date(`${item.publication_date}T00:00:00`).getFullYear()))))

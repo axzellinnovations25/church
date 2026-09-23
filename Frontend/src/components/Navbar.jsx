@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { queryClient } from '../lib/queryClient'
+import { prefetchPublicDataForPath } from '../lib/publicData'
 import './Navbar.css'
 
 function isRouteMatch(pathname, path) {
@@ -89,6 +91,7 @@ export default function Navbar() {
     const [openDropdown, setOpenDropdown] = useState(null)
     const location = useLocation()
     const pathname = location.pathname
+    const prefetch = path => prefetchPublicDataForPath(queryClient, path)
 
     return (
         <nav className="navbar">
@@ -110,7 +113,11 @@ export default function Navbar() {
                                     <Link
                                         to={item.path}
                                         className={`nav-link ${getActiveChild(item, pathname) ? 'active' : ''}`}
-                                        onMouseEnter={() => setOpenDropdown(item.label)}
+                                        onMouseEnter={() => {
+                                            setOpenDropdown(item.label)
+                                            prefetch(item.path)
+                                        }}
+                                        onFocus={() => prefetch(item.path)}
                                     >
                                         {getActiveChild(item, pathname)?.label || item.label} <span className="dropdown-arrow">▼</span>
                                     </Link>
@@ -121,6 +128,8 @@ export default function Navbar() {
                                                     <Link
                                                         to={child.path}
                                                         className="dropdown-link"
+                                                        onMouseEnter={() => prefetch(child.path)}
+                                                        onFocus={() => prefetch(child.path)}
                                                         onClick={() => setOpenDropdown(null)}
                                                     >
                                                         {child.label}
@@ -134,6 +143,8 @@ export default function Navbar() {
                                 <Link
                                     to={item.path}
                                     className={`nav-link ${isRouteMatch(pathname, item.path) ? 'active' : ''}`}
+                                    onMouseEnter={() => prefetch(item.path)}
+                                    onFocus={() => prefetch(item.path)}
                                 >
                                     {item.label}
                                 </Link>
@@ -167,6 +178,7 @@ export default function Navbar() {
                                                 key={child.label}
                                                 to={child.path}
                                                 className={`mobile-sub-link ${isRouteMatch(pathname, child.path) ? 'active' : ''}`}
+                                                onTouchStart={() => prefetch(child.path)}
                                                 onClick={() => setMobileOpen(false)}
                                             >
                                                 {child.label}
@@ -178,6 +190,7 @@ export default function Navbar() {
                                 <Link
                                     to={item.path}
                                     className={`mobile-link ${isRouteMatch(pathname, item.path) ? 'active' : ''}`}
+                                    onTouchStart={() => prefetch(item.path)}
                                     onClick={() => setMobileOpen(false)}
                                 >
                                     {item.label}

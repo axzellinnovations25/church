@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { NewsHero, NewsIntro, NewsCTA, SubscribeSection } from '../components/news/NewsEventsSections'
 import { getBackendUrl } from '../lib/auth'
+import { publicQueries } from '../lib/publicData'
 
 function formatDate(value) {
     if (!value) {
@@ -25,35 +26,7 @@ function formatBytes(value) {
 }
 
 export default function WeeklyNewsletterPage() {
-    const [newsletters, setNewsletters] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
-
-    useEffect(() => {
-        let ignore = false
-
-        async function loadNewsletters() {
-            try {
-                const response = await fetch(getBackendUrl('/api/v1/newsletters'))
-                const payload = await response.json()
-
-                if (!ignore && response.ok && Array.isArray(payload.data)) {
-                    setNewsletters(payload.data)
-                }
-            } catch (error) {
-                console.log('Error loading newsletters:', error)
-            } finally {
-                if (!ignore) {
-                    setIsLoading(false)
-                }
-            }
-        }
-
-        loadNewsletters()
-
-        return () => {
-            ignore = true
-        }
-    }, [])
+    const { data: newsletters = [], isPending: isLoading } = useQuery(publicQueries.newsletters)
 
     const latestNewsletter = newsletters[0]
 

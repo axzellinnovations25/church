@@ -1,32 +1,15 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import PageHero from '../components/PageHero'
 import Container from '../components/ui/Container'
 import Section from '../components/ui/Section'
 import PhotoGallery from '../components/PhotoGallery'
-import { fetchGalleryImages, galleryImages } from '../lib/galleryImages'
+import { galleryImages } from '../lib/galleryImages'
+import { publicQueries } from '../lib/publicData'
 import './GalleryPage.css'
 
 export default function GalleryPage() {
-  const [publicGalleryImages, setPublicGalleryImages] = useState(galleryImages)
-
-  useEffect(() => {
-    let ignore = false
-
-    async function loadGalleryImages() {
-      const images = await fetchGalleryImages()
-
-      if (!ignore) {
-        setPublicGalleryImages(images)
-      }
-    }
-
-    loadGalleryImages()
-
-    return () => {
-      ignore = true
-    }
-  }, [])
+  const { data: publicGalleryImages = galleryImages } = useQuery(publicQueries.gallery)
 
   return (
     <div className="gallery-page">

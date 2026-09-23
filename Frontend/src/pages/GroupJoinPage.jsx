@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import FeedbackDialog from '../components/FeedbackDialog'
 import PageHero from '../components/PageHero'
 import { getBackendUrl } from '../lib/auth'
+import { publicQueries } from '../lib/publicData'
 import { firstError, hasErrors, requireField, validateEmail, validateMaxLength, validateNameText, validatePhone } from '../lib/validation'
 import './ContactPage.css'
 
@@ -17,42 +19,12 @@ const initialJoinForm = {
 export default function GroupJoinPage() {
   const { groupSlug } = useParams()
   const navigate = useNavigate()
-  const [groups, setGroups] = useState([])
-  const [isLoadingGroup, setIsLoadingGroup] = useState(true)
+  const { data: groups = [], isPending: isLoadingGroup } = useQuery(publicQueries.groups)
   const [joinForm, setJoinForm] = useState(initialJoinForm)
   const [joinErrors, setJoinErrors] = useState({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
-
-  useEffect(() => {
-    let ignore = false
-
-    async function loadGroups() {
-      try {
-        const response = await fetch(getBackendUrl('/api/v1/groups'))
-        const payload = await response.json()
-
-        if (!ignore && response.ok && Array.isArray(payload?.data)) {
-          setGroups(payload.data)
-        }
-      } catch {
-        if (!ignore) {
-          setGroups([])
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoadingGroup(false)
-        }
-      }
-    }
-
-    loadGroups()
-
-    return () => {
-      ignore = true
-    }
-  }, [])
 
   const group = useMemo(
     () => groups.find(item => item.slug === groupSlug) || null,

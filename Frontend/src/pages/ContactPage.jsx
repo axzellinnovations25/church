@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import FeedbackDialog from '../components/FeedbackDialog'
 import PageHero from '../components/PageHero'
 import { getBackendUrl } from '../lib/auth'
+import { publicQueries } from '../lib/publicData'
 import { capitalizeFirst, titleCaseWords } from '../lib/textFormat'
 import { firstError, hasErrors, requireField, validateEmail, validateMaxLength, validateNameText, validatePhone } from '../lib/validation'
 import './ContactPage.css'
@@ -45,7 +47,7 @@ const initialContactForm = {
 export default function ContactPage() {
     const [searchParams] = useSearchParams()
     const [contactForm, setContactForm] = useState(initialContactForm)
-    const [groups, setGroups] = useState([])
+    const { data: groups = [] } = useQuery(publicQueries.groups)
     const [loading, setLoading] = useState(false)
     const [successDialogOpen, setSuccessDialogOpen] = useState(false)
     const [error, setError] = useState('')
@@ -60,29 +62,6 @@ export default function ContactPage() {
             setContactForm(prev => ({ ...prev, subject: subj }))
         }
     }, [searchParams])
-
-    useEffect(() => {
-        let ignore = false
-
-        async function loadGroups() {
-            try {
-                const response = await fetch(getBackendUrl('/api/v1/groups'))
-                const payload = await response.json()
-
-                if (!ignore && response.ok && Array.isArray(payload.data)) {
-                    setGroups(payload.data)
-                }
-            } catch (loadError) {
-                console.log('Error loading groups for contact form:', loadError)
-            }
-        }
-
-        loadGroups()
-
-        return () => {
-            ignore = true
-        }
-    }, [])
 
     function handleContactChange(event) {
         const { name, value } = event.target

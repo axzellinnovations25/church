@@ -1,10 +1,9 @@
 import { getBackendUrl } from './auth'
+import { queryClient } from './queryClient'
 
 let csrfToken = null
-let overviewRequest = null
-let headerSummaryRequest = null
-let headerSummaryCache = null
-let headerSummaryExpiresAt = 0
+const ADMIN_QUERY_KEY = ['admin']
+const ADMIN_STALE_TIME = 30 * 1000
 
 async function parseJsonResponse(response) {
   const contentType = response.headers.get('content-type') || ''
@@ -115,43 +114,47 @@ async function adminRequest(path, { method = 'GET', body } = {}) {
   return payload
 }
 
+function cachedAdminRequest(key, path, staleTime = ADMIN_STALE_TIME) {
+  return queryClient.fetchQuery({
+    queryKey: [...ADMIN_QUERY_KEY, ...key],
+    queryFn: () => adminRequest(path),
+    staleTime,
+  })
+}
+
+function invalidateAdminCache(publicResource) {
+  queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEY })
+
+  if (publicResource) {
+    queryClient.invalidateQueries({ queryKey: ['public', publicResource] })
+  }
+}
+
+async function adminMutation(path, options, publicResource) {
+  const payload = await adminRequest(path, options)
+  invalidateAdminCache(publicResource)
+  return payload
+}
+
+export function clearAdminCache() {
+  queryClient.removeQueries({ queryKey: ADMIN_QUERY_KEY })
+}
+
 export function listEvents(page = 1) {
   const params = new URLSearchParams({ page: String(page) })
-  return adminRequest(`/admin/events?${params.toString()}`)
+  return cachedAdminRequest(['events', 'list', page], `/admin/events?${params.toString()}`)
 }
 
 export function getOverview() {
-  if (!overviewRequest) {
-    overviewRequest = adminRequest('/admin/overview').finally(() => {
-      overviewRequest = null
-    })
-  }
-
-  return overviewRequest
+  return cachedAdminRequest(['overview'], '/admin/overview')
 }
 
 export function getHeaderSummary() {
-  if (headerSummaryCache && Date.now() < headerSummaryExpiresAt) {
-    return Promise.resolve(headerSummaryCache)
-  }
-
-  if (!headerSummaryRequest) {
-    headerSummaryRequest = adminRequest('/admin/header-summary')
-      .then(payload => {
-        headerSummaryCache = payload
-        headerSummaryExpiresAt = Date.now() + 30_000
-        return payload
-      })
-      .finally(() => {
-        headerSummaryRequest = null
-      })
-  }
-
-  return headerSummaryRequest
+  return cachedAdminRequest(['header-summary'], '/admin/header-summary')
 }
 
 export function updateOverviewItemVisibility(itemKey, visibility) {
-  return adminRequest('/admin/overview/items/visibility', {
+  return adminMutation('/admin/overview/items/visibility', {
     method: 'PATCH',
     body: {
       item_key: itemKey,
@@ -161,50 +164,50 @@ export function updateOverviewItemVisibility(itemKey, visibility) {
 }
 
 export function getEvent(id) {
-  return adminRequest(`/admin/events/${id}/edit`)
+  return cachedAdminRequest(['events', 'detail', String(id)], `/admin/events/${id}/edit`)
 }
 
 export function createEvent(data) {
-  return adminRequest('/admin/events', { method: 'POST', body: data })
+  return adminMutation('/admin/events', { method: 'POST', body: data }, 'events')
 }
 
 export function updateEvent(id, data) {
   if (data instanceof FormData) {
     data.append('_method', 'PUT')
-    return adminRequest(`/admin/events/${id}`, { method: 'POST', body: data })
+    return adminMutation(`/admin/events/${id}`, { method: 'POST', body: data }, 'events')
   }
 
-  return adminRequest(`/admin/events/${id}`, { method: 'PUT', body: data })
+  return adminMutation(`/admin/events/${id}`, { method: 'PUT', body: data }, 'events')
 }
 
 export function deleteEvent(id) {
-  return adminRequest(`/admin/events/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/events/${id}`, { method: 'DELETE' }, 'events')
 }
 
 export function listEventsByDate(date) {
   const params = new URLSearchParams({ date })
-  return adminRequest(`/admin/events/by-date?${params.toString()}`)
+  return cachedAdminRequest(['events', 'by-date', date], `/admin/events/by-date?${params.toString()}`)
 }
 
 export function listMassTimes(page = 1) {
   const params = new URLSearchParams({ page: String(page) })
-  return adminRequest(`/admin/mass-times?${params.toString()}`)
+  return cachedAdminRequest(['mass-times', 'list', page], `/admin/mass-times?${params.toString()}`)
 }
 
 export function getMassTime(id) {
-  return adminRequest(`/admin/mass-times/${id}/edit`)
+  return cachedAdminRequest(['mass-times', 'detail', String(id)], `/admin/mass-times/${id}/edit`)
 }
 
 export function createMassTime(data) {
-  return adminRequest('/admin/mass-times', { method: 'POST', body: data })
+  return adminMutation('/admin/mass-times', { method: 'POST', body: data }, 'mass-times')
 }
 
 export function updateMassTime(id, data) {
-  return adminRequest(`/admin/mass-times/${id}`, { method: 'PUT', body: data })
+  return adminMutation(`/admin/mass-times/${id}`, { method: 'PUT', body: data }, 'mass-times')
 }
 
 export function deleteMassTime(id) {
-  return adminRequest(`/admin/mass-times/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/mass-times/${id}`, { method: 'DELETE' }, 'mass-times')
 }
 
 export function listMassTimesByDay(day, location = '') {
@@ -218,182 +221,225 @@ export function listMassTimesByDay(day, location = '') {
     params.set('location', location)
   }
 
-  return adminRequest(`/admin/mass-times/by-day?${params.toString()}`)
+  return cachedAdminRequest(['mass-times', 'by-day', day || '', location || ''], `/admin/mass-times/by-day?${params.toString()}`)
 }
 
 export function listNewsletters(page = 1) {
   const params = new URLSearchParams({ page: String(page) })
-  return adminRequest(`/admin/newsletters?${params.toString()}`)
+  return cachedAdminRequest(['newsletters', 'list', page], `/admin/newsletters?${params.toString()}`)
 }
 
 export function getNewsletter(id) {
-  return adminRequest(`/admin/newsletters/${id}/edit`)
+  return cachedAdminRequest(['newsletters', 'detail', String(id)], `/admin/newsletters/${id}/edit`)
 }
 
 export function createNewsletter(data) {
-  return adminRequest('/admin/newsletters', { method: 'POST', body: data })
+  return adminMutation('/admin/newsletters', { method: 'POST', body: data }, 'newsletters')
 }
 
 export function updateNewsletter(id, data) {
-  return adminRequest(`/admin/newsletters/${id}`, { method: 'POST', body: data })
+  return adminMutation(`/admin/newsletters/${id}`, { method: 'POST', body: data }, 'newsletters')
 }
 
 export function deleteNewsletter(id) {
-  return adminRequest(`/admin/newsletters/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/newsletters/${id}`, { method: 'DELETE' }, 'newsletters')
 }
 
 export function listNewsPosts(page = 1) {
   const params = new URLSearchParams({ page: String(page) })
-  return adminRequest(`/admin/news?${params.toString()}`)
+  return cachedAdminRequest(['news', 'list', page], `/admin/news?${params.toString()}`)
 }
 
 export function getNewsPost(id) {
-  return adminRequest(`/admin/news/${id}/edit`)
+  return cachedAdminRequest(['news', 'detail', String(id)], `/admin/news/${id}/edit`)
 }
 
 export function createNewsPost(data) {
-  return adminRequest('/admin/news', { method: 'POST', body: data })
+  return adminMutation('/admin/news', { method: 'POST', body: data }, 'news')
 }
 
 export function updateNewsPost(id, data) {
-  return adminRequest(`/admin/news/${id}`, { method: 'POST', body: data })
+  return adminMutation(`/admin/news/${id}`, { method: 'POST', body: data }, 'news')
 }
 
 export function deleteNewsPost(id) {
-  return adminRequest(`/admin/news/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/news/${id}`, { method: 'DELETE' }, 'news')
 }
 
 export function listRegistrations(page = 1) {
   const params = new URLSearchParams({ page: String(page) })
-  return adminRequest(`/admin/parish-registrations?${params.toString()}`)
+  return cachedAdminRequest(['registrations', 'list', page], `/admin/parish-registrations?${params.toString()}`)
 }
 
 export function getRegistration(id) {
-  return adminRequest(`/admin/parish-registrations/${id}`)
+  return cachedAdminRequest(['registrations', 'detail', String(id)], `/admin/parish-registrations/${id}`)
 }
 
 export function updateRegistration(id, data) {
-  return adminRequest(`/admin/parish-registrations/${id}`, { method: 'PUT', body: data })
+  return adminMutation(`/admin/parish-registrations/${id}`, { method: 'PUT', body: data })
 }
 
 export function deleteRegistration(id) {
-  return adminRequest(`/admin/parish-registrations/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/parish-registrations/${id}`, { method: 'DELETE' })
 }
 
 export function listContactMessages(page = 1) {
   const params = new URLSearchParams({ page: String(page) })
-  return adminRequest(`/admin/contact-messages?${params.toString()}`)
+  return cachedAdminRequest(['contact-messages', 'list', page], `/admin/contact-messages?${params.toString()}`)
 }
 
 export function getContactMessage(id) {
-  return adminRequest(`/admin/contact-messages/${id}`)
+  return cachedAdminRequest(['contact-messages', 'detail', String(id)], `/admin/contact-messages/${id}`)
 }
 
 export function updateContactMessageStatus(id, status) {
-  return adminRequest(`/admin/contact-messages/${id}`, {
+  return adminMutation(`/admin/contact-messages/${id}`, {
     method: 'PATCH',
     body: { status },
   })
 }
 
 export function deleteContactMessage(id) {
-  return adminRequest(`/admin/contact-messages/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/contact-messages/${id}`, { method: 'DELETE' })
 }
 
 export function listParishCouncilMembers(page = 1) {
   const params = new URLSearchParams({ page: String(page) })
-  return adminRequest(`/admin/parish-council-members?${params.toString()}`)
+  return cachedAdminRequest(['parish-council-members', 'list', page], `/admin/parish-council-members?${params.toString()}`)
 }
 
 export function getParishCouncilMember(id) {
-  return adminRequest(`/admin/parish-council-members/${id}/edit`)
+  return cachedAdminRequest(['parish-council-members', 'detail', String(id)], `/admin/parish-council-members/${id}/edit`)
 }
 
 export function createParishCouncilMember(data) {
-  return adminRequest('/admin/parish-council-members', { method: 'POST', body: data })
+  return adminMutation('/admin/parish-council-members', { method: 'POST', body: data }, 'parish-council-members')
 }
 
 export function updateParishCouncilMember(id, data) {
-  return adminRequest(`/admin/parish-council-members/${id}`, { method: 'POST', body: data })
+  return adminMutation(`/admin/parish-council-members/${id}`, { method: 'POST', body: data }, 'parish-council-members')
 }
 
 export function deleteParishCouncilMember(id) {
-  return adminRequest(`/admin/parish-council-members/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/parish-council-members/${id}`, { method: 'DELETE' }, 'parish-council-members')
 }
 
 export function listGalleryImages(page = 1) {
   const params = new URLSearchParams({ page: String(page) })
-  return adminRequest(`/admin/gallery-images?${params.toString()}`)
+  return cachedAdminRequest(['gallery-images', 'list', page], `/admin/gallery-images?${params.toString()}`)
 }
 
 export function getGalleryImage(id) {
-  return adminRequest(`/admin/gallery-images/${id}/edit`)
+  return cachedAdminRequest(['gallery-images', 'detail', String(id)], `/admin/gallery-images/${id}/edit`)
 }
 
 export function createGalleryImage(data) {
-  return adminRequest('/admin/gallery-images', { method: 'POST', body: data })
+  return adminMutation('/admin/gallery-images', { method: 'POST', body: data }, 'gallery-images')
 }
 
 export function updateGalleryImage(id, data) {
-  return adminRequest(`/admin/gallery-images/${id}`, { method: 'POST', body: data })
+  return adminMutation(`/admin/gallery-images/${id}`, { method: 'POST', body: data }, 'gallery-images')
 }
 
 export function deleteGalleryImage(id) {
-  return adminRequest(`/admin/gallery-images/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/gallery-images/${id}`, { method: 'DELETE' }, 'gallery-images')
 }
 
 export function listGroups() {
-  return adminRequest('/admin/groups')
+  return cachedAdminRequest(['groups', 'list'], '/admin/groups')
 }
 
 export function getGroup(id) {
-  return adminRequest(`/admin/groups/${id}/edit`)
+  return cachedAdminRequest(['groups', 'detail', String(id)], `/admin/groups/${id}/edit`)
 }
 
 export function createGroup(data) {
-  return adminRequest('/admin/groups', { method: 'POST', body: data })
+  return adminMutation('/admin/groups', { method: 'POST', body: data }, 'groups')
 }
 
 export function updateGroup(id, data) {
-  return adminRequest(`/admin/groups/${id}`, { method: 'POST', body: data })
+  return adminMutation(`/admin/groups/${id}`, { method: 'POST', body: data }, 'groups')
 }
 
 export function deleteGroup(id) {
-  return adminRequest(`/admin/groups/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/groups/${id}`, { method: 'DELETE' }, 'groups')
 }
 
 export function createAdminAccount(data) {
-  return adminRequest('/admin/admin-accounts', { method: 'POST', body: data })
+  return adminMutation('/admin/admin-accounts', { method: 'POST', body: data })
 }
 
 export function updateAdminAccount(id, data) {
-  return adminRequest(`/admin/admin-accounts/${id}`, { method: 'PUT', body: data })
+  return adminMutation(`/admin/admin-accounts/${id}`, { method: 'PUT', body: data })
 }
 
 export function deleteAdminAccount(id) {
-  return adminRequest(`/admin/admin-accounts/${id}`, { method: 'DELETE' })
+  return adminMutation(`/admin/admin-accounts/${id}`, { method: 'DELETE' })
 }
 
 export function createGroupMember(groupId, data) {
-  return adminRequest(`/admin/groups/${groupId}/members`, { method: 'POST', body: data })
+  return adminMutation(`/admin/groups/${groupId}/members`, { method: 'POST', body: data })
 }
 
 export function updateGroupMember(groupId, memberId, data) {
-  return adminRequest(`/admin/groups/${groupId}/members/${memberId}`, { method: 'PUT', body: data })
+  return adminMutation(`/admin/groups/${groupId}/members/${memberId}`, { method: 'PUT', body: data })
 }
 
 export function deleteGroupMember(groupId, memberId) {
-  return adminRequest(`/admin/groups/${groupId}/members/${memberId}`, { method: 'DELETE' })
+  return adminMutation(`/admin/groups/${groupId}/members/${memberId}`, { method: 'DELETE' })
 }
 
 export function updateProfile(data) {
-  return adminRequest('/profile', { method: 'PATCH', body: data })
+  return adminMutation('/profile', { method: 'PATCH', body: data })
 }
 
 export function updatePassword(data) {
-  return adminRequest('/password', { method: 'PUT', body: data })
+  return adminMutation('/password', { method: 'PUT', body: data })
 }
 
 export function deleteProfile(data) {
-  return adminRequest('/profile', { method: 'DELETE', body: data })
+  return adminMutation('/profile', { method: 'DELETE', body: data })
+}
+
+const adminPathLoaders = {
+  '/dashboard': getOverview,
+  '/dashboard/events': () => listEvents(1),
+  '/dashboard/mass-times': () => listMassTimes(1),
+  '/dashboard/newsletters': () => listNewsletters(1),
+  '/dashboard/news': () => listNewsPosts(1),
+  '/dashboard/registrations': () => listRegistrations(1),
+  '/dashboard/contact-messages': () => listContactMessages(1),
+  '/dashboard/parish-council': () => listParishCouncilMembers(1),
+  '/dashboard/groups': listGroups,
+  '/dashboard/my-group': listGroups,
+  '/dashboard/gallery': () => listGalleryImages(1),
+  '/dashboard/accounts': listGroups,
+}
+
+export function prefetchAdminDataForPath(path) {
+  const loader = adminPathLoaders[path]
+  return loader ? loader().catch(() => null) : Promise.resolve(null)
+}
+
+export function warmAdminData(user) {
+  const loaders = [
+    getOverview,
+    getHeaderSummary,
+    () => listEvents(1),
+    () => listContactMessages(1),
+    listGroups,
+  ]
+
+  if (user?.is_main_admin) {
+    loaders.push(
+      () => listMassTimes(1),
+      () => listNewsletters(1),
+      () => listNewsPosts(1),
+      () => listRegistrations(1),
+      () => listParishCouncilMembers(1),
+      () => listGalleryImages(1),
+    )
+  }
+
+  return Promise.allSettled(loaders.map(loader => loader()))
 }

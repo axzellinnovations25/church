@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import FeedbackDialog from '../components/FeedbackDialog'
-import { getHeaderSummary } from '../lib/admin'
+import { getHeaderSummary, prefetchAdminDataForPath, warmAdminData } from '../lib/admin'
 import { titleCaseWords } from '../lib/textFormat'
 import { useAdminSession } from './useAdminSession'
 import './admin.css'
@@ -125,6 +125,7 @@ export default function AdminLayout() {
       }
 
       try {
+        warmAdminData(user)
         const payload = await getHeaderSummary()
 
         if (!ignore) {
@@ -287,6 +288,9 @@ export default function AdminLayout() {
                   key={item.to}
                   to={item.to}
                   end={item.end}
+                  onMouseEnter={() => prefetchAdminDataForPath(item.to)}
+                  onFocus={() => prefetchAdminDataForPath(item.to)}
+                  onTouchStart={() => prefetchAdminDataForPath(item.to)}
                   onClick={() => setIsMenuOpen(false)}
                   className={({ isActive }) => `admin-sidenav-link ${isActive ? 'active' : ''}`}
                 >

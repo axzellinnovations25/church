@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import PageHero from '../components/PageHero'
 import { getBackendUrl } from '../lib/auth'
+import { newsPostQuery, publicQueries } from '../lib/publicData'
 import './EventDetailPage.css'
 
 function formatDate(value) {
@@ -31,50 +32,15 @@ function formatType(value) {
 
 export default function NewsDetailPage() {
   const { newsId } = useParams()
-  const [newsPost, setNewsPost] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    let ignore = false
-
-    async function loadNewsPost() {
-      try {
-        setLoading(true)
-        setError('')
-
-        const response = await fetch(getBackendUrl(`/api/v1/news/${newsId}`))
-        const payload = await response.json()
-
-        if (ignore) {
-          return
-        }
-
-        if (!response.ok || !payload?.data) {
-          setNewsPost(null)
-          setError(payload?.message || 'We could not find that news post.')
-          return
-        }
-
-        setNewsPost(payload.data)
-      } catch {
-        if (!ignore) {
-          setNewsPost(null)
-          setError('The news details could not be loaded right now.')
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false)
-        }
-      }
-    }
-
-    loadNewsPost()
-
-    return () => {
-      ignore = true
-    }
-  }, [newsId])
+  const queryClient = useQueryClient()
+  const cachedNewsPost = queryClient
+    .getQueryData(publicQueries.news.queryKey)
+    ?.find(item => String(item.id) === String(newsId))
+  const { data: newsPost = null, isPending: loading, error: queryError } = useQuery({
+    ...newsPostQuery(newsId),
+    placeholderData: cachedNewsPost,
+  })
+  const error = queryError?.message || ''
 
   return (
     <div className="event-detail-page">
