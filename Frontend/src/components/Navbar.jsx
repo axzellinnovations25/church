@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { queryClient } from '../lib/queryClient'
 import { prefetchPublicDataForPath } from '../lib/publicData'
@@ -89,15 +89,62 @@ const navItems = [
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const [openDropdown, setOpenDropdown] = useState(null)
+    const [expandedMobileCategories, setExpandedMobileCategories] = useState({})
     const location = useLocation()
     const pathname = location.pathname
     const prefetch = path => prefetchPublicDataForPath(queryClient, path)
+
+    const handleToggleMobile = () => {
+        setMobileOpen(prev => {
+            const nextOpen = !prev
+            if (nextOpen) {
+                const activeCategory = navItems.find(item => item.children && getActiveChild(item, pathname))
+                if (activeCategory) {
+                    setExpandedMobileCategories(prevExpanded => ({
+                        ...prevExpanded,
+                        [activeCategory.label]: true,
+                    }))
+                }
+            }
+            return nextOpen
+        })
+    }
+
+    // Lock body scroll when mobile menu drawer is open
+    useEffect(() => {
+        if (mobileOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => {
+            document.body.style.overflow = ''
+        }
+    }, [mobileOpen])
+
+    // Close mobile menu on desktop window resize
+    useEffect(() => {
+        function handleResize() {
+            if (window.innerWidth > 1024) {
+                setMobileOpen(false)
+            }
+        }
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
+
+    const toggleMobileCategory = (label) => {
+        setExpandedMobileCategories(prev => ({
+            ...prev,
+            [label]: !prev[label],
+        }))
+    }
 
     return (
         <nav className="navbar">
             <div className="container navbar-inner">
                 {/* Logo */}
-                <Link to="/" className="navbar-logo">
+                <Link to="/" className="navbar-logo" onClick={() => setMobileOpen(false)}>
                     <span style={{ fontSize: '1.8rem' }}>⛪</span>
                     <div className="logo-text">
                         <span className="logo-name">ST MARY'S CATHEDRAL</span>
@@ -119,7 +166,7 @@ export default function Navbar() {
                                         }}
                                         onFocus={() => prefetch(item.path)}
                                     >
-                                        {getActiveChild(item, pathname)?.label || item.label} <span className="dropdown-arrow">▼</span>
+                                        {item.label} <span className="dropdown-arrow">▼</span>
                                     </Link>
                                     {openDropdown === item.label && (
                                         <ul className="dropdown" onMouseLeave={() => setOpenDropdown(null)}>
@@ -127,7 +174,7 @@ export default function Navbar() {
                                                 <li key={child.label}>
                                                     <Link
                                                         to={child.path}
-                                                        className="dropdown-link"
+                                                        className={`dropdown-link ${isRouteMatch(pathname, child.path) ? 'active' : ''}`}
                                                         onMouseEnter={() => prefetch(child.path)}
                                                         onFocus={() => prefetch(child.path)}
                                                         onClick={() => setOpenDropdown(null)}
@@ -156,8 +203,11 @@ export default function Navbar() {
                 <Link to="/donate" className="btn-gold navbar-donate">Donate</Link>
 
                 <button
-                    className="hamburger"
-                    onClick={() => setMobileOpen(!mobileOpen)}
+                    className={`hamburger ${mobileOpen ? 'open' : ''}`}
+                    onClick={handleToggleMobile}
+                    aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                    aria-expanded={mobileOpen}
+                    aria-controls="mobile-nav-menu"
                 >
                     <span></span>
                     <span></span>
@@ -165,49 +215,89 @@ export default function Navbar() {
                 </button>
             </div>
 
+            {/* Mobile Drawer Backdrop */}
             {mobileOpen && (
-                <div className="mobile-menu">
-                    {navItems.map(item => (
-                        <div key={item.label}>
-                            {item.children ? (
-                                <>
-                                    <span className="mobile-link">{getActiveChild(item, pathname)?.label || item.label}</span>
-                                    <div className="mobile-sub">
-                                        {item.children.map(child => (
-                                            <Link
-                                                key={child.label}
-                                                to={child.path}
-                                                className={`mobile-sub-link ${isRouteMatch(pathname, child.path) ? 'active' : ''}`}
-                                                onTouchStart={() => prefetch(child.path)}
-                                                onClick={() => setMobileOpen(false)}
-                                            >
-                                                {child.label}
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </>
-                            ) : (
-                                <Link
-                                    to={item.path}
-                                    className={`mobile-link ${isRouteMatch(pathname, item.path) ? 'active' : ''}`}
-                                    onTouchStart={() => prefetch(item.path)}
-                                    onClick={() => setMobileOpen(false)}
-                                >
-                                    {item.label}
-                                </Link>
-                            )}
+                <div
+                    className="mobile-menu-backdrop"
+                    onClick={() => setMobileOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* Mobile Navigation Sidebar Drawer */}
+            {mobileOpen && (
+                <div id="mobile-nav-menu" className="mobile-menu">
+                    <div className="mobile-menu-inner">
+                        {navItems.map(item => {
+                            const isExpanded = !!expandedMobileCategories[item.label]
+                            const hasActiveChild = getActiveChild(item, pathname)
+                            const isParentActive = isRouteMatch(pathname, item.path) || hasActiveChild
+
+                            return (
+                                <div key={item.label} className={`mobile-nav-group ${isExpanded ? 'is-expanded' : ''}`}>
+                                    {item.children ? (
+                                        <>
+                                            <div className="mobile-group-header">
+                                                <Link
+                                                    to={item.path}
+                                                    className={`mobile-link ${isParentActive ? 'active' : ''}`}
+                                                    onTouchStart={() => prefetch(item.path)}
+                                                    onClick={() => setMobileOpen(false)}
+                                                >
+                                                    {item.label}
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    className={`mobile-expand-btn ${isExpanded ? 'expanded' : ''}`}
+                                                    onClick={() => toggleMobileCategory(item.label)}
+                                                    aria-label={`${isExpanded ? 'Minimize' : 'Expand'} ${item.label} section`}
+                                                    aria-expanded={isExpanded}
+                                                >
+                                                    <span className="expand-chevron">▼</span>
+                                                </button>
+                                            </div>
+                                            {isExpanded && (
+                                                <div className="mobile-sub">
+                                                    {item.children.map(child => (
+                                                        <Link
+                                                            key={child.label}
+                                                            to={child.path}
+                                                            className={`mobile-sub-link ${isRouteMatch(pathname, child.path) ? 'active' : ''}`}
+                                                            onTouchStart={() => prefetch(child.path)}
+                                                            onClick={() => setMobileOpen(false)}
+                                                        >
+                                                            {child.label}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <Link
+                                            to={item.path}
+                                            className={`mobile-link ${isRouteMatch(pathname, item.path) ? 'active' : ''}`}
+                                            onTouchStart={() => prefetch(item.path)}
+                                            onClick={() => setMobileOpen(false)}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    )}
+                                </div>
+                            )
+                        })}
+                        <div className="mobile-donate-wrapper">
+                            <Link
+                                to="/donate"
+                                className="btn-gold mobile-donate-btn"
+                                onClick={() => setMobileOpen(false)}
+                            >
+                                Donate
+                            </Link>
                         </div>
-                    ))}
-                    <Link
-                        to="/donate"
-                        className="mobile-link"
-                        style={{ color: 'var(--gold)' }}
-                        onClick={() => setMobileOpen(false)}
-                    >
-                        Donate
-                    </Link>
+                    </div>
                 </div>
             )}
         </nav>
     )
 }
+
