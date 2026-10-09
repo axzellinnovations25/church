@@ -338,6 +338,24 @@
     text-align: center;
 }
 
+@media (max-width: 640px) {
+    .newsletter-edition-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .newsletter-edition-actions {
+        justify-content: stretch;
+        width: 100%;
+    }
+
+    .newsletter-edition-actions .btn-navy,
+    .newsletter-edition-actions .btn-gold-outline {
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+}
+
 /* Archive List */
 .archive-year-group {
     margin-bottom: 40px;

@@ -29,6 +29,7 @@ export default function WeeklyNewsletterPage() {
     const { data: newsletters = [], isPending: isLoading } = useQuery(publicQueries.newsletters)
 
     const latestNewsletter = newsletters[0]
+    const previousNewsletters = newsletters.slice(1)
 
     return (
         <div className="news-events-page">
@@ -92,6 +93,31 @@ export default function WeeklyNewsletterPage() {
                                 <a className="btn-navy" href={getBackendUrl(latestNewsletter.view_url)} target="_blank" rel="noreferrer">Open in New Tab</a>
                                 <a className="btn-gold" href={getBackendUrl(latestNewsletter.download_url)}>Download PDF</a>
                             </div>
+
+                            {previousNewsletters.length ? (
+                                <div className="newsletter-inner-section" style={{ marginTop: '40px' }}>
+                                    <h4>Previous published newsletters</h4>
+                                    <p className="text-mid" style={{ marginBottom: '18px' }}>
+                                        All other published editions are available below.
+                                    </p>
+                                    <div className="newsletter-edition-list">
+                                        {previousNewsletters.map(newsletter => (
+                                            <article key={newsletter.id} className="newsletter-edition-item">
+                                                <div>
+                                                    <h4 style={{ marginBottom: '5px' }}>{newsletter.title}</h4>
+                                                    <p className="text-mid" style={{ margin: 0 }}>
+                                                        {formatDate(newsletter.publication_date)} · {formatBytes(newsletter.file_size)}
+                                                    </p>
+                                                </div>
+                                                <div className="newsletter-edition-actions">
+                                                    <a className="btn-navy" href={getBackendUrl(newsletter.view_url)} target="_blank" rel="noreferrer">Open</a>
+                                                    <a className="btn-gold-outline" href={getBackendUrl(newsletter.download_url)}>Download</a>
+                                                </div>
+                                            </article>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : null}
                         </>
                     ) : null}
 
