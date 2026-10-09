@@ -48,6 +48,37 @@ class NewsletterTest extends TestCase
         $newsletter = Newsletter::first();
         $this->assertNotNull($newsletter);
         $this->assertFileExists(storage_path("app/private/{$newsletter->file_path}"));
+        $this->assertNotNull($newsletter->file_contents);
+    }
+
+    public function test_published_newsletter_remains_public_when_local_pdf_is_lost(): void
+    {
+        $user = User::factory()->create();
+        $pdfContents = "%PDF-1.4\ndurable newsletter\n%%EOF";
+
+        $this->actingAs($user)->postJson('/admin/newsletters', [
+            'title' => 'Durable Newsletter',
+            'publication_date' => '2026-03-29',
+            'status' => 'published',
+            'pdf' => UploadedFile::fake()->createWithContent('durable.pdf', $pdfContents),
+        ])->assertCreated();
+
+        $newsletter = Newsletter::firstOrFail();
+        @unlink(storage_path("app/private/{$newsletter->file_path}"));
+
+        $this->getJson('/api/v1/newsletters')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Durable Newsletter');
+
+        $this->get("/newsletters/{$newsletter->id}/view")
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertContent($pdfContents);
+
+        $this->get("/newsletters/{$newsletter->id}/download")
+            ->assertOk()
+            ->assertDownload('durable.pdf');
     }
 
     public function test_admin_cannot_upload_a_non_pdf_newsletter(): void

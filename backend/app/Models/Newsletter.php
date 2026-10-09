@@ -16,9 +16,14 @@ class Newsletter extends Model
         'publication_date',
         'description',
         'file_path',
+        'file_contents',
         'original_filename',
         'file_size',
         'status',
+    ];
+
+    protected $hidden = [
+        'file_contents',
     ];
 
     public static function publishDueDrafts(): int
@@ -63,7 +68,42 @@ class Newsletter extends Model
 
     public function pdfExists(): bool
     {
-        return $this->file_path
-            && is_file(storage_path("app/private/{$this->file_path}"));
+        if ($this->file_path && is_file(storage_path("app/private/{$this->file_path}"))) {
+            return true;
+        }
+
+        if (array_key_exists('has_file_contents', $this->getAttributes())) {
+            return (bool) $this->getAttribute('has_file_contents');
+        }
+
+        return $this->file_contents !== null;
+    }
+
+    public function pdfContents(): ?string
+    {
+        if ($this->file_path) {
+            $path = storage_path("app/private/{$this->file_path}");
+
+            if (is_file($path)) {
+                $contents = file_get_contents($path);
+
+                return $contents === false ? null : $contents;
+            }
+        }
+
+        $contents = $this->file_contents;
+
+        if (is_resource($contents)) {
+            rewind($contents);
+            $contents = stream_get_contents($contents);
+        }
+
+        if (! is_string($contents)) {
+            return null;
+        }
+
+        $decoded = base64_decode($contents, true);
+
+        return $decoded === false ? null : $decoded;
     }
 }

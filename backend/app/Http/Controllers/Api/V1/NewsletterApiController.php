@@ -15,6 +15,11 @@ class NewsletterApiController extends Controller
         Newsletter::publishDueDrafts();
 
         $newsletters = Newsletter::publiclyPublished()
+            ->select([
+                'id', 'title', 'publication_date', 'description', 'file_path',
+                'original_filename', 'file_size', 'status', 'created_at', 'updated_at',
+            ])
+            ->selectRaw('CASE WHEN file_contents IS NULL THEN 0 ELSE 1 END AS has_file_contents')
             ->orderBy('publication_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->get()

@@ -16,7 +16,10 @@ class NewsletterController extends Controller
     {
         Newsletter::publishDueDrafts();
 
-        $newsletters = Newsletter::orderBy('publication_date', 'desc')
+        $newsletters = Newsletter::select([
+            'id', 'title', 'publication_date', 'description', 'file_path',
+            'original_filename', 'file_size', 'status', 'created_at', 'updated_at',
+        ])->orderBy('publication_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->orderBy('id')->paginate(10);
 
@@ -107,18 +110,27 @@ class NewsletterController extends Controller
     private function storePdf(NewsletterRequest $request): array
     {
         $file = $request->file('pdf');
+        $contents = file_get_contents($file->getRealPath());
+
+        if ($contents === false) {
+            abort(422, 'The newsletter PDF could not be read.');
+        }
+
         $filename = now()->format('YmdHis').'-'.Str::uuid().'.pdf';
         $path = "newsletters/{$filename}";
         $directory = storage_path('app/private/newsletters');
 
         if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
+            @mkdir($directory, 0755, true);
         }
 
-        copy($file->getRealPath(), storage_path("app/private/{$path}"));
+        if (is_dir($directory) && is_writable($directory)) {
+            @copy($file->getRealPath(), storage_path("app/private/{$path}"));
+        }
 
         return [
             'file_path' => $path,
+            'file_contents' => base64_encode($contents),
             'original_filename' => $file->getClientOriginalName(),
             'file_size' => $file->getSize() ?: 0,
         ];

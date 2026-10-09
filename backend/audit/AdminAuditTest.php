@@ -5,6 +5,7 @@ namespace Tests\Audit;
 use App\Models\{Event, Group, MassTime, Newsletter, User};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 // Run explicitly against an isolated database and upload directory.
@@ -135,7 +136,7 @@ class AdminAuditTest extends TestCase
         $id = $this->post('/admin/gallery-images', [...$data, 'image' => $image], ['Accept' => 'application/json'])
             ->assertCreated()->json('gallery_image.id');
         $this->get('/admin/gallery-images/'.$id.'/image')->assertOk();
-        auth()->logout();
+        Auth::logout();
         $this->get('/api/v1/gallery-images/'.$id.'/image')->assertNotFound();
         $this->actingAs($admin);
         $this->postJson('/admin/gallery-images/'.$id, [...$data, 'is_active' => true])->assertOk();
