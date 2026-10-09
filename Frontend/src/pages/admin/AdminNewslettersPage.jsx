@@ -1,3 +1,4 @@
+import { useAdminPagination } from '../../admin/useAdminPagination'
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FeedbackDialog from '../../components/FeedbackDialog'
@@ -92,7 +93,6 @@ export default function AdminNewslettersPage() {
   const fileInputRef = useRef(null)
   const editorRef = useRef(null)
   const [newsletters, setNewsletters] = useState([])
-  const [newsletterMeta, setNewsletterMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
   const [selectedNewsletterId, setSelectedNewsletterId] = useState(null)
   const [newsletterForm, setNewsletterForm] = useState(emptyNewsletterForm)
   const [selectedFile, setSelectedFile] = useState(null)
@@ -120,11 +120,12 @@ export default function AdminNewslettersPage() {
 
       if (!ignore) {
         setNewsletters(payload.newsletters || [])
-        setNewsletterMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
       }
     }
 
-    loadNewsletters()
+    loadNewsletters().catch(error => {
+      if (!ignore) openDialog('error', 'Unable to load records', error.message || 'Please try again.')
+    })
 
     return () => {
       ignore = true
@@ -192,10 +193,9 @@ export default function AdminNewslettersPage() {
     setDialogState({ open: true, tone, title, message })
   }
 
-  async function refreshNewsletters(page = newsletterMeta.current_page || 1) {
-    const payload = await listNewsletters(page)
+  async function refreshNewsletters() {
+    const payload = await listNewsletters()
     setNewsletters(payload.newsletters || [])
-    setNewsletterMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
   }
 
   function startNewNewsletter() {
@@ -435,6 +435,7 @@ export default function AdminNewslettersPage() {
 
     return matchesQuery && matchesStatus && matchesYear && matchesMonth
   })
+  const { items: visibleItems, meta: newsletterMeta, setPage } = useAdminPagination(filteredNewsletters, [newsletterSearch, newsletterStatusFilter, newsletterYearFilter, newsletterMonthFilter])
 
   return (
     <div className="admin-page-grid">
@@ -479,7 +480,7 @@ export default function AdminNewslettersPage() {
                 <span className="text-right">Actions</span>
               </div>
             ) : null}
-            {filteredNewsletters.map(item => (
+            {visibleItems.map(item => (
               <div key={item.id} className="admin-row admin-row-newsletters">
                 <div className="admin-col-main">
                   <strong>{item.title}</strong>
@@ -504,11 +505,11 @@ export default function AdminNewslettersPage() {
           </div>
 
           <div className="admin-pagination">
-            <button className="btn-outline" type="button" onClick={() => refreshNewsletters(Math.max(1, newsletterMeta.current_page - 1))} disabled={newsletterMeta.current_page <= 1}>
+            <button className="btn-outline" type="button" onClick={() => setPage(Math.max(1, newsletterMeta.current_page - 1))} disabled={newsletterMeta.current_page <= 1}>
               Previous
             </button>
             <span>Page {newsletterMeta.current_page} of {newsletterMeta.last_page}</span>
-            <button className="btn-outline" type="button" onClick={() => refreshNewsletters(Math.min(newsletterMeta.last_page, newsletterMeta.current_page + 1))} disabled={newsletterMeta.current_page >= newsletterMeta.last_page}>
+            <button className="btn-outline" type="button" onClick={() => setPage(Math.min(newsletterMeta.last_page, newsletterMeta.current_page + 1))} disabled={newsletterMeta.current_page >= newsletterMeta.last_page}>
               Next
             </button>
           </div>

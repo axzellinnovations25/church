@@ -74,7 +74,7 @@ class EventApiController extends Controller
     {
         $event = Event::query()->find($id);
 
-        abort_unless($event && ($event->status === 'published' || $request->user()), 404);
+        abort_unless($event && ($event->status === 'published' || $event->canBeManagedBy($request->user())), 404);
         abort_unless($event->image_path, 404);
 
         $path = storage_path("app/private/{$event->image_path}");

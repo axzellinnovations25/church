@@ -1,3 +1,5 @@
+import { queryClient } from './queryClient'
+
 const AUTH_BASE = '/auth-api'
 const FALLBACK_BACKEND_ORIGIN = 'http://127.0.0.1:8000'
 
@@ -84,6 +86,11 @@ async function authRequest(path, body) {
     }
 
     throw normalizeError(payload, 'Authentication request failed.')
+  }
+
+  if (['/login', '/signup', '/logout'].includes(path)) {
+    await queryClient.cancelQueries({ queryKey: ['admin'] })
+    queryClient.removeQueries({ queryKey: ['admin'] })
   }
 
   return payload

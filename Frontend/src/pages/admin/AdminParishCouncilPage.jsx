@@ -1,3 +1,4 @@
+import { useAdminPagination } from '../../admin/useAdminPagination'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 import FeedbackDialog from '../../components/FeedbackDialog'
@@ -61,7 +62,6 @@ export default function AdminParishCouncilPage() {
   const fileInputRef = useRef(null)
   const editorRef = useRef(null)
   const [members, setMembers] = useState([])
-  const [membersMeta, setMembersMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
   const [selectedMemberId, setSelectedMemberId] = useState(null)
   const [memberForm, setMemberForm] = useState(emptyMemberForm)
   const [selectedFile, setSelectedFile] = useState(null)
@@ -89,7 +89,6 @@ export default function AdminParishCouncilPage() {
 
         if (!ignore) {
           setMembers(payload.members || [])
-          setMembersMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
         }
       } catch (error) {
         if (!ignore) {
@@ -158,10 +157,9 @@ export default function AdminParishCouncilPage() {
 
   const selectedMember = members.find(item => item.id === selectedMemberId)
 
-  async function refreshMembers(page = membersMeta.current_page || 1) {
-    const payload = await listParishCouncilMembers(page)
+  async function refreshMembers() {
+    const payload = await listParishCouncilMembers()
     setMembers(payload.members || [])
-    setMembersMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
   }
 
   function selectMember(id) {
@@ -170,7 +168,7 @@ export default function AdminParishCouncilPage() {
   }
 
   function startNewMember() {
-    const suggestedSortOrder = String(members.length + 1)
+    const suggestedSortOrder = String(highestSortOrder + 1)
     setSelectedMemberId(null)
     setMemberForm({
       ...emptyMemberForm,
@@ -355,9 +353,10 @@ export default function AdminParishCouncilPage() {
   }
 
   const memberRoles = Array.from(new Set(members.map(item => item.role).filter(Boolean))).sort((a, b) => a.localeCompare(b))
-  const suggestedSortOrder = selectedMemberId ? memberForm.sort_order || '1' : String(members.length + 1)
+  const highestSortOrder = Math.max(0, ...members.map(member => Number(member.sort_order) || 0))
+  const suggestedSortOrder = selectedMemberId ? memberForm.sort_order || '1' : String(highestSortOrder + 1)
   const sortOrderOptions = Array.from(
-    { length: Math.max(1, selectedMemberId ? members.length : members.length + 1) },
+    { length: Math.max(1, highestSortOrder + 1, Number(memberForm.sort_order) || 0) },
     (_, index) => String(index + 1)
   )
   const filteredMembers = members.filter(item => {
@@ -374,6 +373,7 @@ export default function AdminParishCouncilPage() {
 
     return matchesQuery && matchesRole && matchesVisibility
   })
+  const { items: visibleItems, meta: membersMeta, setPage } = useAdminPagination(filteredMembers, [memberSearch, memberRoleFilter, memberVisibilityFilter])
 
   if (!user?.is_main_admin) {
     return (
@@ -430,7 +430,7 @@ export default function AdminParishCouncilPage() {
                 <span>Actions</span>
               </div>
             ) : null}
-            {filteredMembers.map(item => (
+            {visibleItems.map(item => (
               <div
                 key={item.id}
                 className={`admin-row admin-row-clickable admin-row-council ${selectedMemberId === item.id ? 'active' : ''}`}
@@ -480,7 +480,7 @@ export default function AdminParishCouncilPage() {
             <button
               className="btn-outline"
               type="button"
-              onClick={() => refreshMembers(Math.max(1, membersMeta.current_page - 1))}
+              onClick={() => setPage(Math.max(1, membersMeta.current_page - 1))}
               disabled={membersMeta.current_page <= 1}
             >
               Previous
@@ -489,7 +489,7 @@ export default function AdminParishCouncilPage() {
             <button
               className="btn-outline"
               type="button"
-              onClick={() => refreshMembers(Math.min(membersMeta.last_page, membersMeta.current_page + 1))}
+              onClick={() => setPage(Math.min(membersMeta.last_page, membersMeta.current_page + 1))}
               disabled={membersMeta.current_page >= membersMeta.last_page}
             >
               Next

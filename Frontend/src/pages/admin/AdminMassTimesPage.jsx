@@ -1,3 +1,4 @@
+import { useAdminPagination } from '../../admin/useAdminPagination'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FeedbackDialog from '../../components/FeedbackDialog'
@@ -38,7 +39,6 @@ export default function AdminMassTimesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const editorRef = useRef(null)
   const [massTimes, setMassTimes] = useState([])
-  const [massTimeMeta, setMassTimeMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
   const [massPreview, setMassPreview] = useState([])
   const [selectedMassTimeId, setSelectedMassTimeId] = useState(null)
   const [massTimeForm, setMassTimeForm] = useState(emptyMassTimeForm)
@@ -67,11 +67,12 @@ export default function AdminMassTimesPage() {
 
       if (!ignore) {
         setMassTimes(payload.mass_times || [])
-        setMassTimeMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
       }
     }
 
-    loadData()
+    loadData().catch(error => {
+      if (!ignore) openDialog('error', 'Unable to load records', error.message || 'Please try again.')
+    })
 
     return () => {
       ignore = true
@@ -152,10 +153,9 @@ export default function AdminMassTimesPage() {
     setDialogState({ open: true, tone, title, message })
   }
 
-  async function refreshMassTimes(page = massTimeMeta.current_page || 1) {
-    const payload = await listMassTimes(page)
+  async function refreshMassTimes() {
+    const payload = await listMassTimes()
     setMassTimes(payload.mass_times || [])
-    setMassTimeMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
   }
 
   function handleMassTimeChange(event) {
@@ -280,6 +280,7 @@ export default function AdminMassTimesPage() {
 
     return matchesQuery && matchesDay && matchesStatus && matchesLocation && matchesLanguage
   })
+  const { items: visibleItems, meta: massTimeMeta, setPage } = useAdminPagination(filteredMassTimes, [massSearch, massDayFilter, massStatusFilter, massLocationFilter, massLanguageFilter])
 
   return (
     <div className="admin-page-grid">
@@ -329,7 +330,7 @@ export default function AdminMassTimesPage() {
                 <span className="text-right">Actions</span>
               </div>
             ) : null}
-            {filteredMassTimes.map(item => (
+            {visibleItems.map(item => (
               <div key={item.id} className="admin-row admin-row-mass-times">
                 <div className="admin-col-day">
                   <strong>{item.day}</strong>
@@ -354,11 +355,11 @@ export default function AdminMassTimesPage() {
           </div>
 
           <div className="admin-pagination">
-            <button className="btn-outline" type="button" onClick={() => refreshMassTimes(Math.max(1, massTimeMeta.current_page - 1))} disabled={massTimeMeta.current_page <= 1}>
+            <button className="btn-outline" type="button" onClick={() => setPage(Math.max(1, massTimeMeta.current_page - 1))} disabled={massTimeMeta.current_page <= 1}>
               Previous
             </button>
             <span>Page {massTimeMeta.current_page} of {massTimeMeta.last_page}</span>
-            <button className="btn-outline" type="button" onClick={() => refreshMassTimes(Math.min(massTimeMeta.last_page, massTimeMeta.current_page + 1))} disabled={massTimeMeta.current_page >= massTimeMeta.last_page}>
+            <button className="btn-outline" type="button" onClick={() => setPage(Math.min(massTimeMeta.last_page, massTimeMeta.current_page + 1))} disabled={massTimeMeta.current_page >= massTimeMeta.last_page}>
               Next
             </button>
           </div>

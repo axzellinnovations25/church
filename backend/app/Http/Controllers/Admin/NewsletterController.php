@@ -7,6 +7,7 @@ use App\Http\Requests\NewsletterRequest;
 use App\Http\Resources\NewsletterResource;
 use App\Models\Newsletter;
 use Illuminate\Http\Request;
+use App\Support\Audit;
 use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
@@ -17,7 +18,7 @@ class NewsletterController extends Controller
 
         $newsletters = Newsletter::orderBy('publication_date', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->orderBy('id')->paginate(10);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -46,6 +47,8 @@ class NewsletterController extends Controller
             'status' => $validated['status'],
             ...$fileData,
         ]);
+
+        Audit::log($request, 'created newsletter', $newsletter, $newsletter->title);
 
         return response()->json([
             'message' => 'Newsletter saved successfully.',
@@ -81,6 +84,8 @@ class NewsletterController extends Controller
 
         $newsletter->update($data);
 
+        Audit::log($request, 'updated newsletter', $newsletter, $newsletter->title);
+
         return response()->json([
             'message' => 'Newsletter updated successfully.',
             'newsletter' => NewsletterResource::make($newsletter->fresh())->resolve($request),
@@ -91,6 +96,8 @@ class NewsletterController extends Controller
     {
         $this->deletePdf($newsletter->file_path);
         $newsletter->delete();
+
+        Audit::log($request, 'deleted newsletter', $newsletter, $newsletter->title);
 
         return response()->json([
             'message' => 'Newsletter deleted successfully.',

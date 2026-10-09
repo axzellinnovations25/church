@@ -11,7 +11,7 @@ class NewsletterFileController extends Controller
         Newsletter::publishDueDrafts();
         $newsletter->refresh();
 
-        abort_unless(($newsletter->status === 'published' && ! $newsletter->is_future) || auth()->check(), 404);
+        abort_unless(($newsletter->status === 'published' && ! $newsletter->is_future) || auth()->user()?->is_main_admin, 404);
         $path = storage_path("app/private/{$newsletter->file_path}");
         abort_unless(is_file($path), 404);
 
@@ -26,7 +26,7 @@ class NewsletterFileController extends Controller
         Newsletter::publishDueDrafts();
         $newsletter->refresh();
 
-        abort_unless(($newsletter->status === 'published' && ! $newsletter->is_future) || auth()->check(), 404);
+        abort_unless(($newsletter->status === 'published' && ! $newsletter->is_future) || auth()->user()?->is_main_admin, 404);
         $path = storage_path("app/private/{$newsletter->file_path}");
         abort_unless(is_file($path), 404);
 

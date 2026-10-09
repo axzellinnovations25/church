@@ -7,6 +7,7 @@ use App\Http\Requests\ParishCouncilMemberRequest;
 use App\Http\Resources\ParishCouncilMemberResource;
 use App\Models\ParishCouncilMember;
 use Illuminate\Http\Request;
+use App\Support\Audit;
 use Illuminate\Support\Str;
 
 class ParishCouncilMemberController extends Controller
@@ -16,7 +17,7 @@ class ParishCouncilMemberController extends Controller
         $members = ParishCouncilMember::orderByRaw('CASE WHEN sort_order <= 0 THEN 1 ELSE 0 END')
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->paginate(10);
+            ->orderBy('id')->paginate(10);
 
         return response()->json([
             'members' => ParishCouncilMemberResource::collection(collect($members->items()))->resolve($request),
@@ -42,6 +43,8 @@ class ParishCouncilMemberController extends Controller
             'is_active' => (bool) ($validated['is_active'] ?? true),
             ...$photoData,
         ]);
+
+        Audit::log($request, 'created parish council member', $member, $member->name);
 
         return response()->json([
             'message' => 'Parish council member saved successfully.',
@@ -86,6 +89,8 @@ class ParishCouncilMemberController extends Controller
 
         $parishCouncilMember->update($data);
 
+        Audit::log($request, 'updated parish council member', $parishCouncilMember, $parishCouncilMember->name);
+
         return response()->json([
             'message' => 'Parish council member updated successfully.',
             'member' => ParishCouncilMemberResource::make($parishCouncilMember->fresh())->resolve($request),
@@ -96,6 +101,8 @@ class ParishCouncilMemberController extends Controller
     {
         $this->deletePhoto($parishCouncilMember->photo_path);
         $parishCouncilMember->delete();
+
+        Audit::log($request, 'deleted parish council member', $parishCouncilMember, $parishCouncilMember->name);
 
         return response()->json([
             'message' => 'Parish council member deleted successfully.',

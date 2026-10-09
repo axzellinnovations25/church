@@ -50,7 +50,7 @@ class NewsPostApiController extends Controller
     {
         $newsPost = NewsPost::query()->find($id);
 
-        abort_unless($newsPost && ($newsPost->status === 'published' || $request->user()), 404);
+        abort_unless($newsPost && ($newsPost->status === 'published' || $request->user()?->is_main_admin), 404);
         abort_unless($newsPost->image_path, 404);
 
         $path = storage_path("app/private/{$newsPost->image_path}");

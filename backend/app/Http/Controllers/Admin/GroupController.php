@@ -9,6 +9,7 @@ use App\Http\Resources\GroupResource;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Support\Audit;
 use Illuminate\Support\Str;
 
 class GroupController extends Controller
@@ -61,6 +62,8 @@ class GroupController extends Controller
 
         $this->assignAdminUser($validated['admin_user_id'] ?? null, $group);
 
+        Audit::log($request, 'created group', $group, $group->name);
+
         return response()->json([
             'message' => 'Group saved successfully.',
             'group' => $this->serializeGroup($group->fresh(['users', 'groupMembers'])->loadCount('groupMembers'), $request),
@@ -104,6 +107,8 @@ class GroupController extends Controller
 
         $this->assignAdminUser($validated['admin_user_id'] ?? null, $group);
 
+        Audit::log($request, 'updated group', $group, $group->name);
+
         return response()->json([
             'message' => 'Group updated successfully.',
             'group' => $this->serializeGroup($group->fresh(['users', 'groupMembers'])->loadCount('groupMembers'), $request),
@@ -114,6 +119,8 @@ class GroupController extends Controller
     {
         User::where('group_id', $group->id)->update(['group_id' => null]);
         $group->delete();
+
+        Audit::log($request, 'deleted group', $group, $group->name);
 
         return response()->json([
             'message' => 'Group deleted successfully.',

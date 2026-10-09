@@ -1,3 +1,4 @@
+import { useAdminPagination } from '../../admin/useAdminPagination'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FeedbackDialog from '../../components/FeedbackDialog'
@@ -79,7 +80,6 @@ export default function AdminNewsPage() {
   const fileInputRef = useRef(null)
   const editorRef = useRef(null)
   const [newsPosts, setNewsPosts] = useState([])
-  const [newsMeta, setNewsMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
   const [selectedNewsId, setSelectedNewsId] = useState(null)
   const [newsForm, setNewsForm] = useState(emptyNewsForm)
   const [selectedFile, setSelectedFile] = useState(null)
@@ -107,7 +107,6 @@ export default function AdminNewsPage() {
 
       if (!ignore) {
         setNewsPosts(payload.news_posts || [])
-        setNewsMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
       }
     }
 
@@ -126,10 +125,9 @@ export default function AdminNewsPage() {
     setDialogState(current => ({ ...current, open: false }))
   }
 
-  async function refreshNews(page = newsMeta.current_page || 1) {
-    const payload = await listNewsPosts(page)
+  async function refreshNews() {
+    const payload = await listNewsPosts()
     setNewsPosts(payload.news_posts || [])
-    setNewsMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
   }
 
   const editNewsPost = useCallback(async (id) => {
@@ -376,6 +374,7 @@ export default function AdminNewsPage() {
 
     return matchesSearch && matchesStatus && matchesType
   })
+  const { items: visibleItems, meta: newsMeta, setPage } = useAdminPagination(filteredNews, [newsSearch, newsStatusFilter, newsTypeFilter])
 
   return (
     <div className="admin-page-grid">
@@ -417,7 +416,7 @@ export default function AdminNewsPage() {
                 <span className="text-right">Actions</span>
               </div>
             ) : null}
-            {filteredNews.map(item => (
+            {visibleItems.map(item => (
               <div key={item.id} className="admin-row admin-row-news">
                 <div className="admin-col-thumb">
                   {item.image_url ? (
@@ -446,11 +445,11 @@ export default function AdminNewsPage() {
           </div>
 
           <div className="admin-pagination">
-            <button className="btn-outline" type="button" onClick={() => refreshNews(Math.max(1, newsMeta.current_page - 1))} disabled={newsMeta.current_page <= 1}>
+            <button className="btn-outline" type="button" onClick={() => setPage(Math.max(1, newsMeta.current_page - 1))} disabled={newsMeta.current_page <= 1}>
               Previous
             </button>
             <span>Page {newsMeta.current_page} of {newsMeta.last_page}</span>
-            <button className="btn-outline" type="button" onClick={() => refreshNews(Math.min(newsMeta.last_page, newsMeta.current_page + 1))} disabled={newsMeta.current_page >= newsMeta.last_page}>
+            <button className="btn-outline" type="button" onClick={() => setPage(Math.min(newsMeta.last_page, newsMeta.current_page + 1))} disabled={newsMeta.current_page >= newsMeta.last_page}>
               Next
             </button>
           </div>

@@ -1,5 +1,6 @@
 import { getBackendUrl } from './auth'
 import { queryClient } from './queryClient'
+import { loadAdminPages } from './adminPagination'
 
 let csrfToken = null
 const ADMIN_QUERY_KEY = ['admin']
@@ -70,7 +71,7 @@ function normalizeError(payload, fallbackMessage) {
   }
 }
 
-async function adminRequest(path, { method = 'GET', body } = {}) {
+async function adminRequest(path, { method = 'GET', body, signal } = {}) {
   const upperMethod = method.toUpperCase()
   const isFormData = body instanceof FormData
 
@@ -88,6 +89,7 @@ async function adminRequest(path, { method = 'GET', body } = {}) {
     const response = await fetch(getBackendUrl(path), {
       method: upperMethod,
       credentials: 'include',
+      signal,
       headers: buildAdminHeaders(upperMethod, body, token),
       body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
     })
@@ -117,8 +119,18 @@ async function adminRequest(path, { method = 'GET', body } = {}) {
 function cachedAdminRequest(key, path, staleTime = ADMIN_STALE_TIME) {
   return queryClient.fetchQuery({
     queryKey: [...ADMIN_QUERY_KEY, ...key],
-    queryFn: () => adminRequest(path),
+    queryFn: ({ signal }) => adminRequest(path, { signal }),
     staleTime,
+  })
+}
+
+function cachedAdminList(resource, field) {
+  return queryClient.fetchQuery({
+    queryKey: [...ADMIN_QUERY_KEY, resource, 'all'],
+    queryFn: ({ signal }) => loadAdminPages(
+      page => adminRequest(`/admin/${resource}?page=${page}`, { signal }), field,
+    ),
+    staleTime: ADMIN_STALE_TIME,
   })
 }
 
@@ -133,16 +145,17 @@ function invalidateAdminCache(publicResource) {
 async function adminMutation(path, options, publicResource) {
   const payload = await adminRequest(path, options)
   invalidateAdminCache(publicResource)
+  window.dispatchEvent(new Event('admin-data-changed'))
   return payload
 }
 
 export function clearAdminCache() {
+  queryClient.cancelQueries({ queryKey: ADMIN_QUERY_KEY })
   queryClient.removeQueries({ queryKey: ADMIN_QUERY_KEY })
 }
 
-export function listEvents(page = 1) {
-  const params = new URLSearchParams({ page: String(page) })
-  return cachedAdminRequest(['events', 'list', page], `/admin/events?${params.toString()}`)
+export function listEvents() {
+  return cachedAdminList('events', 'events')
 }
 
 export function getOverview() {
@@ -189,9 +202,8 @@ export function listEventsByDate(date) {
   return cachedAdminRequest(['events', 'by-date', date], `/admin/events/by-date?${params.toString()}`)
 }
 
-export function listMassTimes(page = 1) {
-  const params = new URLSearchParams({ page: String(page) })
-  return cachedAdminRequest(['mass-times', 'list', page], `/admin/mass-times?${params.toString()}`)
+export function listMassTimes() {
+  return cachedAdminList('mass-times', 'mass_times')
 }
 
 export function getMassTime(id) {
@@ -224,9 +236,8 @@ export function listMassTimesByDay(day, location = '') {
   return cachedAdminRequest(['mass-times', 'by-day', day || '', location || ''], `/admin/mass-times/by-day?${params.toString()}`)
 }
 
-export function listNewsletters(page = 1) {
-  const params = new URLSearchParams({ page: String(page) })
-  return cachedAdminRequest(['newsletters', 'list', page], `/admin/newsletters?${params.toString()}`)
+export function listNewsletters() {
+  return cachedAdminList('newsletters', 'newsletters')
 }
 
 export function getNewsletter(id) {
@@ -245,9 +256,8 @@ export function deleteNewsletter(id) {
   return adminMutation(`/admin/newsletters/${id}`, { method: 'DELETE' }, 'newsletters')
 }
 
-export function listNewsPosts(page = 1) {
-  const params = new URLSearchParams({ page: String(page) })
-  return cachedAdminRequest(['news', 'list', page], `/admin/news?${params.toString()}`)
+export function listNewsPosts() {
+  return cachedAdminList('news', 'news_posts')
 }
 
 export function getNewsPost(id) {
@@ -266,9 +276,8 @@ export function deleteNewsPost(id) {
   return adminMutation(`/admin/news/${id}`, { method: 'DELETE' }, 'news')
 }
 
-export function listRegistrations(page = 1) {
-  const params = new URLSearchParams({ page: String(page) })
-  return cachedAdminRequest(['registrations', 'list', page], `/admin/parish-registrations?${params.toString()}`)
+export function listRegistrations() {
+  return cachedAdminList('parish-registrations', 'registrations')
 }
 
 export function getRegistration(id) {
@@ -283,9 +292,8 @@ export function deleteRegistration(id) {
   return adminMutation(`/admin/parish-registrations/${id}`, { method: 'DELETE' })
 }
 
-export function listContactMessages(page = 1) {
-  const params = new URLSearchParams({ page: String(page) })
-  return cachedAdminRequest(['contact-messages', 'list', page], `/admin/contact-messages?${params.toString()}`)
+export function listContactMessages() {
+  return cachedAdminList('contact-messages', 'messages')
 }
 
 export function getContactMessage(id) {
@@ -303,9 +311,8 @@ export function deleteContactMessage(id) {
   return adminMutation(`/admin/contact-messages/${id}`, { method: 'DELETE' })
 }
 
-export function listParishCouncilMembers(page = 1) {
-  const params = new URLSearchParams({ page: String(page) })
-  return cachedAdminRequest(['parish-council-members', 'list', page], `/admin/parish-council-members?${params.toString()}`)
+export function listParishCouncilMembers() {
+  return cachedAdminList('parish-council-members', 'members')
 }
 
 export function getParishCouncilMember(id) {
@@ -324,9 +331,8 @@ export function deleteParishCouncilMember(id) {
   return adminMutation(`/admin/parish-council-members/${id}`, { method: 'DELETE' }, 'parish-council-members')
 }
 
-export function listGalleryImages(page = 1) {
-  const params = new URLSearchParams({ page: String(page) })
-  return cachedAdminRequest(['gallery-images', 'list', page], `/admin/gallery-images?${params.toString()}`)
+export function listGalleryImages() {
+  return cachedAdminList('gallery-images', 'gallery_images')
 }
 
 export function getGalleryImage(id) {
@@ -421,25 +427,6 @@ export function prefetchAdminDataForPath(path) {
   return loader ? loader().catch(() => null) : Promise.resolve(null)
 }
 
-export function warmAdminData(user) {
-  const loaders = [
-    getOverview,
-    getHeaderSummary,
-    () => listEvents(1),
-    () => listContactMessages(1),
-    listGroups,
-  ]
-
-  if (user?.is_main_admin) {
-    loaders.push(
-      () => listMassTimes(1),
-      () => listNewsletters(1),
-      () => listNewsPosts(1),
-      () => listRegistrations(1),
-      () => listParishCouncilMembers(1),
-      () => listGalleryImages(1),
-    )
-  }
-
-  return Promise.allSettled(loaders.map(loader => loader()))
+export function warmAdminData() {
+  return Promise.allSettled([getOverview(), getHeaderSummary()])
 }

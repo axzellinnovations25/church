@@ -1,3 +1,4 @@
+import { useAdminPagination } from '../../admin/useAdminPagination'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useOutletContext } from 'react-router-dom'
@@ -134,7 +135,6 @@ export default function AdminEventsPage() {
   const fileInputRef = useRef(null)
   const editorRef = useRef(null)
   const [events, setEvents] = useState([])
-  const [eventMeta, setEventMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
   const [eventPreview, setEventPreview] = useState([])
   const [selectedEventId, setSelectedEventId] = useState(null)
   const [eventForm, setEventForm] = useState(emptyEventForm)
@@ -166,11 +166,12 @@ export default function AdminEventsPage() {
 
       if (!ignore) {
         setEvents(payload.events || [])
-        setEventMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
       }
     }
 
-    loadEventsData()
+    loadEventsData().catch(error => {
+      if (!ignore) openDialog('error', 'Unable to load events', error.message || 'Please try again.')
+    })
 
     return () => {
       ignore = true
@@ -262,10 +263,9 @@ export default function AdminEventsPage() {
     setDialogState({ open: true, tone, title, message })
   }
 
-  async function refreshEvents(page = eventMeta.current_page || 1) {
-    const payload = await listEvents(page)
+  async function refreshEvents() {
+    const payload = await listEvents()
     setEvents(payload.events || [])
-    setEventMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
   }
 
   function handleEventChange(event) {
@@ -446,7 +446,9 @@ export default function AdminEventsPage() {
     requireField(nextErrors, 'start_time', eventForm.start_time, 'Start time')
     requireField(nextErrors, 'end_time', eventForm.end_time, 'End time')
     validateDateOrder(nextErrors, 'end_date', eventForm.start_date, eventForm.end_date, 'End date must be on or after the start date.')
-    validateTimeOrder(nextErrors, 'end_time', eventForm.start_time, eventForm.end_time, 'End time must be after start time.')
+    if (!eventForm.end_date || eventForm.end_date === eventForm.start_date) {
+      validateTimeOrder(nextErrors, 'end_time', eventForm.start_time, eventForm.end_time, 'End time must be after start time.')
+    }
     validateMaxLength(nextErrors, 'location', eventForm.location, 255, 'Location')
     validateMaxLength(nextErrors, 'category', eventForm.category, 255, 'Category')
 
@@ -488,12 +490,16 @@ export default function AdminEventsPage() {
 
     if (changedName === 'start_time' || changedName === 'all_day') {
       requireField(nextErrors, 'start_time', form.start_time, 'Start time')
-      validateTimeOrder(nextErrors, 'end_time', form.start_time, form.end_time, 'End time must be after start time.')
+      if (!form.end_date || form.end_date === form.start_date) {
+        validateTimeOrder(nextErrors, 'end_time', form.start_time, form.end_time, 'End time must be after start time.')
+      }
     }
 
     if (changedName === 'end_time' || changedName === 'all_day') {
       requireField(nextErrors, 'end_time', form.end_time, 'End time')
-      validateTimeOrder(nextErrors, 'end_time', form.start_time, form.end_time, 'End time must be after start time.')
+      if (!form.end_date || form.end_date === form.start_date) {
+        validateTimeOrder(nextErrors, 'end_time', form.start_time, form.end_time, 'End time must be after start time.')
+      }
     }
 
     if (changedName === 'location') {
@@ -512,7 +518,7 @@ export default function AdminEventsPage() {
       [changedName]: nextErrors[changedName],
       description: changedName === 'description' ? nextErrors.description : undefined,
       end_date: changedName === 'start_date' || changedName === 'end_date' ? nextErrors.end_date : undefined,
-      end_time: ['start_time', 'end_time', 'all_day'].includes(changedName) ? nextErrors.end_time : undefined,
+      end_time: ['start_date', 'end_date', 'start_time', 'end_time', 'all_day'].includes(changedName) ? nextErrors.end_time : undefined,
       start_time: ['start_time', 'all_day'].includes(changedName) ? nextErrors.start_time : undefined,
     }
   }
@@ -551,6 +557,7 @@ export default function AdminEventsPage() {
 
     return matchesQuery && matchesStatus && matchesLocation && matchesGroup && matchesDate
   })
+  const { items: visibleItems, meta: eventMeta, setPage } = useAdminPagination(filteredEvents, [eventSearch, eventStatusFilter, eventLocationFilter, eventGroupFilter, eventDateFilter])
 
   return (
     <div className="admin-page-grid">
@@ -604,7 +611,7 @@ export default function AdminEventsPage() {
                 <span className="text-right">Actions</span>
               </div>
             ) : null}
-            {filteredEvents.map(item => (
+            {visibleItems.map(item => (
               <div key={item.id} className="admin-row admin-row-events">
                 <div className="admin-col-thumb">
                   {item.admin_image_url || item.image_url ? (
@@ -641,7 +648,7 @@ export default function AdminEventsPage() {
             <button
               className="btn-outline"
               type="button"
-              onClick={() => refreshEvents(Math.max(1, eventMeta.current_page - 1))}
+              onClick={() => setPage(Math.max(1, eventMeta.current_page - 1))}
               disabled={eventMeta.current_page <= 1}
             >
               Previous
@@ -650,7 +657,7 @@ export default function AdminEventsPage() {
             <button
               className="btn-outline"
               type="button"
-              onClick={() => refreshEvents(Math.min(eventMeta.last_page, eventMeta.current_page + 1))}
+              onClick={() => setPage(Math.min(eventMeta.last_page, eventMeta.current_page + 1))}
               disabled={eventMeta.current_page >= eventMeta.last_page}
             >
               Next

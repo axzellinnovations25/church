@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MassTimeRequest;
 use App\Http\Resources\MassTimeResource;
 use App\Models\MassTime;
+use App\Support\Audit;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 
 class MassTimeController extends Controller
@@ -27,7 +29,7 @@ class MassTimeController extends Controller
 
         $massTimes = MassTime::orderByRaw($dayOrderSql)
             ->orderBy('start_time')
-            ->paginate(10);
+            ->orderBy('id')->paginate(10);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -51,7 +53,9 @@ class MassTimeController extends Controller
 
     public function store(MassTimeRequest $request)
     {
-        $massTime = MassTime::create($request->validated());
+        $massTime = MassTime::create([...$request->validated(),
+            'end_time' => CarbonImmutable::createFromFormat('H:i', $request->start_time)->addHour()->format('H:i:s')]);
+        Audit::log($request, 'created mass time', $massTime, $massTime->day.' '.$request->start_time);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -78,7 +82,9 @@ class MassTimeController extends Controller
 
     public function update(MassTimeRequest $request, MassTime $massTime)
     {
-        $massTime->update($request->validated());
+        $massTime->update([...$request->validated(),
+            'end_time' => CarbonImmutable::createFromFormat('H:i', $request->start_time)->addHour()->format('H:i:s')]);
+        Audit::log($request, 'updated mass time', $massTime, $massTime->day.' '.$request->start_time);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -95,6 +101,7 @@ class MassTimeController extends Controller
     public function destroy(Request $request, MassTime $massTime)
     {
         $massTime->delete();
+        Audit::log($request, 'deleted mass time', $massTime, $massTime->day);
 
         if ($request->expectsJson()) {
             return response()->json([

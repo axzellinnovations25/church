@@ -189,9 +189,11 @@ export default function AdminLayout() {
     }
 
     loadTopbarPanels()
+    window.addEventListener('admin-data-changed', loadTopbarPanels)
 
     return () => {
       ignore = true
+      window.removeEventListener('admin-data-changed', loadTopbarPanels)
     }
   }, [user])
 

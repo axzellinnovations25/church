@@ -333,7 +333,7 @@ export default function AdminProfilePage() {
           </form>
         </article>
 
-        <article className="admin-surface admin-danger-surface">
+        {!user?.is_main_admin && <article className="admin-surface admin-danger-surface">
           <div className="admin-section-head">
             <div>
               <h2>Delete account</h2>
@@ -368,7 +368,7 @@ export default function AdminProfilePage() {
               </button>
             </div>
           </form>
-        </article>
+        </article>}
       </div>
 
       <FeedbackDialog

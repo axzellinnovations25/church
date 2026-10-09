@@ -21,6 +21,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -56,38 +57,28 @@ class OverviewController extends Controller
 
         $hasGroupScope = $user->is_main_admin || (bool) $user->group_id;
 
-        $events = $hasGroupScope ? Event::query()
+        $events = $hasGroupScope ? $this->overviewRecords(Event::query()
             ->with(['group', 'creator'])
             ->when(! $user->is_main_admin, fn ($query) => $query->where('group_id', $user->group_id))
             ->orderBy('start_date', 'desc')
-            ->orderBy('start_time', 'desc')
-            ->limit(4)
-            ->get() : collect();
+            ->orderBy('start_time', 'desc'), 'event', $overviewPreferences) : collect();
 
-        $massTimes = $user->is_main_admin ? MassTime::query()
+        $massTimes = $user->is_main_admin ? $this->overviewRecords(MassTime::query()
             ->orderByRaw($this->dayOrderSql())
-            ->orderBy('start_time')
-            ->limit(4)
-            ->get() : collect();
+            ->orderBy('start_time'), 'mass_time', $overviewPreferences) : collect();
 
-        $registrations = $user->is_main_admin ? ParishRegistration::query()
-            ->latest()
-            ->limit(4)
-            ->get() : collect();
+        $registrations = $user->is_main_admin ? $this->overviewRecords(ParishRegistration::query()
+            ->latest(), 'registration', $overviewPreferences) : collect();
 
-        $contactMessages = $hasGroupScope ? ContactMessage::query()
+        $contactMessages = $hasGroupScope ? $this->overviewRecords(ContactMessage::query()
             ->with('group')
             ->when(! $user->is_main_admin, fn ($query) => $query->where('group_id', $user->group_id))
-            ->latest()
-            ->limit(4)
-            ->get() : collect();
+            ->latest(), 'contact_message', $overviewPreferences) : collect();
 
-        $groupMembers = $hasGroupScope ? GroupMember::query()
+        $groupMembers = $hasGroupScope ? $this->overviewRecords(GroupMember::query()
             ->with('group')
             ->when(! $user->is_main_admin, fn ($query) => $query->where('group_id', $user->group_id))
-            ->latest()
-            ->limit(4)
-            ->get() : collect();
+            ->latest(), 'group_member', $overviewPreferences) : collect();
         $summaryCounts = $this->buildSummaryCounts($request);
         $alertCounts = $this->alertCountsFromSummary($summaryCounts);
         $auditLogs = $this->recentAuditLogs($request);
@@ -155,6 +146,17 @@ class OverviewController extends Controller
                 ),
             ],
         ]);
+    }
+
+    private function overviewRecords(Builder $query, string $type, array $preferences)
+    {
+        $ids = fn (string $kind) => collect($preferences[$kind])
+            ->filter(fn ($key) => str_starts_with($key, $type.':'))
+            ->map(fn ($key) => (int) substr($key, strlen($type) + 1))->all();
+        $query->whereNotIn('id', $ids('dismissed'));
+        $recent = (clone $query)->where('created_at', '>', $preferences['baseline_at'])->limit(4)->get();
+        $pinned = (clone $query)->whereIn('id', $ids('pinned'))->get();
+        return $pinned->merge($recent)->values();
     }
 
     private function buildSummaryCounts(Request $request): array

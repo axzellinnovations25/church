@@ -8,7 +8,7 @@ class EventImageController extends Controller
 {
     public function show(Event $event)
     {
-        abort_unless($event->image_path && ($event->status === 'published' || auth()->check()), 404);
+        abort_unless($event->image_path && ($event->status === 'published' || $event->canBeManagedBy(auth()->user())), 404);
 
         $path = storage_path("app/private/{$event->image_path}");
         abort_unless(is_file($path), 404);

@@ -56,6 +56,8 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        abort_if($user->is_main_admin, 403, 'The main admin account cannot be deleted.');
+
         Auth::logout();
 
         $user->delete();

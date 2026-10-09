@@ -1,3 +1,4 @@
+import { useAdminPagination } from '../../admin/useAdminPagination'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useOutletContext, useSearchParams } from 'react-router-dom'
 import FeedbackDialog from '../../components/FeedbackDialog'
@@ -105,7 +106,6 @@ export default function AdminContactMessagesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const editorRef = useRef(null)
   const [messages, setMessages] = useState([])
-  const [messageMeta, setMessageMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
   const [selectedMessageId, setSelectedMessageId] = useState(null)
   const [messageDetail, setMessageDetail] = useState(null)
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
@@ -136,13 +136,6 @@ export default function AdminContactMessagesPage() {
 
         const items = payload.messages || []
         setMessages(items)
-        setMessageMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
-
-        const querySelected = searchParams.get('message')
-        if (querySelected) {
-          setSelectedMessageId(Number(querySelected))
-          setIsModalOpen(true)
-        }
       } catch (error) {
         if (!ignore) {
           setErrorMessage(error.message || 'Unable to load contact messages.')
@@ -225,26 +218,6 @@ export default function AdminContactMessagesPage() {
     setSearchParams({})
   }
 
-  async function goToPage(page) {
-    setIsLoadingMessages(true)
-    setErrorMessage('')
-
-    try {
-      const payload = await listContactMessages(page)
-      const items = payload.messages || []
-      setMessages(items)
-      setMessageMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
-      setSelectedMessageId(null)
-      setMessageDetail(null)
-      setIsModalOpen(false)
-      setSearchParams({})
-    } catch (error) {
-      setErrorMessage(error.message || 'Unable to load contact messages.')
-    } finally {
-      setIsLoadingMessages(false)
-    }
-  }
-
   async function removeMessage(id) {
     try {
       await deleteContactMessage(id)
@@ -252,7 +225,7 @@ export default function AdminContactMessagesPage() {
       const items = payload.messages || []
 
       setMessages(items)
-      setMessageMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
+
       setSelectedMessageId(null)
       setMessageDetail(null)
       setIsModalOpen(false)
@@ -308,6 +281,7 @@ export default function AdminContactMessagesPage() {
 
     return matchesSearch && matchesStatus && matchesCategory && matchesGroup && matchesDate
   })
+  const { items: visibleItems, meta: messageMeta, setPage } = useAdminPagination(filteredMessages, [messageSearch, messageStatusFilter, messageCategoryFilter, messageGroupFilter, messageDateFilter])
 
   return (
     <div className="admin-page-grid">
@@ -369,7 +343,7 @@ export default function AdminContactMessagesPage() {
                 <span>Status & Snippet</span>
               </div>
             ) : null}
-            {filteredMessages.map(item => (
+            {visibleItems.map(item => (
               <button
                 key={item.id}
                 type="button"
@@ -402,7 +376,7 @@ export default function AdminContactMessagesPage() {
           <button
             className="btn-outline"
             type="button"
-            onClick={() => goToPage(Math.max(1, messageMeta.current_page - 1))}
+            onClick={() => setPage(Math.max(1, messageMeta.current_page - 1))}
             disabled={messageMeta.current_page <= 1}
           >
             Previous
@@ -411,7 +385,7 @@ export default function AdminContactMessagesPage() {
           <button
             className="btn-outline"
             type="button"
-            onClick={() => goToPage(Math.min(messageMeta.last_page, messageMeta.current_page + 1))}
+            onClick={() => setPage(Math.min(messageMeta.last_page, messageMeta.current_page + 1))}
             disabled={messageMeta.current_page >= messageMeta.last_page}
           >
             Next

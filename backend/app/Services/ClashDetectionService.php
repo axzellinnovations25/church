@@ -2,109 +2,87 @@
 
 namespace App\Services;
 
+use App\Models\Event;
+use App\Models\MassTime;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 class ClashDetectionService
 {
-    /**
-     * Generic overlap detection method.
-     * Used when checking clashes inside a single model.
-     */
-    public function hasOverlap(
-        string $modelClass,
-        string $startColumn,
-        string $endColumn,
-        string $start,
-        string $end,
-        ?int $ignoreId = null,
-        array $filters = []
-    ): bool {
-
-        // Start query for the given model
-        $query = $modelClass::query();
-
-        // Apply optional filters (day, location etc.)
-        foreach ($filters as $column => $value) {
-            if ($value !== null && $value !== '') {
-                $query->where($column, $value);
-            }
-        }
-
-        // Ignore current record when editing
-        if ($ignoreId) {
-            $query->where('id', '!=', $ignoreId);
-        }
-
-        // Core overlap logic:
-        // newStart < existingEnd AND newEnd > existingStart
-        $query->where($startColumn, '<', $end)
-              ->where($endColumn, '>', $start);
-
-        return $query->exists();
+    private function atLocation(Builder $query, ?string $location): Builder
+    {
+        return $query->whereRaw("LOWER(TRIM(COALESCE(location, ''))) = ?", [mb_strtolower(trim($location ?? ''))]);
     }
 
+    public function eventConflict(CarbonImmutable $start, CarbonImmutable $end, ?string $location, ?int $ignoreId): bool
+    {
+        $events = $this->atLocation(Event::query(), $location)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->whereDate('start_date', '<=', $end->toDateString())
+            ->whereRaw('COALESCE(end_date, start_date) >= ?', [$start->toDateString()])->get();
+        foreach ($events as $event) {
+            [$otherStart, $otherEnd] = $this->eventInterval($event);
+            if ($start < $otherEnd && $end > $otherStart) {
+                return true;
+            }
+        }
+        foreach ($this->atLocation(MassTime::query(), $location)->get() as $mass) {
+            if ($this->weeklyOverlaps($start, $end, $mass->day, $mass->getRawOriginal('start_time'), $mass->getRawOriginal('end_time'))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    /**
-     * Check clashes across multiple scheduling models
-     * Used for global conflict prevention (Event vs Mass etc.)
-     */
-    public function hasGlobalOverlap(
-        ?string $location,       // location can be null
-        string $start,
-        string $end,
-        ?string $weekday = null, // weekday is needed only when checking Mass vs Event
-        ?int $ignoreId = null,
-        ?string $ignoreModel = null
-    ): bool {
+    public function massConflict(string $day, string $time, ?string $location, ?int $ignoreId): bool
+    {
+        // A fixed week allows comparisons across midnight and the Sunday boundary.
+        $start = CarbonImmutable::parse('2026-01-04')->next($day)->setTimeFromTimeString($time);
+        $end = $start->addHour();
+        foreach ($this->atLocation(MassTime::query(), $location)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->get() as $mass) {
+            if ($this->weeklyOverlaps($start, $end, $mass->day, $mass->getRawOriginal('start_time'), $mass->getRawOriginal('end_time'))) {
+                return true;
+            }
+        }
+        foreach ($this->atLocation(Event::query(), $location)
+            ->whereRaw('COALESCE(end_date, start_date) >= ?', [now()->toDateString()])->get() as $event) {
+            [$eventStart, $eventEnd] = $this->eventInterval($event);
+            if ($this->weeklyOverlaps($eventStart, $eventEnd, $day, $time, null)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        // If location is empty, skip global clash check
-        // Because we only compare conflicts within same location
-        if (!$location) {
+    private function eventInterval(Event $event): array
+    {
+        return [
+            CarbonImmutable::parse($event->start_date.' '.($event->start_time ?: '00:00')),
+            CarbonImmutable::parse(($event->end_date ?: $event->start_date).' '.($event->end_time ?: '23:59')),
+        ];
+    }
+
+    private function weeklyOverlaps(CarbonImmutable $start, CarbonImmutable $end, string $day, string $time, ?string $endTime): bool
+    {
+        if (!in_array($day, ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], true)) {
             return false;
         }
-
-        // --------------------------------------------------
-        // Check against Events table (date-based events)
-        // --------------------------------------------------
-        $eventQuery = \App\Models\Event::query()
-            ->where('location', $location)
-            ->where('start_time', '<', $end)
-            ->where('end_time', '>', $start);
-
-        // If editing an event, ignore itself
-        if ($ignoreModel === 'event' && $ignoreId) {
-            $eventQuery->where('id', '!=', $ignoreId);
+        $date = $start->subDay()->startOfDay();
+        while ($date->format('l') !== $day) {
+            $date = $date->addDay();
         }
-
-        if ($eventQuery->exists()) {
-            return true;
+        // At most one occurrence can finish before the interval starts.
+        for ($i = 0; $i < 2; $i++, $date = $date->addWeek()) {
+            $serviceStart = $date->setTimeFromTimeString($time);
+            $serviceEnd = $endTime ? $date->setTimeFromTimeString($endTime) : $serviceStart->addHour();
+            if ($serviceEnd <= $serviceStart) {
+                $serviceEnd = $serviceEnd->addDay();
+            }
+            if ($serviceStart < $end && $serviceEnd > $start) {
+                return true;
+            }
         }
-
-        // --------------------------------------------------
-        // Check against Mass Times table (weekly recurring)
-        // --------------------------------------------------
-
-        $massQuery = \App\Models\MassTime::query()
-            ->where('location', $location)
-            ->where('start_time', '<', $end)
-            ->where('end_time', '>', $start);
-
-        // Only compare weekday if provided (for Event vs Mass)
-        if ($weekday) {
-            $massQuery->where('day', $weekday);
-        }
-
-        // If editing a mass time, ignore itself
-        if ($ignoreModel === 'mass' && $ignoreId) {
-            $massQuery->where('id', '!=', $ignoreId);
-        }
-
-        if ($massQuery->exists()) {
-            return true;
-        }
-
-        // If no clashes found
         return false;
     }
 }

@@ -26,7 +26,7 @@ class GalleryImageApiController extends Controller
 
     public function image(Request $request, GalleryImage $galleryImage)
     {
-        abort_unless($galleryImage->is_active || $request->user(), 404);
+        abort_unless($galleryImage->is_active || $request->user()?->is_main_admin, 404);
         abort_unless($galleryImage->image_path, 404);
 
         $path = storage_path("app/private/{$galleryImage->image_path}");

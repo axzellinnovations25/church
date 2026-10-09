@@ -62,7 +62,7 @@ class MassTimeRequest extends FormRequest
 
         return [
 
-            'day' => ['required', 'string', 'max:20'],
+            'day' => ['required', 'in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'],
 
             'start_time' => [
                 'required',

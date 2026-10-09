@@ -17,7 +17,7 @@ class NewsPostController extends Controller
         $newsPosts = NewsPost::with('creator')
             ->latest('published_at')
             ->latest()
-            ->paginate(10);
+            ->orderBy('id')->paginate(10);
 
         if ($request->expectsJson()) {
             return response()->json([

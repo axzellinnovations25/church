@@ -16,7 +16,7 @@ class GalleryImageController extends Controller
     {
         $galleryImages = GalleryImage::with('creator')
             ->orderBy('sort_order')
-            ->paginate(10);
+            ->orderBy('id')->paginate(10);
 
         if ($request->expectsJson()) {
             return response()->json([

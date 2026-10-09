@@ -1,3 +1,4 @@
+import { useAdminPagination } from '../../admin/useAdminPagination'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 import FeedbackDialog from '../../components/FeedbackDialog'
@@ -59,7 +60,6 @@ export default function AdminGalleryPage() {
   const fileInputRef = useRef(null)
   const editorRef = useRef(null)
   const [galleryImages, setGalleryImages] = useState([])
-  const [galleryMeta, setGalleryMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
   const [selectedImageId, setSelectedImageId] = useState(null)
   const [galleryForm, setGalleryForm] = useState(emptyGalleryForm)
   const [selectedFile, setSelectedFile] = useState(null)
@@ -86,7 +86,6 @@ export default function AdminGalleryPage() {
 
         if (!ignore) {
           setGalleryImages(payload.gallery_images || [])
-          setGalleryMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
         }
       } catch (error) {
         if (!ignore) {
@@ -154,17 +153,16 @@ export default function AdminGalleryPage() {
 
   const selectedImage = galleryImages.find(item => item.id === selectedImageId)
 
-  async function refreshGallery(page = galleryMeta.current_page || 1) {
-    const payload = await listGalleryImages(page)
+  async function refreshGallery() {
+    const payload = await listGalleryImages()
     setGalleryImages(payload.gallery_images || [])
-    setGalleryMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
   }
 
   function startNewImage() {
     setSelectedImageId(null)
     setGalleryForm({
       ...emptyGalleryForm,
-      sort_order: String(galleryImages.length + 1),
+      sort_order: String(Math.max(0, ...galleryImages.map(image => Number(image.sort_order) || 0)) + 1),
     })
     setSelectedFile(null)
     setGalleryErrors({})
@@ -366,6 +364,7 @@ export default function AdminGalleryPage() {
 
     return matchesQuery && matchesVisibility
   })
+  const { items: visibleItems, meta: galleryMeta, setPage } = useAdminPagination(filteredImages, [gallerySearch, visibilityFilter])
 
   if (!user?.is_main_admin) {
     return (
@@ -418,7 +417,7 @@ export default function AdminGalleryPage() {
                 <span className="text-right">Actions</span>
               </div>
             ) : null}
-            {filteredImages.map(item => (
+            {visibleItems.map(item => (
               <div
                 key={item.id}
                 className={`admin-row admin-row-clickable admin-row-gallery ${selectedImageId === item.id ? 'active' : ''}`}
@@ -470,7 +469,7 @@ export default function AdminGalleryPage() {
             <button
               className="btn-outline"
               type="button"
-              onClick={() => refreshGallery(Math.max(1, galleryMeta.current_page - 1))}
+              onClick={() => setPage(Math.max(1, galleryMeta.current_page - 1))}
               disabled={galleryMeta.current_page <= 1}
             >
               Previous
@@ -479,7 +478,7 @@ export default function AdminGalleryPage() {
             <button
               className="btn-outline"
               type="button"
-              onClick={() => refreshGallery(Math.min(galleryMeta.last_page, galleryMeta.current_page + 1))}
+              onClick={() => setPage(Math.min(galleryMeta.last_page, galleryMeta.current_page + 1))}
               disabled={galleryMeta.current_page >= galleryMeta.last_page}
             >
               Next

@@ -20,12 +20,11 @@ class EventController extends Controller
         $user = $request->user();
 
         // Get events from database, newest first (latest created at top)
-        $events = (! $user->is_main_admin && ! $user->group_id)
-            ? collect()
-            : Event::with(['group', 'creator'])
+        $events = Event::with(['group', 'creator'])
+                ->when(! $user->is_main_admin && ! $user->group_id, fn ($query) => $query->whereRaw('1 = 0'))
                 ->when(! $user->is_main_admin, fn ($query) => $query->where('group_id', $user->group_id))
                 ->orderBy('start_date', 'desc')
-                ->paginate(10);
+                ->orderBy('id')->paginate(10);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -70,10 +69,6 @@ class EventController extends Controller
         // Capitalise selected fields
         $validated['title'] = ucfirst(strtolower($validated['title']));
 
-        if (!empty($validated['location'])) {
-            $validated['location'] = ucfirst(strtolower($validated['location']));
-        }
-
         if (!empty($validated['category'])) {
             $validated['category'] = ucfirst(strtolower($validated['category']));
         }
@@ -111,10 +106,9 @@ class EventController extends Controller
      * Display a single event (Admin: /admin/events/{event}).
      * (Optional - we may not use this much, but resource route includes it.)
      */
-    public function show(Event $event)
+    public function show(Request $request, Event $event)
     {
-        // Show a simple view page for one event (we will create it if needed)
-        return view('admin.events.show', compact('event'));
+        return $this->edit($request, $event);
     }
 
     /**
@@ -153,10 +147,6 @@ class EventController extends Controller
 
         // Capitalise fields
         $validated['title'] = ucfirst(strtolower($validated['title']));
-
-        if (!empty($validated['location'])) {
-            $validated['location'] = ucfirst(strtolower($validated['location']));
-        }
 
         if (!empty($validated['category'])) {
             $validated['category'] = ucfirst(strtolower($validated['category']));
@@ -203,7 +193,7 @@ class EventController extends Controller
     public function byDate(Request $request)
     {
         // Get date from query string
-        $date = $request->query('date');
+        $date = $request->validate(['date' => ['nullable', 'date_format:Y-m-d']])['date'] ?? null;
 
         if (!$date) {
             return response()->json([]);
@@ -211,6 +201,9 @@ class EventController extends Controller
 
         // Get events that are happening on that date (including multi-day events)
         $events = Event::whereDate('start_date', '<=', $date)
+            ->when(! $request->user()->is_main_admin, fn ($query) => $request->user()->group_id
+                ? $query->where('group_id', $request->user()->group_id)
+                : $query->whereRaw('1 = 0'))
             ->whereRaw("COALESCE(end_date, start_date) >= ?", [$date])
             ->orderByRaw("COALESCE(start_time, '00:00') ASC")
             ->get(['id', 'title', 'start_date', 'start_time', 'end_date', 'end_time']);
@@ -262,9 +255,7 @@ class EventController extends Controller
 
     private function authorizeEventAccess(Request $request, Event $event): void
     {
-        $user = $request->user();
-
-        if (! $user->is_main_admin && $event->group_id !== $user->group_id) {
+        if (! $event->canBeManagedBy($request->user())) {
             abort(403, 'You do not have access to this event.');
         }
     }

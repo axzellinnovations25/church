@@ -1,3 +1,4 @@
+import { useAdminPagination } from '../../admin/useAdminPagination'
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import FeedbackDialog from '../../components/FeedbackDialog'
@@ -161,7 +162,6 @@ export default function AdminRegistrationsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const editorRef = useRef(null)
   const [registrations, setRegistrations] = useState([])
-  const [registrationMeta, setRegistrationMeta] = useState({ current_page: 1, last_page: 1, total: 0 })
   const [selectedRegistrationId, setSelectedRegistrationId] = useState(null)
   const [registrationDetail, setRegistrationDetail] = useState(null)
   const [registrationForm, setRegistrationForm] = useState(initialRegistrationForm(null))
@@ -196,7 +196,6 @@ export default function AdminRegistrationsPage() {
 
       const items = payload.registrations || []
       setRegistrations(items)
-      setRegistrationMeta(payload.meta || { current_page: 1, last_page: 1, total: 0 })
 
       const querySelected = searchParams.get('selected')
       const nextId = querySelected ? Number(querySelected) : null
@@ -206,7 +205,9 @@ export default function AdminRegistrationsPage() {
       }
     }
 
-    loadData()
+    loadData().catch(error => {
+      if (!ignore) openDialog('error', 'Unable to load records', error.message || 'Please try again.')
+    })
 
     return () => {
       ignore = true
@@ -286,11 +287,10 @@ export default function AdminRegistrationsPage() {
     setDialogState({ open: true, tone, title, message })
   }
 
-  async function refreshRegistrations(page = registrationMeta.current_page || 1) {
-    const payload = await listRegistrations(page)
+  async function refreshRegistrations() {
+    const payload = await listRegistrations()
     const items = payload.registrations || []
     setRegistrations(items)
-    setRegistrationMeta(payload.meta || { current_page: page, last_page: 1, total: 0 })
   }
 
   function handleRegistrationChange(event) {
@@ -399,7 +399,7 @@ export default function AdminRegistrationsPage() {
     }
 
     if (registrationDetail.registration_type === 'individual') {
-      openDialog('error', 'Children are only available for family registrations', 'Switch this record to a family registration before adding children to it.')
+      openDialog('error', 'Children are only available for family registrations', 'Children can be added to family registrations only.')
       return
     }
 
@@ -441,6 +441,7 @@ export default function AdminRegistrationsPage() {
       await refreshRegistrations()
       openDialog('success', 'Registration updated successfully', response.message || 'The parish registration has been updated.')
     } catch (error) {
+      setRegistrationErrors(error.errors || {})
       openDialog('error', 'Unable to update registration', error.message || 'Please review the registration details and try again.')
     } finally {
       setIsSavingRegistration(false)
@@ -515,6 +516,7 @@ export default function AdminRegistrationsPage() {
 
     return matchesQuery && matchesType && matchesInterest && matchesChildren && matchesDate
   })
+  const { items: visibleItems, meta: registrationMeta, setPage } = useAdminPagination(filteredRegistrations, [registrationSearch, registrationTypeFilter, registrationInterestFilter, registrationChildrenFilter, registrationDateFilter])
 
   return (
     <div className="admin-page-grid">
@@ -562,7 +564,7 @@ export default function AdminRegistrationsPage() {
                 <span>Contact & Registration Type</span>
               </div>
             ) : null}
-            {filteredRegistrations.map(item => (
+            {visibleItems.map(item => (
               <button
                 key={item.id}
                 type="button"
@@ -587,11 +589,11 @@ export default function AdminRegistrationsPage() {
           </div>
 
           <div className="admin-pagination">
-            <button className="btn-outline" type="button" onClick={() => refreshRegistrations(Math.max(1, registrationMeta.current_page - 1))} disabled={registrationMeta.current_page <= 1}>
+            <button className="btn-outline" type="button" onClick={() => setPage(Math.max(1, registrationMeta.current_page - 1))} disabled={registrationMeta.current_page <= 1}>
               Previous
             </button>
             <span>Page {registrationMeta.current_page} of {registrationMeta.last_page}</span>
-            <button className="btn-outline" type="button" onClick={() => refreshRegistrations(Math.min(registrationMeta.last_page, registrationMeta.current_page + 1))} disabled={registrationMeta.current_page >= registrationMeta.last_page}>
+            <button className="btn-outline" type="button" onClick={() => setPage(Math.min(registrationMeta.last_page, registrationMeta.current_page + 1))} disabled={registrationMeta.current_page >= registrationMeta.last_page}>
               Next
             </button>
           </div>

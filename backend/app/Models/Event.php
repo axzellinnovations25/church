@@ -10,6 +10,12 @@ class Event extends Model
 {
     use HasFactory;
 
+    public function canBeManagedBy(?User $user): bool
+    {
+        return $user && ($user->is_main_admin || ($user->group_id
+            && (int) $this->group_id === (int) $user->group_id));
+    }
+
     /**
      * The attributes that are mass assignable.
      * This allows Laravel to insert/update these fields safely.

@@ -15,11 +15,11 @@ class ContactMessageController extends Controller
     {
         $user = $request->user();
         $messages = (! $user->is_main_admin && ! $user->group_id)
-            ? ContactMessage::whereRaw('1 = 0')->paginate(10)
+            ? ContactMessage::whereRaw('1 = 0')->orderBy('id')->paginate(10)
             : ContactMessage::with('group')
                 ->when(! $user->is_main_admin, fn ($query) => $query->where('group_id', $user->group_id))
                 ->latest()
-                ->paginate(10);
+                ->orderBy('id')->paginate(10);
 
         return response()->json([
             'messages' => ContactMessageResource::collection(collect($messages->items()))->resolve($request),

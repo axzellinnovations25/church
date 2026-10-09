@@ -86,7 +86,7 @@ class ProfileTest extends TestCase
 
     public function test_user_can_delete_their_account(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_main_admin' => false]);
 
         $response = $this
             ->actingAs($user)
@@ -104,7 +104,7 @@ class ProfileTest extends TestCase
 
     public function test_user_can_delete_their_account_with_json_response(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_main_admin' => false]);
 
         $response = $this
             ->actingAs($user)

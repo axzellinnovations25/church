@@ -4,17 +4,21 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\NoEventOverlap;
-use Illuminate\Support\Facades\Auth;
 
 class EventRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::check();
+        $user = $this->user();
+        $event = $this->route('event');
+        return $event ? $event->canBeManagedBy($user) : ($user && ($user->is_main_admin || $user->group_id));
     }
 
     protected function prepareForValidation(): void
     {
+        if ($this->boolean('all_day')) {
+            $this->merge(['start_time' => '00:00', 'end_time' => '23:59']);
+        }
         $this->merge([
             'title' => $this->titleCase($this->title),
             'description' => $this->capitalizeFirst($this->description),
@@ -68,14 +72,14 @@ class EventRequest extends FormRequest
 
             'start_date' => [
                 'required',
-                'date',
+                'date_format:Y-m-d',
                 new NoEventOverlap($eventId),
             ],
 
             'start_time' => ['required', 'date_format:H:i'],
             'end_time'   => ['required', 'date_format:H:i'],
 
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:start_date'],
 
             'location' => ['nullable', 'string', 'max:255'],
 
@@ -100,7 +104,7 @@ class EventRequest extends FormRequest
                 $validator->errors()->add('description', 'Description must be 250 words or fewer.');
             }
 
-            if ($this->start_time && $this->end_time) {
+            if ($this->start_time && $this->end_time && (!$this->end_date || $this->end_date === $this->start_date)) {
 
                 if ($this->end_time <= $this->start_time) {
                     $validator->errors()->add('end_time', 'End time must be after start time.');
