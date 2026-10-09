@@ -50,7 +50,7 @@ class ApiAuthController extends Controller
 
         return response()->json([
             'message' => 'Account created successfully.',
-            'user' => $request->user(),
+            'user' => $this->serializeUser($user->refresh()->loadMissing('group')),
         ], 201);
     }
 
@@ -67,7 +67,7 @@ class ApiAuthController extends Controller
 
         return response()->json([
             'message' => 'Logged in successfully.',
-            'user' => $request->user(),
+            'user' => $this->serializeUser($request->user()->loadMissing('group')),
         ]);
     }
 
@@ -132,18 +132,7 @@ class ApiAuthController extends Controller
         $user = $request->user()?->loadMissing('group');
 
         return response()->json([
-            'user' => $user ? [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'is_main_admin' => (bool) $user->is_main_admin,
-                'group_id' => $user->group_id,
-                'group' => $user->group ? [
-                    'id' => $user->group->id,
-                    'name' => $user->group->name,
-                    'slug' => $user->group->slug,
-                ] : null,
-            ] : null,
+            'user' => $user ? $this->serializeUser($user) : null,
         ]);
     }
 
@@ -157,5 +146,21 @@ class ApiAuthController extends Controller
         return response()->json([
             'message' => 'Logged out successfully.',
         ]);
+    }
+
+    private function serializeUser(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'is_main_admin' => (bool) $user->is_main_admin,
+            'group_id' => $user->group_id,
+            'group' => $user->group ? [
+                'id' => $user->group->id,
+                'name' => $user->group->name,
+                'slug' => $user->group->slug,
+            ] : null,
+        ];
     }
 }

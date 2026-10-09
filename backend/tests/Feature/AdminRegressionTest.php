@@ -32,12 +32,12 @@ class AdminRegressionTest extends TestCase
     {
         $event = Event::create($this->eventData(['status' => 'draft']));
         $this->actingAs(User::factory()->create(['is_main_admin' => false, 'group_id' => null]));
-        $this->getJson('/admin/events')->assertOk()->assertJsonCount(0, 'events');
+        $this->getJson('/admin/events')->assertForbidden();
         $this->getJson('/admin/events/'.$event->id)->assertForbidden();
         $this->getJson('/admin/events/'.$event->id.'/edit')->assertForbidden();
         $this->putJson('/admin/events/'.$event->id, $this->eventData())->assertForbidden();
         $this->deleteJson('/admin/events/'.$event->id)->assertForbidden();
-        $this->getJson('/admin/events/by-date?date=2026-10-05')->assertOk()->assertJsonCount(0);
+        $this->getJson('/admin/events/by-date?date=2026-10-05')->assertForbidden();
         $this->assertDatabaseHas('events', ['id' => $event->id, 'status' => 'draft']);
     }
 
@@ -128,9 +128,12 @@ class AdminRegressionTest extends TestCase
         $event = Event::create($this->eventData(['group_id' => $own->id]));
         $this->actingAs(User::factory()->create(['is_main_admin' => false, 'group_id' => $own->id]));
         $this->getJson('/admin/overview')->assertOk();
-        foreach ([$event->id, $other->id] as $id) {
-            $this->patchJson('/admin/overview/items/visibility', ['item_key' => 'event:'.$id, 'visibility' => 'pinned'])->assertOk();
-        }
+        $this->patchJson('/admin/overview/items/visibility', [
+            'item_key' => 'event:'.$event->id, 'visibility' => 'pinned',
+        ])->assertOk();
+        $this->patchJson('/admin/overview/items/visibility', [
+            'item_key' => 'event:'.$other->id, 'visibility' => 'pinned',
+        ])->assertUnprocessable()->assertJsonValidationErrors('item_key');
         foreach ([6, 7, 8, 9] as $day) {
             Event::create($this->eventData(['group_id' => $own->id, 'start_date' => '2026-10-0'.$day]));
         }

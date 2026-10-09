@@ -31,7 +31,7 @@ class NewsletterTest extends TestCase
 
     public function test_admin_can_upload_a_newsletter_pdf(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_main_admin' => true]);
 
         $response = $this->actingAs($user)->postJson('/admin/newsletters', [
             'title' => 'Palm Sunday Newsletter',
@@ -53,7 +53,7 @@ class NewsletterTest extends TestCase
 
     public function test_published_newsletter_remains_public_when_local_pdf_is_lost(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_main_admin' => true]);
         $pdfContents = "%PDF-1.4\ndurable newsletter\n%%EOF";
 
         $this->actingAs($user)->postJson('/admin/newsletters', [
@@ -115,7 +115,7 @@ class NewsletterTest extends TestCase
 
     public function test_admin_cannot_upload_a_non_pdf_newsletter(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_main_admin' => true]);
 
         $response = $this->actingAs($user)->postJson('/admin/newsletters', [
             'title' => 'Wrong File Newsletter',
@@ -171,7 +171,7 @@ class NewsletterTest extends TestCase
 
     public function test_admin_can_update_newsletter_metadata_without_replacing_pdf(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_main_admin' => true]);
 
         $directory = storage_path('app/private/newsletters');
 
@@ -205,5 +205,32 @@ class NewsletterTest extends TestCase
             'file_path' => 'newsletters/original.pdf',
         ]);
         $this->assertFileExists(storage_path('app/private/newsletters/original.pdf'));
+    }
+
+    public function test_successful_pdf_replacement_commits_new_file_before_removing_old_file(): void
+    {
+        $user = User::factory()->create(['is_main_admin' => true]);
+        $directory = storage_path('app/private/newsletters');
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+        $oldPath = storage_path('app/private/newsletters/replace-old.pdf');
+        file_put_contents($oldPath, '%PDF-1.4 old');
+        $newsletter = Newsletter::create([
+            'title' => 'Replace Me', 'publication_date' => '2026-04-05',
+            'status' => 'draft', 'file_path' => 'newsletters/replace-old.pdf',
+            'file_contents' => base64_encode('%PDF-1.4 old'),
+            'original_filename' => 'replace-old.pdf', 'file_size' => 12,
+        ]);
+
+        $this->actingAs($user)->postJson('/admin/newsletters/'.$newsletter->id, [
+            'title' => 'Replaced', 'publication_date' => '2026-04-05', 'status' => 'published',
+            'pdf' => $this->fakePdf('replacement.pdf'),
+        ])->assertOk();
+
+        $newsletter->refresh();
+        $this->assertNotSame('newsletters/replace-old.pdf', $newsletter->file_path);
+        $this->assertFileDoesNotExist($oldPath);
+        $this->assertFileExists(storage_path('app/private/'.$newsletter->file_path));
     }
 }

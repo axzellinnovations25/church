@@ -463,6 +463,11 @@ export default function AdminContactMessagesPage() {
             </article>
 
             <article className="admin-detail-block">
+              <h3>Attends St Mary&apos;s</h3>
+              <p>{messageDetail.is_member === null || messageDetail.is_member === undefined ? 'Not provided' : messageDetail.is_member ? 'Yes' : 'No'}</p>
+            </article>
+
+            <article className="admin-detail-block">
               <h3>Routed Group</h3>
               <p>{messageDetail.group_name ? formatDisplayText(messageDetail.group_name) : 'Main parish inbox only'}</p>
               {messageDetail.is_existing_group_member ? (

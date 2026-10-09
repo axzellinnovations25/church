@@ -25,6 +25,7 @@ class ContactMessageResource extends JsonResource
             'status' => $this->status,
             'group_id' => $this->group_id,
             'group_name' => $this->whenLoaded('group', fn () => $this->group?->name),
+            'is_member' => $this->is_member,
             'is_existing_group_member' => (bool) $existingGroupMember,
             'existing_group_member_id' => $existingGroupMember?->id,
             'message' => $this->message,

@@ -34,8 +34,16 @@ class ContactMessage extends Model
         'category',
         'status',
         'group_id',
+        'is_member',
         'message'
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_member' => 'boolean',
+        ];
+    }
 
     public function group(): BelongsTo
     {

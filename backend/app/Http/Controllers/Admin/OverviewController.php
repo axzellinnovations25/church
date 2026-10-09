@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class OverviewController extends Controller
 {
@@ -334,11 +335,18 @@ class OverviewController extends Controller
     public function updateItemVisibility(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'item_key' => ['required', 'string'],
+            'item_key' => ['required', 'string', 'max:100', 'regex:/^(event|mass_time|registration|contact_message|group_member):[1-9][0-9]*$/'],
             'visibility' => ['required', Rule::in(['pinned', 'dismissed'])],
         ]);
 
         $user = $request->user();
+
+        if (! $this->overviewItemIsAccessible($user, $validated['item_key'])) {
+            throw ValidationException::withMessages([
+                'item_key' => ['The selected overview item is unavailable.'],
+            ]);
+        }
+
         $overviewPreferences = $this->normalizeOverviewPreferences($user?->hidden_overview_items);
 
         $overviewPreferences['pinned'] = array_values(array_filter(
@@ -361,6 +369,28 @@ class OverviewController extends Controller
                 : 'The item will stay on the overview until you clear it.',
             'overview_preferences' => $overviewPreferences,
         ]);
+    }
+
+    private function overviewItemIsAccessible(User $user, string $itemKey): bool
+    {
+        [$type, $id] = explode(':', $itemKey, 2);
+        $query = match ($type) {
+            'event' => Event::query(),
+            'mass_time' => MassTime::query(),
+            'registration' => ParishRegistration::query(),
+            'contact_message' => ContactMessage::query(),
+            'group_member' => GroupMember::query(),
+        };
+
+        if (! $user->is_main_admin) {
+            if (! in_array($type, ['event', 'contact_message', 'group_member'], true)) {
+                return false;
+            }
+
+            $query->where('group_id', $user->group_id);
+        }
+
+        return $query->whereKey((int) $id)->exists();
     }
 
     private function withOverviewKeys(array $items, string $type, array $overviewPreferences, CarbonImmutable $baselineAt): array

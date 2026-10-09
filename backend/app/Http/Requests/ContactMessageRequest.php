@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ContactMessageRequest extends FormRequest
 {
@@ -67,8 +68,19 @@ class ContactMessageRequest extends FormRequest
             'email' => ['required', 'email:rfc', 'max:255'],
             'phone' => ['required', 'string', 'min:7', 'max:25', 'regex:/^[0-9+\s().-]+$/'],
             'subject' => ['required', 'string', 'min:3', 'max:255'],
-            'category' => ['required', 'string', 'max:100'],
-            'group_id' => ['nullable', 'integer', 'exists:groups,id', 'required_if:category,group_join'],
+            'category' => ['required', 'string', Rule::in([
+                'general', 'mass_times', 'liturgy', 'sacraments', 'baptism',
+                'first_holy_communion', 'confirmation', 'marriage',
+                'becoming_catholic', 'pastoral_care', 'parish_registration',
+                'newsletter', 'safeguarding', 'cathedral_hire', 'donations',
+                'schools', 'group_join', 'other',
+            ])],
+            'group_id' => [
+                'nullable', 'integer', 'required_if:category,group_join',
+                'prohibited_unless:category,group_join',
+                Rule::exists('groups', 'id')->where(fn ($query) => $query->where('is_active', true)),
+            ],
+            'isMember' => ['nullable', Rule::in(['yes', 'no'])],
             'message' => ['required', 'string', 'min:10', 'max:5000'],
         ];
     }

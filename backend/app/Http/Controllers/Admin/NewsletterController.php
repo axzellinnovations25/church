@@ -8,7 +8,9 @@ use App\Http\Resources\NewsletterResource;
 use App\Models\Newsletter;
 use Illuminate\Http\Request;
 use App\Support\Audit;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 class NewsletterController extends Controller
 {
@@ -43,15 +45,24 @@ class NewsletterController extends Controller
         $validated = $request->validated();
         $fileData = $this->storePdf($request);
 
-        $newsletter = Newsletter::create([
-            'title' => $validated['title'],
-            'publication_date' => $validated['publication_date'],
-            'description' => $validated['description'] ?? null,
-            'status' => $validated['status'],
-            ...$fileData,
-        ]);
+        try {
+            $newsletter = DB::transaction(function () use ($request, $validated, $fileData) {
+                $newsletter = Newsletter::create([
+                    'title' => $validated['title'],
+                    'publication_date' => $validated['publication_date'],
+                    'description' => $validated['description'] ?? null,
+                    'status' => $validated['status'],
+                    ...$fileData,
+                ]);
 
-        Audit::log($request, 'created newsletter', $newsletter, $newsletter->title);
+                Audit::log($request, 'created newsletter', $newsletter, $newsletter->title);
+
+                return $newsletter;
+            });
+        } catch (Throwable $exception) {
+            $this->deletePdf($fileData['file_path']);
+            throw $exception;
+        }
 
         return response()->json([
             'message' => 'Newsletter saved successfully.',
@@ -77,17 +88,33 @@ class NewsletterController extends Controller
             'status' => $validated['status'],
         ];
 
+        $oldPath = $newsletter->file_path;
+        $replacementPath = null;
+
         if ($request->hasFile('pdf')) {
-            $this->deletePdf($newsletter->file_path);
+            $fileData = $this->storePdf($request);
+            $replacementPath = $fileData['file_path'];
             $data = [
                 ...$data,
-                ...$this->storePdf($request),
+                ...$fileData,
             ];
         }
 
-        $newsletter->update($data);
+        try {
+            DB::transaction(function () use ($request, $newsletter, $data): void {
+                $newsletter->update($data);
+                Audit::log($request, 'updated newsletter', $newsletter, $newsletter->title);
+            });
+        } catch (Throwable $exception) {
+            if ($replacementPath) {
+                $this->deletePdf($replacementPath);
+            }
+            throw $exception;
+        }
 
-        Audit::log($request, 'updated newsletter', $newsletter, $newsletter->title);
+        if ($replacementPath && $oldPath !== $replacementPath) {
+            $this->deletePdf($oldPath);
+        }
 
         return response()->json([
             'message' => 'Newsletter updated successfully.',
@@ -97,10 +124,12 @@ class NewsletterController extends Controller
 
     public function destroy(Request $request, Newsletter $newsletter)
     {
-        $this->deletePdf($newsletter->file_path);
-        $newsletter->delete();
-
-        Audit::log($request, 'deleted newsletter', $newsletter, $newsletter->title);
+        $filePath = $newsletter->file_path;
+        DB::transaction(function () use ($request, $newsletter): void {
+            $newsletter->delete();
+            Audit::log($request, 'deleted newsletter', $newsletter, $newsletter->title);
+        });
+        $this->deletePdf($filePath);
 
         return response()->json([
             'message' => 'Newsletter deleted successfully.',
@@ -119,13 +148,18 @@ class NewsletterController extends Controller
         $filename = now()->format('YmdHis').'-'.Str::uuid().'.pdf';
         $path = "newsletters/{$filename}";
         $directory = storage_path('app/private/newsletters');
+        $destination = storage_path("app/private/{$path}");
 
-        if (! is_dir($directory)) {
-            @mkdir($directory, 0755, true);
+        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+            abort(500, 'The newsletter storage directory could not be created.');
         }
 
-        if (is_dir($directory) && is_writable($directory)) {
-            @copy($file->getRealPath(), storage_path("app/private/{$path}"));
+        if (! is_writable($directory) || ! copy($file->getRealPath(), $destination)) {
+            if (is_file($destination)) {
+                unlink($destination);
+            }
+
+            abort(500, 'The newsletter PDF could not be stored.');
         }
 
         return [

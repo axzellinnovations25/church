@@ -31,3 +31,19 @@ test('page aggregation handles an empty list', async () => {
   const payload = await loadAdminPages(async () => ({ events: [], meta: { last_page: 1 } }), 'events')
   assert.deepEqual(payload.events, [])
 })
+
+test('aggregates 500 rows with no more than four concurrent page requests', async () => {
+  const records = Array.from({ length: 500 }, (_, index) => ({ id: index + 1, title: `QA News ${index + 1}` }))
+  let inFlight = 0
+  let peak = 0
+  const payload = await loadAdminPages(async page => {
+    inFlight += 1
+    peak = Math.max(peak, inFlight)
+    await new Promise(resolve => setTimeout(resolve, 1))
+    inFlight -= 1
+    return { news_posts: records.slice((page - 1) * 10, page * 10), meta: { last_page: 50 } }
+  }, 'news_posts')
+  assert.equal(payload.news_posts.length, 500)
+  assert.equal(payload.news_posts.find(row => row.title === 'QA News 500')?.id, 500)
+  assert.ok(peak <= 4)
+})

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentUser, logout } from '../lib/auth'
+import { isAdminUser } from '../lib/adminAccess'
 import { clearAdminCache } from '../lib/admin'
 
 export function useAdminSession() {
@@ -15,6 +16,12 @@ export function useAdminSession() {
     if (!currentUser) {
       clearAdminCache()
       navigate('/login', { replace: true })
+      return null
+    }
+
+    if (!isAdminUser(currentUser)) {
+      clearAdminCache()
+      navigate('/', { replace: true })
       return null
     }
 
@@ -36,6 +43,12 @@ export function useAdminSession() {
         if (!currentUser) {
           clearAdminCache()
           navigate('/login', { replace: true })
+          return
+        }
+
+        if (!isAdminUser(currentUser)) {
+          clearAdminCache()
+          navigate('/', { replace: true })
           return
         }
 

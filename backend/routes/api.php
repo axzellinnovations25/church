@@ -41,7 +41,8 @@ Route::prefix('v1')->group(function () {
 
     // POST /api/v1/contact
     // Store contact form message
-    Route::post('contact', [ContactApiController::class, 'store']);
+    Route::post('contact', [ContactApiController::class, 'store'])
+        ->middleware('throttle:contact-submissions');
 
 
     /*

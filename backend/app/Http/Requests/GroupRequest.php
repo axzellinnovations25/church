@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Group;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class GroupRequest extends FormRequest
@@ -60,7 +62,19 @@ class GroupRequest extends FormRequest
         $groupId = $this->route('group')?->id;
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('groups', 'name')->ignore($groupId)],
+            'name' => [
+                'required', 'string', 'max:255', Rule::unique('groups', 'name')->ignore($groupId),
+                function (string $attribute, mixed $value, \Closure $fail) use ($groupId): void {
+                    $slugExists = Group::query()
+                        ->where('slug', Str::slug((string) $value))
+                        ->when($groupId, fn ($query) => $query->where('id', '!=', $groupId))
+                        ->exists();
+
+                    if ($slugExists) {
+                        $fail('A group with a similar web address already exists.');
+                    }
+                },
+            ],
             'description' => ['nullable', 'string', 'max:2000'],
             'is_active' => ['nullable', 'boolean'],
             'admin_user_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where(fn ($query) => $query->where('is_main_admin', false))],

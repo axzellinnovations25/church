@@ -28,6 +28,7 @@ class ContactApiController extends Controller
             'category' => $validated['category'],
             'status' => 'new',
             'group_id' => $validated['group_id'] ?? null,
+            'is_member' => isset($validated['isMember']) ? $validated['isMember'] === 'yes' : null,
             'message' => $validated['message'],
         ]);
 
