@@ -81,6 +81,38 @@ class NewsletterTest extends TestCase
             ->assertDownload('durable.pdf');
     }
 
+    public function test_existing_newsletters_receive_sample_pdfs_during_backfill(): void
+    {
+        $newsletter = Newsletter::create([
+            'title' => 'Existing Parish Newsletter',
+            'publication_date' => '2026-03-29',
+            'file_path' => 'newsletters/missing.pdf',
+            'original_filename' => 'missing.pdf',
+            'file_size' => 0,
+            'status' => 'published',
+        ]);
+
+        $migration = require database_path('migrations/2026_10_09_000001_backfill_newsletter_pdfs.php');
+        $migration->up();
+
+        $newsletter->refresh();
+        $pdfContents = $newsletter->pdfContents();
+        $this->assertNotNull($newsletter->file_contents);
+        $this->assertStringStartsWith('%PDF-1.4', $pdfContents);
+        $this->assertMatchesRegularExpression('/startxref\n(\d+)\n%%EOF\n$/', $pdfContents);
+        preg_match('/startxref\n(\d+)\n%%EOF\n$/', $pdfContents, $xrefMatch);
+        $this->assertSame('xref', substr($pdfContents, (int) $xrefMatch[1], 4));
+
+        $this->getJson('/api/v1/newsletters')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Existing Parish Newsletter');
+
+        $this->get("/newsletters/{$newsletter->id}/view")
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+    }
+
     public function test_admin_cannot_upload_a_non_pdf_newsletter(): void
     {
         $user = User::factory()->create();

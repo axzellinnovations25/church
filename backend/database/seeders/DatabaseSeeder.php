@@ -1114,12 +1114,14 @@ class DatabaseSeeder extends Seeder
             $filename = Str::slug($n['title']) . '.pdf';
             $filePath = 'newsletters/' . $filename;
             $fileSize = $this->createSampleNewsletterPdf($filePath, $n['title'], $n['publication_date']);
+            $fileContents = file_get_contents(storage_path("app/private/{$filePath}"));
 
             Newsletter::create([
                 'title' => $n['title'],
                 'publication_date' => $n['publication_date'],
                 'description' => 'Weekly parish news, Mass intentions, and upcoming events.',
                 'file_path' => $filePath,
+                'file_contents' => is_string($fileContents) ? base64_encode($fileContents) : null,
                 'original_filename' => $filename,
                 'file_size' => $fileSize,
                 'status' => $n['publication_date'] > now()->toDateString() ? 'draft' : 'published',
@@ -1154,16 +1156,30 @@ class DatabaseSeeder extends Seeder
         $safeTitle = str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $title);
         $safeDate = str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $publicationDate);
         $stream = "BT /F1 18 Tf 72 720 Td ({$safeTitle}) Tj 0 -32 Td /F1 12 Tf (Publication date: {$safeDate}) Tj 0 -28 Td (Sample parish newsletter PDF for local development.) Tj ET";
-        $streamLength = strlen($stream);
+        $objects = [
+            '<< /Type /Catalog /Pages 2 0 R >>',
+            '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+            '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+            '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+            '<< /Length '.strlen($stream).">> stream\n{$stream}\nendstream",
+        ];
+        $pdf = "%PDF-1.4\n";
+        $offsets = [];
 
-        $pdf = "%PDF-1.4\n"
-            . "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n"
-            . "2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n"
-            . "3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj\n"
-            . "4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n"
-            . "5 0 obj << /Length {$streamLength} >> stream\n{$stream}\nendstream endobj\n"
-            . "xref\n0 6\n0000000000 65535 f \n"
-            . "trailer << /Root 1 0 R /Size 6 >>\nstartxref\n0\n%%EOF\n";
+        foreach ($objects as $index => $object) {
+            $number = $index + 1;
+            $offsets[$number] = strlen($pdf);
+            $pdf .= "{$number} 0 obj\n{$object}\nendobj\n";
+        }
+
+        $xrefOffset = strlen($pdf);
+        $pdf .= "xref\n0 6\n0000000000 65535 f \n";
+
+        foreach ($offsets as $offset) {
+            $pdf .= sprintf('%010d 00000 n ', $offset)."\n";
+        }
+
+        $pdf .= "trailer << /Root 1 0 R /Size 6 >>\nstartxref\n{$xrefOffset}\n%%EOF\n";
 
         file_put_contents($fullPath, $pdf);
 
