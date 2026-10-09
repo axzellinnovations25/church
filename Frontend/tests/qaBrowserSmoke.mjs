@@ -63,6 +63,12 @@ async function navigate(path, delay = 500) {
 
 await call('Page.enable')
 await call('Runtime.enable')
+await call('Network.enable')
+await call('Network.clearBrowserCookies')
+await call('Storage.clearDataForOrigin', {
+  origin: siteUrl,
+  storageTypes: 'all',
+})
 const results = {}
 for (const path of ['/', '/login', '/contact', '/registration', '/news', '/gallery', '/dashboard', '/no-such-page']) {
   results[path] = await navigate(path, path === '/dashboard' ? 2500 : 1800)

@@ -5,7 +5,7 @@
 
 $database = $argv[1] ?? '';
 $email = $argv[2] ?? '';
-if (! is_file($database) || ! preg_match('#/qa-browser-[^/]+/[^/]+\.sqlite$#', str_replace('\\', '/', $database))) {
+if (! is_file($database) || ! preg_match('#/qa-(?:browser|reconcile-browser)[^/]*/[^/]+\.sqlite$#', str_replace('\\', '/', $database))) {
     fwrite(STDERR, "Expected the isolated QA browser SQLite file.\n");
     exit(2);
 }

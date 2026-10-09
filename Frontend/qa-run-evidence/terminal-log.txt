@@ -1,0 +1,33 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261010003801
+Username: THUSHANTH\Thushanth
+RunAs User: THUSHANTH\Thushanth
+Configuration Name: 
+Machine: THUSHANTH (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 23980
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is .\qa-run-evidence\terminal-log.txt
+PS C:\Users\Thushanth\Downloads\st-marys-cathedral-website-main\st-marys-cathedral-website-main\Frontend> powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\run-local-qa.ps1"
+Laravel migrations failed
+At C:\Users\Thushanth\Downloads\st-marys-cathedral-website-main\st-marys-cathedral-website-main\Frontend\scripts\run-lo
+cal-qa.ps1:14 char:29
++ function Fail([string]$m) { throw $m }
++                             ~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Laravel migrations failed:String) [], RuntimeException
+    + FullyQualifiedErrorId : Laravel migrations failed
+PS C:\Users\Thushanth\Downloads\st-marys-cathedral-website-main\st-marys-cathedral-website-main\Frontend> $qaExitCode = $LASTEXITCODE
+PS C:\Users\Thushanth\Downloads\st-marys-cathedral-website-main\st-marys-cathedral-website-main\Frontend> Stop-Transcript
+**********************
+Windows PowerShell transcript end
+End time: 20261010003802
+**********************

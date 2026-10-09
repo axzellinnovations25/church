@@ -44,10 +44,10 @@ class AdminAuditTest extends TestCase
         }
     }
 
-    public function test_unassigned_account_events_list_should_not_crash(): void
+    public function test_unassigned_account_cannot_access_events_list(): void
     {
         $this->actingAs(User::factory()->create(['is_main_admin' => false, 'group_id' => null]))
-            ->getJson('/admin/events')->assertOk();
+            ->getJson('/admin/events')->assertForbidden();
     }
 
     public function test_unassigned_account_cannot_read_ungrouped_event(): void

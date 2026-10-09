@@ -2,11 +2,15 @@
 
 Review and execution date: 9 October 2026. The observations below preserve the original review basis. QA-F01, QA-F02, QA-F06, QA-F08, QA-F09, QA-F10, QA-F11, QA-F13 and QA-F14 were confirmed as D-001 through D-009 and are now **Resolved and verified**. QA-F03, QA-F04, QA-F05, QA-F07 and QA-F15 still require a product decision or more execution. QA-F12 was not reproduced for retrieval completeness, while broader performance coverage remains open.
 
+The expanded documented-case run also reproduced two new issues: D-010, a successful parish registration returning HTTP 200 instead of the documented 201; and D-011, a case-variant duplicate admin email reaching an unhandled unique-constraint HTTP 500 instead of validation HTTP 422. Both remain open because this execution was restricted from changing production application code.
+
 | Finding set | Current classification |
 |---|---|
 | QA-F01, F02, F06, F08, F09, F10, F11, F13, F14 | Resolved through D-001–D-009; regression tests pass |
 | QA-F03, F04, F05, F07, F15 | Needs clarification or broader verification |
 | QA-F12 | Not reproduced for completeness; browser scale testing remains Not Run |
+| D-010 | Open; REG-TC-001 fails its documented HTTP creation-status contract |
+| D-011 | Open; ACC-TC-002 causes HTTP 500 for a case-variant duplicate email |
 
 | ID | Priority | Observation and evidence | Recommended verification / decision | Cases |
 |---|---|---|---|---|
