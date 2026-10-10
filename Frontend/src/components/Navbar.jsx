@@ -152,7 +152,10 @@ export default function Navbar() {
                     </div>
                 </Link>
 
-                <ul className="navbar-links">
+                <ul
+                    className="navbar-links"
+                    onMouseLeave={() => setOpenDropdown(null)}
+                >
                     {navItems.map(item => (
                         <li key={item.label} className="nav-item">
                             {item.children ? (
@@ -169,7 +172,7 @@ export default function Navbar() {
                                         {item.label} <span className="dropdown-arrow">▼</span>
                                     </Link>
                                     {openDropdown === item.label && (
-                                        <ul className="dropdown" onMouseLeave={() => setOpenDropdown(null)}>
+                                        <ul className="dropdown">
                                             {item.children.map(child => (
                                                 <li key={child.label}>
                                                     <Link

@@ -143,20 +143,15 @@ export default function HomePage() {
         </div>
 
         <div className="container hero-content-centered">
-          {heroSlides.map((slide, index) => (
-            <div
-              key={index}
-              className={`hero-text-layer ${index === heroIdx ? 'active' : ''}`}
-            >
-              <p className="hero-label-stately">{slide.label} • EST. 1857</p>
-              <h1 className="hero-title-grand">{slide.title}</h1>
-              <p className="hero-desc">{slide.desc}</p>
-              <div className="hero-btns">
-                <Link to={slide.link} className="btn-primary-grand">{slide.btnText}</Link>
-                <Link to="/contact" className="btn-outline-white hero-secondary-btn">Contact Us</Link>
-              </div>
+          <div key={heroIdx} className="hero-text-layer active">
+            <p className="hero-label-stately">{heroSlides[heroIdx].label} • EST. 1857</p>
+            <h1 className="hero-title-grand">{heroSlides[heroIdx].title}</h1>
+            <p className="hero-desc">{heroSlides[heroIdx].desc}</p>
+            <div className="hero-btns">
+              <Link to={heroSlides[heroIdx].link} className="btn-primary-grand">{heroSlides[heroIdx].btnText}</Link>
+              <Link to="/contact" className="btn-outline-white hero-secondary-btn">Contact Us</Link>
             </div>
-          ))}
+          </div>
 
           <div className="hero-dots">
             {heroSlides.map((_, index) => (
@@ -300,7 +295,7 @@ export default function HomePage() {
               </div>
             )}
           </div>
-          <div style={{ textAlign: 'center', marginTop: '32px' }}>
+          <div className="mass-schedule-cta" style={{ textAlign: 'center', marginTop: '32px' }}>
             <Link to="/mass-times" className="btn-outline">View Full Mass Schedule</Link>
           </div>
         </div>
