@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import './Sacraments.css'
-import baptismImg from '../../assets/baptism-hero.jpg'
-import reconciliationImg from '../../assets/reconciliation-hero.jpg'
+import { siteImageUrl } from '../../lib/siteImages'
 
 export function SacramentHero({ title, subtitle, image }) {
     return (
@@ -91,10 +90,10 @@ export function SacramentCTA({ title, description, buttonText, link }) {
 
 export function RelatedSacraments({ current }) {
     const sacraments = [
-        { name: 'Baptism', path: '/baptism', image: baptismImg },
+        { name: 'Baptism', path: '/baptism', image: siteImageUrl('assets/baptism-hero.jpg') },
         { name: 'Confirmation', path: '/confirmation', image: 'https://images.unsplash.com/photo-1544427920-c49ccfb85579?q=80&w=800' },
         { name: 'Marriage', path: '/marriage', image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800' },
-        { name: 'Reconciliation', path: '/reconciliation', image: reconciliationImg },
+        { name: 'Reconciliation', path: '/reconciliation', image: siteImageUrl('assets/reconciliation-hero.jpg') },
     ].filter(s => s.name !== current)
 
     return (

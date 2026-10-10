@@ -7,8 +7,8 @@ use App\Http\Resources\EventResource;
 use App\Models\Event;                         // Our Event model (database table)
 use App\Http\Requests\EventRequest;           // Event validation request (clash prevention)
 use App\Support\Audit;
+use App\Support\ImageStorage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
@@ -160,18 +160,20 @@ class EventController extends Controller
             $validated['created_by_user_id'] = $event->created_by_user_id ?: $user->id;
         }
 
-        if ($request->boolean('remove_image') && $event->image_path) {
-            $this->deleteImage($event->image_path);
+        $oldImagePath = $event->image_path;
+        if ($request->boolean('remove_image') && $oldImagePath) {
             $validated['image_path'] = null;
         }
 
         if ($request->hasFile('image')) {
-            $this->deleteImage($event->image_path);
             $validated['image_path'] = $this->storeImage($request);
         }
 
         // Update the event using validated data
         $event->update($validated);
+        if (array_key_exists('image_path', $validated) && $oldImagePath) {
+            rescue(fn () => $this->deleteImage($oldImagePath), report: true);
+        }
         Audit::log($request, 'updated event', $event, $event->title);
 
         if ($request->expectsJson()) {
@@ -216,16 +218,7 @@ class EventController extends Controller
         $this->authorizeEventAccess($request, $event);
         abort_unless($event->image_path, 404);
 
-        $path = storage_path("app/private/{$event->image_path}");
-        abort_unless(is_file($path), 404);
-
-        return response()->file($path, [
-            'Content-Type' => match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
-                'jpg', 'jpeg' => 'image/jpeg',
-                'webp' => 'image/webp',
-                default => 'image/png',
-            },
-        ]);
+        return ImageStorage::serve($event->image_path);
     }
 
     /**
@@ -262,31 +255,11 @@ class EventController extends Controller
 
     private function storeImage(EventRequest $request): string
     {
-        $image = $request->file('image');
-        $extension = strtolower($image->getClientOriginalExtension() ?: 'jpg');
-        $filename = now()->format('YmdHis').'-'.Str::uuid().'.'.$extension;
-        $path = "events/{$filename}";
-        $directory = storage_path('app/private/events');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        copy($image->getRealPath(), storage_path("app/private/{$path}"));
-
-        return $path;
+        return ImageStorage::store($request->file('image'), 'events');
     }
 
     private function deleteImage(?string $path): void
     {
-        if (! $path) {
-            return;
-        }
-
-        $fullPath = storage_path("app/private/{$path}");
-
-        if (is_file($fullPath)) {
-            unlink($fullPath);
-        }
+        ImageStorage::delete($path);
     }
 }

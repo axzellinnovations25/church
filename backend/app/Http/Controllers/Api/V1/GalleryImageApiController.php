@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GalleryImageResource;
 use App\Models\GalleryImage;
+use App\Support\ImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -29,15 +30,6 @@ class GalleryImageApiController extends Controller
         abort_unless($galleryImage->is_active || $request->user()?->is_main_admin, 404);
         abort_unless($galleryImage->image_path, 404);
 
-        $path = storage_path("app/private/{$galleryImage->image_path}");
-        abort_unless(is_file($path), 404);
-
-        return response()->file($path, [
-            'Content-Type' => match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
-                'jpg', 'jpeg', 'jfif' => 'image/jpeg',
-                'webp' => 'image/webp',
-                default => 'image/png',
-            },
-        ]);
+        return ImageStorage::serve($galleryImage->image_path, $galleryImage->is_active);
     }
 }

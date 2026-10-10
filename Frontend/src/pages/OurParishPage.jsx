@@ -1,5 +1,5 @@
 import { ParishHero, ParishIntro, ParishInfoCards, ParishCTA, RelatedParishLinks } from '../components/parish/ParishSections'
-import parishHeroImg from '../assets/parish-hero.jpg'
+import { siteImageUrl } from '../lib/siteImages'
 
 const parishLifeCards = [
     {
@@ -34,7 +34,7 @@ export default function OurParishPage() {
             <ParishHero 
                 title="Our Parish"
                 subtitle="A vibrant community of faith, worship, and service in the heart of Wrexham"
-                image={parishHeroImg}
+                image={siteImageUrl('assets/parish-hero.jpg')}
             />
             
             <ParishIntro 

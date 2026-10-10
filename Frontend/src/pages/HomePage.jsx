@@ -3,18 +3,16 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import './HomePage.css'
 
-import churchIcon from '../assets/icons/church_sketch.png'
-import bibleIcon from '../assets/icons/bible_sketch.png'
-import doveIcon from '../assets/icons/dove_sketch.png'
 import PhotoGallery from '../components/PhotoGallery'
 import { galleryImages } from '../lib/galleryImages'
 import { publicQueries } from '../lib/publicData'
+import { siteImageUrl } from '../lib/siteImages'
 
 const publicAsset = (path) => encodeURI(`${import.meta.env.BASE_URL}${path}`)
 
 const heroSlides = [
   {
-    image: [publicAsset('gallery/hero-interior.jpg'), publicAsset('image 01.jpg')],
+    image: [siteImageUrl('gallery/hero-interior.jpg'), siteImageUrl('image 01.jpg')],
     label: 'MASS TIMES',
     title: 'Join Us For Worship',
     desc: "Find weekday and weekend Mass times at St Mary's Cathedral and the Church of the Holy Family, Coedpoeth.",
@@ -22,7 +20,7 @@ const heroSlides = [
     link: '/mass-times',
   },
   {
-    image: [publicAsset('gallery/thumbnail_IMG_7226.jpg'), publicAsset('image 02.jpg')],
+    image: [siteImageUrl('gallery/thumbnail_IMG_7226.jpg'), siteImageUrl('image 02.jpg')],
     label: 'UPCOMING EVENTS',
     title: 'See What Is Happening',
     desc: 'Keep up with parish events, special celebrations, and community gatherings across cathedral life.',
@@ -30,7 +28,7 @@ const heroSlides = [
     link: '/news-events',
   },
   {
-    image: [publicAsset('gallery/IMG_4020.jpeg'), publicAsset('image 03.jpg')],
+    image: [siteImageUrl('gallery/IMG_4020.jpeg'), siteImageUrl('image 03.jpg')],
     label: 'PARISH REGISTRATION',
     title: 'Become Part Of Our Parish',
     desc: 'Register with the parish so we can welcome you, support your household, and help you stay connected.',
@@ -38,7 +36,7 @@ const heroSlides = [
     link: '/registration',
   },
   {
-    image: [publicAsset('gallery/IMG_5236 (1).jpeg'), publicAsset('image 04.jpg')],
+    image: [siteImageUrl('gallery/IMG_5236 (1).jpeg'), siteImageUrl('image 04.jpg')],
     label: 'NEWSLETTER',
     title: 'Stay In Touch Each Week',
     desc: 'Read the weekly newsletter for parish notices, Mass updates, diocesan news, and seasonal services.',
@@ -49,17 +47,17 @@ const heroSlides = [
 
 const services = [
   {
-    icon: churchIcon,
+    icon: siteImageUrl('assets/icons/church_sketch.png'),
     title: 'Parish Registration',
     desc: 'Register with the parish so we can stay connected, support your family, and welcome you fully into Cathedral life.',
   },
   {
-    icon: bibleIcon,
+    icon: siteImageUrl('assets/icons/bible_sketch.png'),
     title: 'Sacramental Life',
     desc: 'Preparation is available for Baptism, First Holy Communion, Reconciliation, Confirmation, Marriage, and becoming a Catholic through RCIA.',
   },
   {
-    icon: doveIcon,
+    icon: siteImageUrl('assets/icons/dove_sketch.png'),
     title: 'Prayer And Parish Life',
     desc: 'Join prayer groups, youth ministry, volunteers, fundraising, and pastoral outreach that help our parish live and serve together.',
   },

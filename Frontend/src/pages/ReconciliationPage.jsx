@@ -1,5 +1,5 @@
 import { SacramentHero, SacramentIntro, SacramentInfoCards, SacramentSchedule, SacramentSteps, SacramentCTA, RelatedSacraments } from '../components/sacraments/SacramentSections'
-import reconciliationHero from '../assets/reconciliation-hero.jpg'
+import { siteImageUrl } from '../lib/siteImages'
 
 const reconciliationCards = [
     { title: 'Regular Confession Times', content: 'Confessions are heard on Saturdays from 10.30am to 11.30am and again from 5.00pm to 6.00pm.' },
@@ -18,7 +18,7 @@ const reconciliationSteps = [
 export default function ReconciliationPage() {
     return (
         <div className="sacrament-page">
-            <SacramentHero title="Reconciliation" subtitle="Regular confession times and guidance for the Sacrament of Reconciliation" image={reconciliationHero} />
+            <SacramentHero title="Reconciliation" subtitle="Regular confession times and guidance for the Sacrament of Reconciliation" image={siteImageUrl('assets/reconciliation-hero.jpg')} />
             <SacramentIntro title="God's Mercy And Healing" text="The Sacrament of Reconciliation restores us to grace, renews our friendship with God, and strengthens us to live the Christian life. Cathedral parish provides regular confession times and extra seasonal opportunities during Lent." />
             <SacramentInfoCards cards={reconciliationCards} />
             <SacramentSchedule title="Confession Times" content="Saturday 10.30am to 11.30am and Saturday 5.00pm to 6.00pm." />

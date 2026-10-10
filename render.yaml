@@ -53,6 +53,12 @@ services:
         value: sync
       - key: FILESYSTEM_DISK
         value: local
+      - key: SUPABASE_STORAGE_URL
+        value: https://pxfoldhgjbmpdeemwqqd.supabase.co
+      - key: SUPABASE_STORAGE_BUCKET
+        value: cathedral-images
+      - key: SUPABASE_STORAGE_SERVICE_KEY
+        sync: false
       - key: MAIL_MAILER
         value: smtp
       - key: MAIL_HOST

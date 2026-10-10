@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\NewsPostResource;
 use App\Models\NewsPost;
+use App\Support\ImageStorage;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -52,20 +54,11 @@ class NewsPostApiController extends Controller
 
         $isPublic = $newsPost
             && $newsPost->status === 'published'
-            && ($newsPost->published_at === null || $newsPost->published_at->isToday() || $newsPost->published_at->isPast());
+            && ($newsPost->published_at === null || Carbon::parse($newsPost->published_at)->format('Y-m-d') <= now()->toDateString());
 
         abort_unless($newsPost && ($isPublic || $request->user()?->is_main_admin), 404);
         abort_unless($newsPost->image_path, 404);
 
-        $path = storage_path("app/private/{$newsPost->image_path}");
-        abort_unless(is_file($path), 404);
-
-        return response()->file($path, [
-            'Content-Type' => match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
-                'jpg', 'jpeg' => 'image/jpeg',
-                'webp' => 'image/webp',
-                default => 'image/png',
-            },
-        ]);
+        return ImageStorage::serve($newsPost->image_path, $isPublic);
     }
 }

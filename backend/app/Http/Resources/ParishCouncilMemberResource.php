@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
+use App\Support\ImageStorage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ParishCouncilMemberResource extends JsonResource
@@ -12,8 +13,7 @@ class ParishCouncilMemberResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $photoPath = $this->photo_path ? storage_path("app/private/{$this->photo_path}") : null;
-        $hasPhoto = $photoPath && is_file($photoPath);
+        $hasPhoto = ImageStorage::exists($this->photo_path);
 
         return [
             'id' => $this->id,
@@ -23,7 +23,7 @@ class ParishCouncilMemberResource extends JsonResource
             'photo_url' => $hasPhoto ? "/api/v1/parish-council-members/{$this->id}/photo" : null,
             'admin_photo_url' => $hasPhoto ? "/admin/parish-council-members/{$this->id}/photo" : null,
             'photo_filename' => $this->photo_filename,
-            'photo_size' => $hasPhoto ? filesize($photoPath) : null,
+            'photo_size' => ImageStorage::size($this->photo_path) ?? $this->photo_size,
             'sort_order' => $this->sort_order,
             'is_active' => (bool) $this->is_active,
             'created_at' => $this->created_at,

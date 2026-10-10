@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
+use App\Support\ImageStorage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class EventResource extends JsonResource
@@ -12,8 +13,7 @@ class EventResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $imagePath = $this->image_path ? storage_path("app/private/{$this->image_path}") : null;
-        $hasImage = $imagePath && is_file($imagePath);
+        $hasImage = ImageStorage::exists($this->image_path);
 
         return [
             'id' => $this->id,
@@ -30,7 +30,7 @@ class EventResource extends JsonResource
             'image_url' => $hasImage ? "/api/v1/events/{$this->id}/image" : null,
             'admin_image_url' => $hasImage ? "/admin/events/{$this->id}/image" : null,
             'image_filename' => $this->image_path ? basename($this->image_path) : null,
-            'image_size' => $hasImage ? filesize($imagePath) : null,
+            'image_size' => ImageStorage::size($this->image_path),
             'group_id' => $this->group_id,
             'group_name' => $this->whenLoaded('group', fn () => $this->group?->name),
             'created_by_user_id' => $this->created_by_user_id,

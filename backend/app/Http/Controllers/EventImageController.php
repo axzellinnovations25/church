@@ -3,27 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Support\ImageStorage;
+use Illuminate\Http\Request;
 
 class EventImageController extends Controller
 {
-    public function show(Event $event)
+    public function show(Request $request, Event $event)
     {
-        abort_unless($event->image_path && ($event->status === 'published' || $event->canBeManagedBy(auth()->user())), 404);
+        abort_unless($event->image_path && ($event->status === 'published' || $event->canBeManagedBy($request->user())), 404);
 
-        $path = storage_path("app/private/{$event->image_path}");
-        abort_unless(is_file($path), 404);
-
-        return response()->file($path, [
-            'Content-Type' => $this->contentTypeFor($path),
-        ]);
-    }
-
-    private function contentTypeFor(string $path): string
-    {
-        return match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
-            'jpg', 'jpeg' => 'image/jpeg',
-            'webp' => 'image/webp',
-            default => 'image/png',
-        };
+        return ImageStorage::serve($event->image_path, $event->status === 'published');
     }
 }

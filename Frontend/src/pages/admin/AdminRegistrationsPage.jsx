@@ -604,19 +604,18 @@ export default function AdminRegistrationsPage() {
         onClose={closeModal}
         title="Registration Details"
         subtitle={isLoadingRegistration ? 'Loading registration...' : 'Review the record or switch into edit mode.'}
+        actions={registrationDetail ? (
+          <div className="admin-actions admin-detail-actions">
+            <button className="btn-outline" type="button" onClick={() => setIsEditingRegistration(current => !current)}>
+              {isEditingRegistration ? 'Cancel Edit' : 'Edit'}
+            </button>
+            <button className="btn-primary btn-danger" type="button" onClick={() => setConfirmDeleteId(registrationDetail.id)}>
+              Delete
+            </button>
+          </div>
+        ) : null}
       >
         <div ref={editorRef} id="admin-editor">
-          {registrationDetail ? (
-            <div className="admin-actions" style={{ marginBottom: '24px' }}>
-              <button className="btn-outline" type="button" onClick={() => setIsEditingRegistration(current => !current)}>
-                {isEditingRegistration ? 'Cancel Edit' : 'Edit'}
-              </button>
-              <button className="btn-primary" type="button" onClick={() => setConfirmDeleteId(registrationDetail.id)}>
-                Delete
-              </button>
-            </div>
-          ) : null}
-
         {!registrationDetail && !isLoadingRegistration ? <p className="admin-empty">Select a registration to view details.</p> : null}
 
         {registrationDetail && !isEditingRegistration ? (

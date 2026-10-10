@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\NewsPostApiController;
 use App\Http\Controllers\Api\V1\ParishCouncilMemberApiController;
 use App\Http\Controllers\Api\V1\GroupApiController;
 use App\Http\Controllers\Api\V1\GalleryImageApiController;
+use App\Http\Controllers\Api\V1\SiteImageApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,8 @@ use App\Http\Controllers\Api\V1\GalleryImageApiController;
 */
 
 Route::prefix('v1')->group(function () {
+
+    Route::get('site-images/{path}', [SiteImageApiController::class, 'show'])->where('path', '.*');
 
     /*
     |--------------------------------------------------------------------------

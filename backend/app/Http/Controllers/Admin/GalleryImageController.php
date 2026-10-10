@@ -7,8 +7,8 @@ use App\Http\Requests\GalleryImageRequest;
 use App\Http\Resources\GalleryImageResource;
 use App\Models\GalleryImage;
 use App\Support\Audit;
+use App\Support\ImageStorage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class GalleryImageController extends Controller
 {
@@ -72,8 +72,8 @@ class GalleryImageController extends Controller
         $validated = $request->validated();
         $validated['is_active'] = $request->boolean('is_active');
 
+        $oldImagePath = $galleryImage->image_path;
         if ($request->hasFile('image')) {
-            $this->deleteImage($galleryImage->image_path);
             $validated = [
                 ...$validated,
                 ...$this->storeImage($request),
@@ -81,6 +81,9 @@ class GalleryImageController extends Controller
         }
 
         $galleryImage->update($validated);
+        if ($request->hasFile('image')) {
+            rescue(fn () => $this->deleteImage($oldImagePath), report: true);
+        }
         Audit::log($request, 'updated gallery image', $galleryImage, $galleryImage->title);
 
         if ($request->expectsJson()) {
@@ -112,32 +115,13 @@ class GalleryImageController extends Controller
     public function image(GalleryImage $galleryImage)
     {
         abort_unless($galleryImage->image_path, 404);
-
-        $path = storage_path("app/private/{$galleryImage->image_path}");
-        abort_unless(is_file($path), 404);
-
-        return response()->file($path, [
-            'Content-Type' => match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
-                'jpg', 'jpeg', 'jfif' => 'image/jpeg',
-                'webp' => 'image/webp',
-                default => 'image/png',
-            },
-        ]);
+        return ImageStorage::serve($galleryImage->image_path);
     }
 
     private function storeImage(GalleryImageRequest $request): array
     {
         $image = $request->file('image');
-        $extension = strtolower($image->getClientOriginalExtension() ?: 'jpg');
-        $filename = now()->format('YmdHis').'-'.Str::uuid().'.'.$extension;
-        $path = "gallery-images/{$filename}";
-        $directory = storage_path('app/private/gallery-images');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        copy($image->getRealPath(), storage_path("app/private/{$path}"));
+        $path = ImageStorage::store($image, 'gallery-images');
 
         return [
             'image_path' => $path,
@@ -148,14 +132,6 @@ class GalleryImageController extends Controller
 
     private function deleteImage(?string $path): void
     {
-        if (! $path) {
-            return;
-        }
-
-        $fullPath = storage_path("app/private/{$path}");
-
-        if (is_file($fullPath)) {
-            unlink($fullPath);
-        }
+        ImageStorage::delete($path);
     }
 }

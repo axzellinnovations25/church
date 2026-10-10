@@ -8,7 +8,7 @@ use App\Http\Resources\ParishCouncilMemberResource;
 use App\Models\ParishCouncilMember;
 use Illuminate\Http\Request;
 use App\Support\Audit;
-use Illuminate\Support\Str;
+use App\Support\ImageStorage;
 
 class ParishCouncilMemberController extends Controller
 {
@@ -61,10 +61,8 @@ class ParishCouncilMemberController extends Controller
 
     public function photo(ParishCouncilMember $parishCouncilMember)
     {
-        $path = storage_path("app/private/{$parishCouncilMember->photo_path}");
-        abort_unless($parishCouncilMember->photo_path && is_file($path), 404);
-
-        return response()->file($path);
+        abort_unless($parishCouncilMember->photo_path, 404);
+        return ImageStorage::serve($parishCouncilMember->photo_path);
     }
 
     public function update(ParishCouncilMemberRequest $request, ParishCouncilMember $parishCouncilMember)
@@ -79,8 +77,8 @@ class ParishCouncilMemberController extends Controller
             'is_active' => (bool) ($validated['is_active'] ?? true),
         ];
 
+        $oldPhotoPath = $parishCouncilMember->photo_path;
         if ($request->hasFile('photo')) {
-            $this->deletePhoto($parishCouncilMember->photo_path);
             $data = [
                 ...$data,
                 ...$this->storePhoto($request),
@@ -88,6 +86,9 @@ class ParishCouncilMemberController extends Controller
         }
 
         $parishCouncilMember->update($data);
+        if ($request->hasFile('photo')) {
+            rescue(fn () => $this->deletePhoto($oldPhotoPath), report: true);
+        }
 
         Audit::log($request, 'updated parish council member', $parishCouncilMember, $parishCouncilMember->name);
 
@@ -112,16 +113,7 @@ class ParishCouncilMemberController extends Controller
     private function storePhoto(ParishCouncilMemberRequest $request): array
     {
         $photo = $request->file('photo');
-        $extension = strtolower($photo->getClientOriginalExtension() ?: 'jpg');
-        $filename = now()->format('YmdHis').'-'.Str::uuid().'.'.$extension;
-        $path = "parish-council-members/{$filename}";
-        $directory = storage_path('app/private/parish-council-members');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        copy($photo->getRealPath(), storage_path("app/private/{$path}"));
+        $path = ImageStorage::store($photo, 'parish-council-members');
 
         return [
             'photo_path' => $path,
@@ -132,14 +124,6 @@ class ParishCouncilMemberController extends Controller
 
     private function deletePhoto(?string $path): void
     {
-        if (! $path) {
-            return;
-        }
-
-        $fullPath = storage_path("app/private/{$path}");
-
-        if (is_file($fullPath)) {
-            unlink($fullPath);
-        }
+        ImageStorage::delete($path);
     }
 }

@@ -1,4 +1,5 @@
 import { ParishHero, ParishIntro, ParishInfoCards, ParishCTA } from '../components/parish/ParishSections'
+import { siteImageUrl } from '../lib/siteImages'
 import './DiocesePage.css'
 
 export default function DiocesePage() {
@@ -69,7 +70,7 @@ export default function DiocesePage() {
                     <div className="bishop-card">
                         <img
                             className="bishop-image"
-                            src="/leadership/bishop-peter.jfif"
+                            src={siteImageUrl('leadership/bishop-peter.jfif')}
                             alt="Bishop Peter Brignall"
                         />
                         <h3 className="bishop-name">Bishop Peter Brignall</h3>

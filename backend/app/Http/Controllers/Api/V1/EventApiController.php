@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
+use App\Support\ImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -77,15 +78,6 @@ class EventApiController extends Controller
         abort_unless($event && ($event->status === 'published' || $event->canBeManagedBy($request->user())), 404);
         abort_unless($event->image_path, 404);
 
-        $path = storage_path("app/private/{$event->image_path}");
-        abort_unless(is_file($path), 404);
-
-        return response()->file($path, [
-            'Content-Type' => match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
-                'jpg', 'jpeg' => 'image/jpeg',
-                'webp' => 'image/webp',
-                default => 'image/png',
-            },
-        ]);
+        return ImageStorage::serve($event->image_path, $event->status === 'published');
     }
 }

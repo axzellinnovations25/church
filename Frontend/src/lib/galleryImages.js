@@ -1,9 +1,7 @@
 import { getBackendUrl } from './auth'
+import { siteImageUrl } from './siteImages'
 
-const publicAsset = (path) => encodeURI(`${import.meta.env.BASE_URL}${path}`)
-
-// These images live in `Frontend/public/gallery/`.
-// If a file is missing, the UI will fall back gracefully.
+const publicAsset = siteImageUrl
 export const galleryImages = [
   {
     src: publicAsset('gallery/IMG_5236 (1).jpeg'),

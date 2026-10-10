@@ -7,8 +7,8 @@ use App\Http\Requests\NewsPostRequest;
 use App\Http\Resources\NewsPostResource;
 use App\Models\NewsPost;
 use App\Support\Audit;
+use App\Support\ImageStorage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class NewsPostController extends Controller
 {
@@ -68,17 +68,19 @@ class NewsPostController extends Controller
     {
         $validated = $request->validated();
 
-        if ($request->boolean('remove_image') && $newsPost->image_path) {
-            $this->deleteImage($newsPost->image_path);
+        $oldImagePath = $newsPost->image_path;
+        if ($request->boolean('remove_image') && $oldImagePath) {
             $validated['image_path'] = null;
         }
 
         if ($request->hasFile('image')) {
-            $this->deleteImage($newsPost->image_path);
             $validated['image_path'] = $this->storeImage($request);
         }
 
         $newsPost->update($validated);
+        if (array_key_exists('image_path', $validated) && $oldImagePath) {
+            rescue(fn () => $this->deleteImage($oldImagePath), report: true);
+        }
         Audit::log($request, 'updated news post', $newsPost, $newsPost->title);
 
         if ($request->expectsJson()) {
@@ -109,31 +111,11 @@ class NewsPostController extends Controller
 
     private function storeImage(NewsPostRequest $request): string
     {
-        $image = $request->file('image');
-        $extension = strtolower($image->getClientOriginalExtension() ?: 'jpg');
-        $filename = now()->format('YmdHis').'-'.Str::uuid().'.'.$extension;
-        $path = "news/{$filename}";
-        $directory = storage_path('app/private/news');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        copy($image->getRealPath(), storage_path("app/private/{$path}"));
-
-        return $path;
+        return ImageStorage::store($request->file('image'), 'news');
     }
 
     private function deleteImage(?string $path): void
     {
-        if (! $path) {
-            return;
-        }
-
-        $fullPath = storage_path("app/private/{$path}");
-
-        if (is_file($fullPath)) {
-            unlink($fullPath);
-        }
+        ImageStorage::delete($path);
     }
 }

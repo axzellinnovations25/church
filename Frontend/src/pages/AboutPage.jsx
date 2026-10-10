@@ -3,6 +3,7 @@ import Container from '../components/ui/Container'
 import Section from '../components/ui/Section'
 import PhotoGallery from '../components/PhotoGallery'
 import { galleryImages } from '../lib/galleryImages'
+import { siteImageUrl } from '../lib/siteImages'
 import './AboutPage.css'
 
 const values = [
@@ -13,10 +14,10 @@ const values = [
 ]
 
 const staff = [
-    { role: 'Bishop of Wrexham', name: 'Bishop Peter Brignall', title: 'Diocesan Bishop', bio: 'Episcopal leadership for Catholic communities across North Wales.', image: '/leadership/bishop-peter-brignall.jpg' },
-    { role: 'Cathedral Dean', name: 'Fr Nicolas Enzama', title: 'Cathedral Dean and Parish Priest', bio: 'Pastoral leadership for the Cathedral parish and Coedpoeth.', image: '/leadership/fr-nicolas-enzama.jpg' },
-    { role: 'Permanent Deacons', name: 'Deacon Michael Schoonjans and Deacon Steve Davies', title: 'Serving Cathedral parish life and ministry', bio: 'Supporting liturgy, pastoral care, and parish outreach.', image: '/leadership/person-4.jpg' },
-    { role: 'Religious Sisters', name: 'Sisters of the Holy Family and the Evangelising Sisters of Mary', title: 'Part of Cathedral parish life', bio: 'A longstanding presence of prayer, service, and community support.', image: '/leadership/person-6.jpg' },
+    { role: 'Bishop of Wrexham', name: 'Bishop Peter Brignall', title: 'Diocesan Bishop', bio: 'Episcopal leadership for Catholic communities across North Wales.', image: siteImageUrl('leadership/bishop-peter-brignall.jpg') },
+    { role: 'Cathedral Dean', name: 'Fr Nicolas Enzama', title: 'Cathedral Dean and Parish Priest', bio: 'Pastoral leadership for the Cathedral parish and Coedpoeth.', image: siteImageUrl('leadership/fr-nicolas-enzama.jpg') },
+    { role: 'Permanent Deacons', name: 'Deacon Michael Schoonjans and Deacon Steve Davies', title: 'Serving Cathedral parish life and ministry', bio: 'Supporting liturgy, pastoral care, and parish outreach.', image: siteImageUrl('leadership/person-4.jpg') },
+    { role: 'Religious Sisters', name: 'Sisters of the Holy Family and the Evangelising Sisters of Mary', title: 'Part of Cathedral parish life', bio: 'A longstanding presence of prayer, service, and community support.', image: siteImageUrl('leadership/person-6.jpg') },
 ]
 
 const historyTimeline = [
@@ -86,7 +87,7 @@ export default function AboutPage() {
                     </div>
                     <div className="history-image">
                         <img
-                            src="/cathedral-photo.png"
+                            src={siteImageUrl('cathedral-photo.png')}
                             alt="Cathedral exterior"
                         />
                     </div>

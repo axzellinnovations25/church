@@ -1,5 +1,5 @@
 import { SacramentHero, SacramentIntro, SacramentInfoCards, SacramentSteps, SacramentCTA, RelatedSacraments } from '../components/sacraments/SacramentSections'
-import baptismHero from '../assets/baptism-hero.jpg'
+import { siteImageUrl } from '../lib/siteImages'
 
 const baptismCards = [
     { title: 'Who Can Apply', content: 'Infant or child Baptism is normally for children under the age of 7 where at least one parent is a baptised, regularly practising Catholic registered in the parish.' },
@@ -18,7 +18,7 @@ const baptismSteps = [
 export default function BaptismPage() {
     return (
         <div className="sacrament-page">
-            <SacramentHero title="Baptism" subtitle="Preparation and reception of Baptism in Cathedral parish" image={baptismHero} />
+            <SacramentHero title="Baptism" subtitle="Preparation and reception of Baptism in Cathedral parish" image={siteImageUrl('assets/baptism-hero.jpg')} />
             <SacramentIntro title="Sacrament of New Life" text="Baptism is the foundation of Christian life and the gateway to the other sacraments. Cathedral parish offers preparation for infants, children, young people, and adults according to age and circumstance." />
             <SacramentInfoCards cards={baptismCards} />
             <SacramentSteps title="How Baptism Is Arranged" steps={baptismSteps} />

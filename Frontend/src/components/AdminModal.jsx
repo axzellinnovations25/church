@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export default function AdminModal({ isOpen, onClose, title, subtitle, children }) {
+export default function AdminModal({ isOpen, onClose, title, subtitle, actions, children }) {
   const modalRef = useRef(null)
 
   useEffect(() => {
@@ -38,9 +38,12 @@ export default function AdminModal({ isOpen, onClose, title, subtitle, children 
             <h2>{title}</h2>
             {subtitle && <p>{subtitle}</p>}
           </div>
-          <button className="admin-modal-close" onClick={onClose} aria-label="Close modal">
-            &times;
-          </button>
+          <div className="admin-modal-head-actions">
+            {actions}
+            <button className="admin-modal-close" onClick={onClose} aria-label="Close modal">
+              &times;
+            </button>
+          </div>
         </div>
         <div className="admin-modal-body">
           {children}

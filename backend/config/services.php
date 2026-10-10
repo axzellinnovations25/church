@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'supabase_storage' => [
+        'url' => env('SUPABASE_STORAGE_URL'),
+        'key' => env('SUPABASE_STORAGE_SERVICE_KEY'),
+        'bucket' => env('SUPABASE_STORAGE_BUCKET', 'cathedral-images'),
+    ],
+
 ];

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import PageHero from '../components/PageHero'
+import { siteImageUrl } from '../lib/siteImages'
 import './UsefulLinksPage.css'
 
 const categories = [
@@ -53,7 +54,7 @@ export default function UsefulLinksPage() {
                         <div className="links-feature-card">
                             <img
                                 className="links-feature-image"
-                                src="/leadership/bishop-peter.jfif"
+                                src={siteImageUrl('leadership/bishop-peter.jfif')}
                                 alt="Bishop Peter Brignall"
                             />
                             <h2 className="links-feature-title">Diocese of Wrexham</h2>

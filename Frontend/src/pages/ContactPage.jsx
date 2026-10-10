@@ -5,11 +5,10 @@ import FeedbackDialog from '../components/FeedbackDialog'
 import PageHero from '../components/PageHero'
 import { getBackendUrl } from '../lib/auth'
 import { publicQueries } from '../lib/publicData'
+import { siteImageUrl } from '../lib/siteImages'
 import { capitalizeFirst, titleCaseWords } from '../lib/textFormat'
 import { firstError, hasErrors, requireField, validateEmail, validateMaxLength, validateNameText, validatePhone } from '../lib/validation'
 import './ContactPage.css'
-
-const publicAsset = (path) => encodeURI(`${import.meta.env.BASE_URL}${path}`)
 
 const categoryOptions = [
     { value: '', label: 'Select enquiry type' },
@@ -222,7 +221,7 @@ export default function ContactPage() {
                                 For more directions via Google Maps, please <a href="https://goo.gl/maps/8nN7F1H1R3J2" target="_blank" rel="noopener noreferrer" className="click-here-link">click here</a>.
                             </p>
                             <div className="contact-photo-wrap">
-                                <img src={publicAsset('gallery/IMG_4301.jpeg')} alt="Entrance to St Mary's Cathedral" />
+                                <img src={siteImageUrl('gallery/IMG_4301.jpeg')} alt="Entrance to St Mary's Cathedral" />
                             </div>
                         </div>
                     </div>
