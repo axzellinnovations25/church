@@ -20,15 +20,6 @@ class NewsletterTest extends TestCase
         );
     }
 
-    protected function tearDown(): void
-    {
-        foreach (glob(storage_path('app/private/newsletters/*.pdf')) ?: [] as $path) {
-            @unlink($path);
-        }
-
-        parent::tearDown();
-    }
-
     public function test_admin_can_upload_a_newsletter_pdf(): void
     {
         $user = User::factory()->create(['is_main_admin' => true]);
@@ -47,11 +38,11 @@ class NewsletterTest extends TestCase
 
         $newsletter = Newsletter::first();
         $this->assertNotNull($newsletter);
-        $this->assertFileExists(storage_path("app/private/{$newsletter->file_path}"));
-        $this->assertNotNull($newsletter->file_contents);
+        $this->assertTrue($this->hasSupabaseObject($newsletter->file_path));
+        $this->assertNull($newsletter->file_contents);
     }
 
-    public function test_published_newsletter_remains_public_when_local_pdf_is_lost(): void
+    public function test_published_newsletter_is_served_from_supabase(): void
     {
         $user = User::factory()->create(['is_main_admin' => true]);
         $pdfContents = "%PDF-1.4\ndurable newsletter\n%%EOF";
@@ -64,7 +55,7 @@ class NewsletterTest extends TestCase
         ])->assertCreated();
 
         $newsletter = Newsletter::firstOrFail();
-        @unlink(storage_path("app/private/{$newsletter->file_path}"));
+        $this->assertSame($pdfContents, $this->supabaseObjects[$newsletter->file_path]);
 
         $this->getJson('/api/v1/newsletters')
             ->assertOk()
@@ -96,8 +87,10 @@ class NewsletterTest extends TestCase
         $migration->up();
 
         $newsletter->refresh();
-        $pdfContents = $newsletter->pdfContents();
-        $this->assertNotNull($newsletter->file_contents);
+        $this->artisan('storage:migrate-newsletters')->assertExitCode(0);
+        $newsletter->refresh();
+        $pdfContents = $this->supabaseObjects[$newsletter->file_path];
+        $this->assertNull($newsletter->file_contents);
         $this->assertStringStartsWith('%PDF-1.4', $pdfContents);
         $this->assertMatchesRegularExpression('/startxref\n(\d+)\n%%EOF\n$/', $pdfContents);
         preg_match('/startxref\n(\d+)\n%%EOF\n$/', $pdfContents, $xrefMatch);
@@ -133,13 +126,7 @@ class NewsletterTest extends TestCase
 
     public function test_public_newsletter_api_only_returns_published_newsletters(): void
     {
-        $directory = storage_path('app/private/newsletters');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        file_put_contents(storage_path('app/private/newsletters/published.pdf'), 'PDF content');
+        $this->putSupabaseObject('newsletters/published.pdf', '%PDF-1.4 published');
 
         Newsletter::create([
             'title' => 'Published Newsletter',
@@ -173,13 +160,7 @@ class NewsletterTest extends TestCase
     {
         $user = User::factory()->create(['is_main_admin' => true]);
 
-        $directory = storage_path('app/private/newsletters');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        file_put_contents(storage_path('app/private/newsletters/original.pdf'), 'PDF content');
+        $this->putSupabaseObject('newsletters/original.pdf', '%PDF-1.4 original');
 
         $newsletter = Newsletter::create([
             'title' => 'Original Title',
@@ -204,18 +185,13 @@ class NewsletterTest extends TestCase
             'title' => 'Updated Title',
             'file_path' => 'newsletters/original.pdf',
         ]);
-        $this->assertFileExists(storage_path('app/private/newsletters/original.pdf'));
+        $this->assertTrue($this->hasSupabaseObject('newsletters/original.pdf'));
     }
 
     public function test_successful_pdf_replacement_commits_new_file_before_removing_old_file(): void
     {
         $user = User::factory()->create(['is_main_admin' => true]);
-        $directory = storage_path('app/private/newsletters');
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-        $oldPath = storage_path('app/private/newsletters/replace-old.pdf');
-        file_put_contents($oldPath, '%PDF-1.4 old');
+        $this->putSupabaseObject('newsletters/replace-old.pdf', '%PDF-1.4 old');
         $newsletter = Newsletter::create([
             'title' => 'Replace Me', 'publication_date' => '2026-04-05',
             'status' => 'draft', 'file_path' => 'newsletters/replace-old.pdf',
@@ -230,7 +206,8 @@ class NewsletterTest extends TestCase
 
         $newsletter->refresh();
         $this->assertNotSame('newsletters/replace-old.pdf', $newsletter->file_path);
-        $this->assertFileDoesNotExist($oldPath);
-        $this->assertFileExists(storage_path('app/private/'.$newsletter->file_path));
+        $this->assertFalse($this->hasSupabaseObject('newsletters/replace-old.pdf'));
+        $this->assertTrue($this->hasSupabaseObject($newsletter->file_path));
+        $this->assertNull($newsletter->file_contents);
     }
 }

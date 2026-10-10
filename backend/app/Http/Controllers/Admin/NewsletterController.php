@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\NewsletterRequest;
 use App\Http\Resources\NewsletterResource;
 use App\Models\Newsletter;
+use App\Support\SupabaseStorage;
 use Illuminate\Http\Request;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Throwable;
 
 class NewsletterController extends Controller
@@ -139,32 +139,11 @@ class NewsletterController extends Controller
     private function storePdf(NewsletterRequest $request): array
     {
         $file = $request->file('pdf');
-        $contents = file_get_contents($file->getRealPath());
-
-        if ($contents === false) {
-            abort(422, 'The newsletter PDF could not be read.');
-        }
-
-        $filename = now()->format('YmdHis').'-'.Str::uuid().'.pdf';
-        $path = "newsletters/{$filename}";
-        $directory = storage_path('app/private/newsletters');
-        $destination = storage_path("app/private/{$path}");
-
-        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
-            abort(500, 'The newsletter storage directory could not be created.');
-        }
-
-        if (! is_writable($directory) || ! copy($file->getRealPath(), $destination)) {
-            if (is_file($destination)) {
-                unlink($destination);
-            }
-
-            abort(500, 'The newsletter PDF could not be stored.');
-        }
+        $path = SupabaseStorage::store($file, 'newsletters');
 
         return [
             'file_path' => $path,
-            'file_contents' => base64_encode($contents),
+            'file_contents' => null,
             'original_filename' => $file->getClientOriginalName(),
             'file_size' => $file->getSize() ?: 0,
         ];
@@ -176,10 +155,6 @@ class NewsletterController extends Controller
             return;
         }
 
-        $fullPath = storage_path("app/private/{$path}");
-
-        if (is_file($fullPath)) {
-            unlink($fullPath);
-        }
+        SupabaseStorage::delete($path);
     }
 }

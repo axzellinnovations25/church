@@ -20,15 +20,6 @@ class ParishCouncilMemberManagementTest extends TestCase
         );
     }
 
-    protected function tearDown(): void
-    {
-        foreach (glob(storage_path('app/private/parish-council-members/*')) ?: [] as $path) {
-            @unlink($path);
-        }
-
-        parent::tearDown();
-    }
-
     public function test_main_admin_can_create_a_parish_council_member(): void
     {
         $admin = User::factory()->create([
@@ -51,7 +42,7 @@ class ParishCouncilMemberManagementTest extends TestCase
 
         $member = ParishCouncilMember::first();
         $this->assertNotNull($member);
-        $this->assertFileExists(storage_path("app/private/{$member->photo_path}"));
+        $this->assertTrue($this->hasSupabaseObject($member->photo_path));
 
         $this->get("/api/v1/parish-council-members/{$member->id}/photo")
             ->assertOk()
@@ -64,16 +55,7 @@ class ParishCouncilMemberManagementTest extends TestCase
             'is_main_admin' => true,
         ]);
 
-        $directory = storage_path('app/private/parish-council-members');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        file_put_contents(
-            storage_path('app/private/parish-council-members/hidden.png'),
-            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9pR4H8sAAAAASUVORK5CYII=')
-        );
+        $this->putSupabaseObject('parish-council-members/hidden.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9pR4H8sAAAAASUVORK5CYII='));
 
         $member = ParishCouncilMember::create([
             'name' => 'Hidden Member',
@@ -99,13 +81,7 @@ class ParishCouncilMemberManagementTest extends TestCase
             'is_main_admin' => true,
         ]);
 
-        $directory = storage_path('app/private/parish-council-members');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        file_put_contents(storage_path('app/private/parish-council-members/original.jpg'), 'image');
+        $this->putSupabaseObject('parish-council-members/original.jpg', 'image');
 
         $member = ParishCouncilMember::create([
             'name' => 'John Davies',
@@ -144,7 +120,7 @@ class ParishCouncilMemberManagementTest extends TestCase
         $this->assertDatabaseMissing(ParishCouncilMember::class, [
             'id' => $member->id,
         ]);
-        $this->assertFileDoesNotExist(storage_path('app/private/parish-council-members/original.jpg'));
+        $this->assertFalse($this->hasSupabaseObject('parish-council-members/original.jpg'));
     }
 
     public function test_non_main_admin_cannot_manage_parish_council_members(): void

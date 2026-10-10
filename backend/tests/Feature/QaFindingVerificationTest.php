@@ -149,6 +149,7 @@ class QaFindingVerificationTest extends TestCase
 
     public function test_due_newsletter_draft_is_published_during_public_read(): void
     {
+        $this->putSupabaseObject('newsletters/missing.pdf', '%PDF-1.4 qa');
         $newsletter = Newsletter::create([
             'title' => 'Due Bulletin', 'publication_date' => now()->toDateString(),
             'status' => 'draft', 'file_path' => 'newsletters/missing.pdf',
@@ -162,6 +163,7 @@ class QaFindingVerificationTest extends TestCase
     public function test_future_newsletter_stays_private_then_publishes_on_due_read(): void
     {
         $this->travelTo(now()->startOfDay());
+        $this->putSupabaseObject('newsletters/not-on-disk.pdf', '%PDF-1.4 next');
         $newsletter = Newsletter::create([
             'title' => 'Next Bulletin', 'publication_date' => now()->addDay()->toDateString(),
             'status' => 'draft', 'file_path' => 'newsletters/not-on-disk.pdf',

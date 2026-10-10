@@ -46,13 +46,7 @@ class PublicApiTest extends TestCase
 
     public function test_public_event_image_route_serves_uploaded_poster_for_published_events(): void
     {
-        $directory = storage_path('app/private/events');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        file_put_contents(storage_path('app/private/events/published-event.png'), base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9pR4H8sAAAAASUVORK5CYII='));
+        $this->putSupabaseObject('events/published-event.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9pR4H8sAAAAASUVORK5CYII='));
 
         $event = Event::create([
             'title' => 'Published Event With Image',

@@ -20,15 +20,6 @@ class AdminEventManagementTest extends TestCase
         );
     }
 
-    protected function tearDown(): void
-    {
-        foreach (glob(storage_path('app/private/events/*')) ?: [] as $path) {
-            @unlink($path);
-        }
-
-        parent::tearDown();
-    }
-
     public function test_main_admin_can_create_update_and_delete_an_event_with_an_uploaded_image(): void
     {
         $admin = User::factory()->create([
@@ -54,7 +45,7 @@ class AdminEventManagementTest extends TestCase
         $event = Event::first();
         $this->assertNotNull($event);
         $this->assertNotNull($event->image_path);
-        $this->assertFileExists(storage_path("app/private/{$event->image_path}"));
+        $this->assertTrue($this->hasSupabaseObject($event->image_path));
 
         $originalImagePath = $event->image_path;
 
@@ -77,8 +68,8 @@ class AdminEventManagementTest extends TestCase
 
         $event->refresh();
         $this->assertNotSame($originalImagePath, $event->image_path);
-        $this->assertFileDoesNotExist(storage_path("app/private/{$originalImagePath}"));
-        $this->assertFileExists(storage_path("app/private/{$event->image_path}"));
+        $this->assertFalse($this->hasSupabaseObject($originalImagePath));
+        $this->assertTrue($this->hasSupabaseObject($event->image_path));
 
         $deleteResponse = $this->actingAs($admin)->deleteJson("/admin/events/{$event->id}");
 
@@ -86,7 +77,7 @@ class AdminEventManagementTest extends TestCase
         $this->assertDatabaseMissing('events', [
             'id' => $event->id,
         ]);
-        $this->assertFileDoesNotExist(storage_path("app/private/{$event->image_path}"));
+        $this->assertFalse($this->hasSupabaseObject($event->image_path));
     }
 
     public function test_event_validation_rejects_titles_and_descriptions_that_exceed_word_limits(): void

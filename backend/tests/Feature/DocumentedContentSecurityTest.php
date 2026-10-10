@@ -28,12 +28,7 @@ class DocumentedContentSecurityTest extends TestCase
 
     private function writePrivateFile(string $path, string $contents): void
     {
-        $fullPath = storage_path('app/private/'.$path);
-        $directory = dirname($fullPath);
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-        file_put_contents($fullPath, $contents);
+        $this->putSupabaseObject($path, $contents);
     }
 
     private function pngUpload(string $name): UploadedFile
@@ -61,19 +56,18 @@ class DocumentedContentSecurityTest extends TestCase
         ], ['Accept' => 'application/json'])->assertCreated()->json('newsletter.id');
 
         $newsletter = Newsletter::findOrFail($id);
-        $this->assertFileExists(storage_path('app/private/'.$newsletter->file_path));
-        $this->assertNotNull($newsletter->file_contents);
+        $this->assertTrue($this->hasSupabaseObject($newsletter->file_path));
+        $this->assertNull($newsletter->file_contents);
         $this->assertDatabaseHas('audit_logs', ['action' => 'created newsletter', 'subject_id' => $id]);
         $this->get('/newsletters/'.$id.'/view')->assertOk()
-            ->assertHeader('content-disposition', 'inline; filename="weekly.pdf"');
+            ->assertHeader('content-disposition', 'inline; filename=weekly.pdf');
         $this->get('/newsletters/'.$id.'/download')->assertOk()->assertDownload('weekly.pdf');
     }
 
     public function test_nwl_tc_002_invalid_pdf_date_and_required_fields_leave_no_orphans(): void
     {
         $this->mainAdmin();
-        $directory = storage_path('app/private/newsletters');
-        $before = is_dir($directory) ? glob($directory.'/*') : [];
+        $before = $this->supabaseObjects;
 
         $this->post('/admin/newsletters', [
             'title' => '',
@@ -84,7 +78,7 @@ class DocumentedContentSecurityTest extends TestCase
             ->assertUnprocessable()->assertJsonValidationErrors(['title', 'status', 'pdf']);
 
         $this->assertDatabaseCount(Newsletter::class, 0);
-        $after = is_dir($directory) ? glob($directory.'/*') : [];
+        $after = $this->supabaseObjects;
         $this->assertSame($before, $after);
     }
 
@@ -136,8 +130,8 @@ class DocumentedContentSecurityTest extends TestCase
         $this->assertSame('Replacement Edition', $updated->title);
         $this->assertSame('replacement.pdf', $updated->original_filename);
         $this->assertNotSame($oldPath, $updated->file_path);
-        $this->assertFileDoesNotExist(storage_path('app/private/'.$oldPath));
-        $this->assertFileExists(storage_path('app/private/'.$updated->file_path));
+        $this->assertFalse($this->hasSupabaseObject($oldPath));
+        $this->assertTrue($this->hasSupabaseObject($updated->file_path));
         $this->getJson('/admin/newsletters/999999/edit')->assertNotFound();
         $this->postJson('/admin/newsletters/999999', [
             'title' => 'Missing', 'publication_date' => now()->toDateString(), 'status' => 'draft',
@@ -165,10 +159,12 @@ class DocumentedContentSecurityTest extends TestCase
             'file_size' => strlen($pdf),
             'status' => 'draft',
         ]);
+        $this->putSupabaseObject($published->file_path, $pdf);
+        $this->putSupabaseObject($future->file_path, $pdf);
 
         $this->get('/newsletters/'.$published->id.'/view')->assertOk()
             ->assertHeader('content-type', 'application/pdf')
-            ->assertHeader('content-disposition', 'inline; filename="published.pdf"');
+            ->assertHeader('content-disposition', 'inline; filename=published.pdf');
         $this->get('/newsletters/'.$published->id.'/download')->assertOk()
             ->assertHeader('content-type', 'application/pdf')
             ->assertDownload('published.pdf');

@@ -164,14 +164,11 @@ class AdminRegressionTest extends TestCase
 
     public function test_draft_files_are_not_available_to_unassigned_users(): void
     {
-        $directory = storage_path('app/private');
-        if (!is_dir($directory)) mkdir($directory, 0755, true);
-        $file = tempnam($directory, 'permission-test-');
-        file_put_contents($file, 'private file');
-        try {
-            $event = Event::create($this->eventData(['status' => 'draft', 'image_path' => basename($file)]));
-            $newsletter = Newsletter::create(['title' => 'Future issue', 'publication_date' => '2026-10-10',
-                'status' => 'draft', 'file_path' => basename($file), 'original_filename' => 'issue.pdf', 'file_size' => 12]);
+        $this->putSupabaseObject('events/permission-test.png', 'private image');
+        $this->putSupabaseObject('newsletters/permission-test.pdf', '%PDF-1.4 private');
+        $event = Event::create($this->eventData(['status' => 'draft', 'image_path' => 'events/permission-test.png']));
+        $newsletter = Newsletter::create(['title' => 'Future issue', 'publication_date' => now()->addDay()->toDateString(),
+                'status' => 'draft', 'file_path' => 'newsletters/permission-test.pdf', 'original_filename' => 'issue.pdf', 'file_size' => 12]);
             $user = User::factory()->create(['is_main_admin' => false]);
             $this->actingAs($user);
             $this->get('/events/'.$event->id.'/image')->assertNotFound();
@@ -181,8 +178,5 @@ class AdminRegressionTest extends TestCase
             $this->get('/events/'.$event->id.'/image')->assertOk();
             $this->get('/api/v1/events/'.$event->id.'/image')->assertOk();
             $this->get('/newsletters/'.$newsletter->id.'/view')->assertOk();
-        } finally {
-            unlink($file);
-        }
     }
 }

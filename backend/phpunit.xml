@@ -28,6 +28,9 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="SUPABASE_STORAGE_URL" value="https://storage.example.test" force="true"/>
+        <env name="SUPABASE_STORAGE_BUCKET" value="cathedral-images" force="true"/>
+        <env name="SUPABASE_STORAGE_SERVICE_KEY" value="test-service-key" force="true"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
