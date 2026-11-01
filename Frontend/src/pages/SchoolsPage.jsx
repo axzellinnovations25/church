@@ -2,7 +2,7 @@ import PageHero from '../components/PageHero'
 
 const schools = [
     { title: "St Mary's Catholic Primary School", text: 'Website: https://stmarys-wrexham.co.uk. Telephone: 01978 352406. Please follow the school website for admissions procedures and current guidance.' },
-    { title: "St Joseph's Catholic and Anglican High School", text: 'Website: https://stjosephs.wales. Please follow the school website for admissions procedures and current guidance.' },
+    { title: "St Joseph's Catholic and Anglican High School", text: 'Website: https://stjosephs.wales. Telephone: 01978 360310. Please follow the school website for admissions procedures and current guidance.' },
 ]
 
 export default function SchoolsPage() {

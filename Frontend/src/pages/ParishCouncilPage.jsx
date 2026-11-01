@@ -40,10 +40,10 @@ export default function ParishCouncilPage() {
                     <div className="content-card">
                         <h3>Community Involvement</h3>
                         <p>
-                            The PPC Community Group is dedicated to fostering a safe and respectful environment for all individuals and communities within the parish. It provides a platform for sharing experiences, interests, and concerns related to life in Wrexham.
+                            We are active members of the North Wales Interfaith Group and the North Wales Multicultural Hub, supported by the Community Cohesion Team of WCBC. We are members of TCC (Together Creating Communities), and our Youth Group is supported by TCC and the EGIN Environmental Trust.
                         </p>
                         <p>
-                            It also promotes integration, cohesion, equality, culture, and social justice through collaboration with other organisations and community groups.
+                            Being linked with these organisations provides a platform for sharing experiences, interests, and concerns related to life in Wrexham. We are also supporting the Wrexham City of Culture 2029 bid.
                         </p>
                     </div>
                     <div className="content-card">

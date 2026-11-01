@@ -12,7 +12,7 @@ const publicAsset = (path) => encodeURI(`${import.meta.env.BASE_URL}${path}`)
 
 const heroSlides = [
   {
-    image: [siteImageUrl('gallery/hero-interior.jpg'), siteImageUrl('image 01.jpg')],
+    image: [siteImageUrl('cathedral-photo.png')],
     label: 'MASS TIMES',
     title: 'Join Us For Worship',
     desc: "Find weekday and weekend Mass times at St Mary's Cathedral and the Church of the Holy Family, Coedpoeth.",

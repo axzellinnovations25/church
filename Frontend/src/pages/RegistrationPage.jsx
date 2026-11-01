@@ -439,7 +439,7 @@ export default function RegistrationPage() {
                             </div>
                             <div className="form-group">
                                 <label>Postcode <span className="required">*</span></label>
-                                <input type="text" className="form-input" placeholder="e.g. LL11 1RR" required name="postcode" onChange={handleChange} onBlur={event => formatFieldValue(event, value => value.toUpperCase())} aria-invalid={Boolean(formErrors.postcode)} />
+                                <input type="text" className="form-input" placeholder="e.g. LL11 1RB" required name="postcode" onChange={handleChange} onBlur={event => formatFieldValue(event, value => value.toUpperCase())} aria-invalid={Boolean(formErrors.postcode)} />
                                 <FieldError errors={formErrors} name="postcode" />
                             </div>
                         </div>

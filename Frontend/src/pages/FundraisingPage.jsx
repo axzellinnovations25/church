@@ -5,13 +5,14 @@ const fundraisingActivities = [
     { icon: 'EV', title: 'Fundraising Events', content: 'Parish fundraising includes the Summer Garden Party, Christmas Fayre, Christmas Hamper Raffle, cake sales, concerts, exhibitions, and other social events.' },
     { icon: 'ID', title: 'Committee And Parish Ideas', content: 'Parishioners are invited to join the fundraising committee, share ideas, or plan their own fundraising events.' },
     { icon: 'EF', title: 'EasyFundraising', content: 'Online shopping through EasyFundraising can generate extra support for the Cathedral through participating retailers.' },
-    { icon: 'CG', title: 'Creative Giving', content: 'Other ideas in the parish material include standing orders, Gift Aid, legacies, hall hire, visitor donations, collections, and resale schemes.' },
+    { icon: 'CG', title: 'Creative Fundraising', content: 'Other ways to boost funds include Gift Aid, Easyfundraising, GoFundMe, Vintage Cash Cow, Sell Your Books, hall hire, visitor donations, collections, and resale schemes.' },
+    { icon: 'LW', title: 'Legacies in Wills', content: 'A legacy in your will can help sustain worship, parish life, and the Cathedral for future generations. Please contact the parish office for a confidential conversation.' },
 ]
 
 export default function FundraisingPage() {
     return (
         <div className="parish-page">
-            <ParishHero title="Fundraising" subtitle="Supporting our parish mission and outreach together" image="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=1600" breadcrumb="Fundraising" />
+            <ParishHero title="Fundraising and Income Generation" subtitle="Supporting our parish mission and outreach together" image="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=1600" breadcrumb="Fundraising" />
             <ParishIntro title="Building a Legacy of Care" text="The mission of St Mary's Cathedral depends on the generosity and collaborative spirit of parishioners. Every pound raised helps support worship, community life, maintenance, and the future of this historic Cathedral site." />
             <ParishInfoCards cards={fundraisingActivities} columns={2} />
 

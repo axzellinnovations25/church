@@ -5,10 +5,10 @@ export default function TopBar() {
         <div className="topbar">
             <div className="container topbar-inner">
                 <div className="topbar-left">
-                    <span>📍 Regent Street, Wrexham, LL11 1RR</span>
+                    <span>📍 Regent Street, Wrexham, LL11 1RB</span>
                 </div>
                 <div className="topbar-right">
-                    <a href="tel:01978262826" className="topbar-link">📞 01978 262 826</a>
+                    <a href="tel:01978263943" className="topbar-link">📞 01978 263943</a>
                     <span className="topbar-divider">|</span>
                     <a href="mailto:secretarywrexhamcathedral@rcdwxm.org.uk" className="topbar-link">✉ secretarywrexhamcathedral@rcdwxm.org.uk</a>
                 </div>

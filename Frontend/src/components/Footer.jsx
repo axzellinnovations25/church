@@ -30,11 +30,11 @@ export default function Footer() {
                     <ul className="footer-list">
                         <li>
                             <span className="footer-icon">📍</span>
-                            <span>Regent Street<br />Wrexham<br />LL11 1RR</span>
+                            <span>St Mary's Cathedral<br />Regent Street<br />Wrexham, LL11 1RB</span>
                         </li>
                         <li>
                             <span className="footer-icon">📞</span>
-                            <a href="tel:01978262826">01978 262 826</a>
+                            <a href="tel:01978263943">01978 263943</a>
                         </li>
                         <li>
                             <span className="footer-icon">✉</span>

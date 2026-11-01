@@ -21,6 +21,9 @@ const fallbackCards = [
     title: 'Youth and Young Adults',
     content: 'Children, teenagers, and young adults can find formation, friendship, and support through parish life.',
   },
+  { icon: 'Serve', title: 'SVP and Pastoral Care', content: 'Support parishioners and neighbours through practical care, visits, and outreach.' },
+  { icon: 'Music', title: 'Choir, Readers and Altar Servers', content: 'Help lead worship through music, proclamation, serving, and liturgical ministry.' },
+  { icon: 'Help', title: 'Hospitality, Maintenance and Safety', content: 'Welcome visitors and help care for the Cathedral through hospitality, gardening, cleaning, building, maintenance, and safety.' },
 ]
 
 export default function ParishGroupsPage() {
@@ -63,7 +66,7 @@ export default function ParishGroupsPage() {
 
       <section className="section" style={{ background: '#fcfaf6' }}>
         <div className="container">
-          <h2 className="section-title">Group Highlights</h2>
+          <h2 className="section-title">Ways to Serve and Connect</h2>
           <p className="section-subtitle">
             {isLoading
               ? 'Loading active parish groups...'
@@ -74,13 +77,13 @@ export default function ParishGroupsPage() {
 
           <div className="content-grid" style={{ marginTop: '40px' }}>
             <div className="content-card">
-              <h3>How groups work</h3>
-              <p>Each active parish group can now be managed from the admin dashboard, including its assigned admin and member list. Public enquiries are routed through the contact form so the right people can respond.</p>
+              <h3>Our parish groups</h3>
+              <p>Our groups include Spiritual Formation, Community Cohesion, Prayer Groups, Youth Group, SVP, Extraordinary Ministers, Choir, Altar Servers, Readers, Cleaning Teams, Gardeners, Hospitality Volunteers, Building and Maintenance, Safety and Security, Fundraising, Catechists, and Tour Guides.</p>
             </div>
 
             <div className="content-card">
               <h3>Joining a group</h3>
-              <p>Choose a group that interests you, then use its join page to send a structured registration enquiry. Group-join requests are routed to the correct parish team automatically.</p>
+              <p>Choose “Join Group” and tell us which group you would like to join or learn more about. Your enquiry will be routed to the right parish team.</p>
             </div>
 
             <div className="content-card">

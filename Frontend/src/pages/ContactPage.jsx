@@ -26,6 +26,7 @@ const categoryOptions = [
     { value: 'newsletter', label: 'Newsletter / Communications', hint: 'Questions about the parish newsletter or updates.' },
     { value: 'safeguarding', label: 'Safeguarding', hint: 'Safeguarding concerns or requests for the safeguarding team.' },
     { value: 'cathedral_hire', label: 'Cathedral Hire / Facilities', hint: 'Venue, facility, or hire-related enquiries.' },
+    { value: 'cathedral_tours', label: 'Cathedral Tours', hint: 'Questions about visiting or arranging a Cathedral tour.' },
     { value: 'donations', label: 'Donations / Fundraising', hint: 'Giving, donations, fundraising, or support enquiries.' },
     { value: 'schools', label: 'Schools / Education', hint: 'School links, education, or children and family-related enquiries.' },
     { value: 'group_join', label: 'Join a Group', hint: 'Choose this if you want your message routed to a parish group.' },
@@ -247,6 +248,21 @@ export default function ContactPage() {
                                 <strong>Office hours</strong>
                                 <small>Tue, Wed, Fri: 9:30 AM - 2:30 PM</small>
                             </span>
+                        </div>
+                    </div>
+                    <div className="contact-coedpoeth-map" style={{ marginTop: '32px' }}>
+                        <p className="contact-kicker">Our Parish Community</p>
+                        <h2>Church of the Holy Family, Coedpoeth</h2>
+                        <div className="contact-map-wrapper" style={{ height: '300px', marginTop: '16px' }}>
+                            <iframe
+                                title="Church of the Holy Family Coedpoeth location"
+                                src="https://www.google.com/maps?q=Church+of+the+Holy+Family+Coedpoeth&output=embed"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                allowFullScreen=""
+                                loading="lazy"
+                            ></iframe>
                         </div>
                     </div>
                 </div>

@@ -40,7 +40,7 @@ export default function DiocesePage() {
         {
             icon: 'PC',
             title: 'Parish Pastoral Council',
-            content: 'The PPC supports building, finance, formation, pastoral care, communications, fundraising, community cohesion, and youth ministry.',
+            content: 'The Pastoral Parish Council supports building, finance, formation, pastoral care, communications, fundraising, community cohesion, and youth ministry.',
             link: '/parish-council'
         },
         {
@@ -62,7 +62,7 @@ export default function DiocesePage() {
 
             <ParishIntro
                 title="About the Diocese"
-                text="The Diocese of Wrexham serves Catholic communities across North Wales. St Mary's Cathedral is the mother church of the diocese and the episcopal seat of Bishop Peter Brignall. Cathedral life is supported by Fr Nicolas Enzama, Deacons Michael Schoonjans and Steve Davies, the Sisters of the Holy Family Convent, and the wider parish community."
+                text="The Diocese of Wrexham serves Catholic communities across North Wales. St Mary's Cathedral is the mother church of the diocese and the episcopal seat of Bishop Peter Brignall. Cathedral life is supported by Canon Nicholas Enzama, Deacons Michael Schoonjans and Steve Davies, the Sisters of the Holy Family Convent, and the wider parish community."
             />
 
             <section className="bishop-section">

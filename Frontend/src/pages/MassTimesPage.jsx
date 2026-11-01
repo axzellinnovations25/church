@@ -7,8 +7,7 @@ import './MassTimesPage.css'
 
 const confessionTimes = [
     'Saturday: 10.30am to 11.30am',
-    'Saturday: 5.00pm to 6.00pm',
-    'Extra services of Reconciliation during Lent are announced in the newsletter',
+    'Additional confession times, including seasonal evening services, are announced in the weekly newsletter',
 ]
 
 const sacramentCards = [
@@ -29,7 +28,7 @@ const prayerSchedule = [
 
 export default function MassTimesPage() {
     const { data: massTimes = [] } = useQuery(publicQueries.massTimes)
-    const [locationFilter, setLocationFilter] = useState('all')
+    const [locationFilter, setLocationFilter] = useState('cathedral')
 
     const normalized = massTimes
         .map(item => ({
@@ -72,9 +71,6 @@ export default function MassTimesPage() {
                     <p className="section-subtitle">Please check the weekly newsletter for weekday updates and seasonal notices</p>
 
                     <div className="mt-filter-bar" role="tablist" aria-label="Filter mass times by location">
-                        <button type="button" className={`mt-filter-tab ${locationFilter === 'all' ? 'active' : ''}`} onClick={() => setLocationFilter('all')}>
-                            All
-                        </button>
                         <button type="button" className={`mt-filter-tab ${locationFilter === 'cathedral' ? 'active' : ''}`} onClick={() => setLocationFilter('cathedral')}>
                             Cathedral
                         </button>

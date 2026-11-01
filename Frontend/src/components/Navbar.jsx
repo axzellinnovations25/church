@@ -30,7 +30,7 @@ const navItems = [
         label: 'Mass & Sacraments',
         path: '/mass-sacraments',
         children: [
-            { label: 'Mass & Sacraments', path: '/mass-sacraments' },
+            { label: 'Mass Times', path: '/mass-times' },
             { label: 'Baptism', path: '/baptism' },
             { label: 'First Holy Communion', path: '/first-holy-communion' },
             { label: 'Confirmation', path: '/confirmation' },

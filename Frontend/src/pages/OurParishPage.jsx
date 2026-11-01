@@ -39,7 +39,7 @@ export default function OurParishPage() {
             
             <ParishIntro 
                 title="Welcome to St Mary's Cathedral"
-                text="St Mary's Cathedral is more than just a magnificent building; it is a spiritual home for a diverse and welcoming community. Rooted in the Catholic faith, we strive to be a light for all through our worship, service, and commitment to love one another as Christ has loved us."
+                text="Welcome to our parish which consists of the Cathedral Church of Our Lady of Sorrows, known as St Mary's Cathedral, and the Church of the Holy Family, Coedpoeth. The Cathedral is both the mother church of the Diocese of Wrexham and a living parish community serving worship, formation, pastoral care, and outreach."
             />
 
             <ParishInfoCards cards={parishLifeCards} columns={4} />

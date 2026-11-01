@@ -15,7 +15,7 @@ const values = [
 
 const staff = [
     { role: 'Bishop of Wrexham', name: 'Bishop Peter Brignall', title: 'Diocesan Bishop', bio: 'Episcopal leadership for Catholic communities across North Wales.', image: siteImageUrl('leadership/bishop-peter-brignall.jpg') },
-    { role: 'Cathedral Dean', name: 'Fr Nicolas Enzama', title: 'Cathedral Dean and Parish Priest', bio: 'Pastoral leadership for the Cathedral parish and Coedpoeth.', image: siteImageUrl('leadership/fr-nicolas-enzama.jpg') },
+    { role: 'Cathedral Dean', name: 'Canon Nicholas Enzama', title: 'Cathedral Dean and Parish Priest', bio: 'Pastoral leadership for the Cathedral parish and Coedpoeth from 13 October 2026.', image: siteImageUrl('leadership/fr-nicolas-enzama.jpg') },
     { role: 'Permanent Deacons', name: 'Deacon Michael Schoonjans and Deacon Steve Davies', title: 'Serving Cathedral parish life and ministry', bio: 'Supporting liturgy, pastoral care, and parish outreach.', image: siteImageUrl('leadership/person-4.jpg') },
     { role: 'Religious Sisters', name: 'Sisters of the Holy Family and the Evangelising Sisters of Mary', title: 'Part of Cathedral parish life', bio: 'A longstanding presence of prayer, service, and community support.', image: siteImageUrl('leadership/person-6.jpg') },
 ]
@@ -34,7 +34,7 @@ const historyTimeline = [
     {
         date: '1857',
         title: "St Mary's Opens",
-        content: "Edward Welby Pugin's church on Regent Street opened on 19 November 1857, dedicated to Our Lady of Sorrows.",
+        content: "Edward Welby Pugin designed the church on Regent Street, which opened on 19 November 1857 and was dedicated to Our Lady of Sorrows. Richard Thompson funded the building, and the rose window was donated by his daughter. The original Wrexham Advertiser quotation will be added when the parish supplies the confirmed wording.",
     },
     {
         date: '1907–1987',
@@ -67,10 +67,7 @@ export default function AboutPage() {
                     <div className="history-text">
                         <h2 className="about-heading">Croeso / Welcome</h2>
                         <p>
-                            Welcome to the Wrexham Diocese Cathedral Church of Our Lady of Sorrows, St Mary&apos;s Cathedral, home to St Mary&apos;s Cathedral Parish and the Church of the Holy Family, Coedpoeth.
-                        </p>
-                        <p>
-                            St Mary&apos;s Cathedral is on Regent Street, Wrexham, LL11 1RB. Telephone: 01978 263943. Email: secretarywrexhamcathedral@rcdwxm.org.uk. Office hours are Tuesday, Wednesday, and Friday from 9.30am to 2.30pm.
+                            Welcome to our parish which consists of the Cathedral Church of Our Lady of Sorrows, known as St Mary&apos;s Cathedral, and the Church of the Holy Family, Coedpoeth.
                         </p>
                         <p>
                             The Cathedral is both the mother church of the Diocese of Wrexham and a living parish community serving worship, formation, pastoral care, and outreach.
@@ -114,7 +111,10 @@ export default function AboutPage() {
                         <div className="content-card">
                             <h3>Religious Communities</h3>
                             <p>
-                                The Sisters of the Holy Family Convent have been part of Cathedral parish life for more than 75 years. The PowerPoint also notes the 2025 welcome to the Missionary Congregation of the Evangelising Sisters of Mary.
+                                The Sisters of the Holy Family Convent have been part of the cathedral parish for over 75 years. Visit <a href="https://www.holyfamilybordeaux.org" target="_blank" rel="noopener noreferrer">holyfamilybordeaux.org</a> to learn more about their community. Sr Maria, Sr Celine and Sr Sheila serve alongside the parish.
+                            </p>
+                            <p>
+                                In 2025 the parish welcomed the Sisters from the Missionary Congregation of the Evangelising Sisters of Mary (MCESMM): Sr Triphosa, Sr Jacqueline and Sr Annalydia.
                             </p>
                             <p>
                                 Named sisters in the presentation include Sr Maria, Sr Celine, Sr Sheila, Sr Triphosa, Sr Jacqueline, and Sr Annlydia.
