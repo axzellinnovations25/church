@@ -80,6 +80,7 @@ function App() {
           <Route path="/parish" element={<OurParishPage />} />
           <Route path="/parish-council" element={<ParishCouncilPage />} />
           <Route path="/parish-groups" element={<ParishGroupsPage />} />
+          <Route path="/parish-groups/join" element={<GroupJoinPage />} />
           <Route path="/parish-groups/:groupSlug/join" element={<GroupJoinPage />} />
           <Route path="/building-project" element={<BuildingProjectPage />} />
           <Route path="/fundraising" element={<FundraisingPage />} />

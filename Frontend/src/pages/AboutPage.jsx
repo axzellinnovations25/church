@@ -16,7 +16,8 @@ const values = [
 const staff = [
     { role: 'Bishop of Wrexham', name: 'Bishop Peter Brignall', title: 'Diocesan Bishop', bio: 'Episcopal leadership for Catholic communities across North Wales.', image: siteImageUrl('leadership/bishop-peter-brignall.jpg') },
     { role: 'Cathedral Dean', name: 'Canon Nicholas Enzama', title: 'Cathedral Dean and Parish Priest', bio: 'Pastoral leadership for the Cathedral parish and Coedpoeth from 13 October 2026.', image: siteImageUrl('leadership/fr-nicolas-enzama.jpg') },
-    { role: 'Permanent Deacons', name: 'Deacon Michael Schoonjans and Deacon Steve Davies', title: 'Serving Cathedral parish life and ministry', bio: 'Supporting liturgy, pastoral care, and parish outreach.', image: siteImageUrl('leadership/person-4.jpg') },
+    { role: 'Permanent Deacon', name: 'Deacon Michael Schoonjans', title: 'Serving the Cathedral parish and Coedpoeth', bio: 'Supporting liturgy, pastoral care, and parish outreach.', initials: 'MS' },
+    { role: 'Permanent Deacon', name: 'Deacon Steve Davies', title: 'Serving the Cathedral parish and Coedpoeth', bio: 'Supporting liturgy, pastoral care, and parish outreach.', initials: 'SD' },
     { role: 'Religious Sisters', name: 'Sisters of the Holy Family and the Evangelising Sisters of Mary', title: 'Part of Cathedral parish life', bio: 'A longstanding presence of prayer, service, and community support.', image: siteImageUrl('leadership/person-6.jpg') },
 ]
 
@@ -72,15 +73,6 @@ export default function AboutPage() {
                         <p>
                             The Cathedral is both the mother church of the Diocese of Wrexham and a living parish community serving worship, formation, pastoral care, and outreach.
                         </p>
-                        <div className="about-contact-card">
-                            <div className="about-contact-kicker">Contact</div>
-                            <div className="about-contact-lines">
-                                <div><strong>Address</strong>: Regent Street, Wrexham, LL11 1RB</div>
-                                <div><strong>Phone</strong>: 01978 263943</div>
-                                <div><strong>Email</strong>: secretarywrexhamcathedral@rcdwxm.org.uk</div>
-                                <div><strong>Office hours</strong>: Tue/Wed/Fri, 9:30am–2:30pm</div>
-                            </div>
-                        </div>
                     </div>
                     <div className="history-image">
                         <img
@@ -94,11 +86,15 @@ export default function AboutPage() {
             <Section id="leadership" className="about-band">
                 <Container>
                     <h2 className="section-title">Cathedral Leadership</h2>
-                    <div className="grid-4" style={{ marginTop: '40px' }}>
+                    <div className="leadership-grid">
                         {staff.map((person) => (
-                            <div key={person.role} className="card staff-card">
+                            <div key={person.name} className="card staff-card">
                                 <div className="staff-avatar">
-                                    <img src={person.image} alt={person.name} loading="lazy" />
+                                    {person.image ? (
+                                        <img src={person.image} alt={person.name} loading="lazy" />
+                                    ) : (
+                                        <span className="staff-initials" aria-hidden="true">{person.initials}</span>
+                                    )}
                                 </div>
                                 <h3 className="staff-role">{person.role}</h3>
                                 <p className="staff-name">{person.name}</p>

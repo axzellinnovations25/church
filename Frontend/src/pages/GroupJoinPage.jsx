@@ -7,40 +7,86 @@ import { getBackendUrl } from '../lib/auth'
 import { publicQueries } from '../lib/publicData'
 import { firstError, hasErrors, requireField, validateEmail, validateMaxLength, validateNameText, validatePhone } from '../lib/validation'
 import './ContactPage.css'
+import './GroupJoinPage.css'
+
+const ministryNames = [
+  'Spiritual Formation',
+  'Community Cohesion',
+  'Prayer Groups',
+  'Youth Group',
+  'SVP',
+  'Extraordinary Ministers',
+  'Choir',
+  'Altar Servers',
+  'Readers',
+  'Cleaning Teams',
+  'Gardeners',
+  'Hospitality Volunteers',
+  'Building & Maintenance',
+  'Safety & Security',
+  'Fundraising Group',
+  'Catechists',
+  'Tour Guides',
+]
 
 const initialJoinForm = {
+  intent: 'join',
+  group_choice: '',
+  other_group: '',
   name: '',
   email: '',
   phone: '',
-  subject: '',
   message: '',
+}
+
+function normaliseName(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/st\.?\s+vincent\s+de\s+paul\s+society/g, 'svp')
+    .replace(/prayer\s+group/g, 'prayer groups')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
 }
 
 export default function GroupJoinPage() {
   const { groupSlug } = useParams()
   const navigate = useNavigate()
-  const { data: groups = [], isPending: isLoadingGroup } = useQuery(publicQueries.groups)
+  const { data: groups = [], isPending: isLoadingGroups } = useQuery(publicQueries.groups)
   const [joinForm, setJoinForm] = useState(initialJoinForm)
   const [joinErrors, setJoinErrors] = useState({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
 
-  const group = useMemo(
-    () => groups.find(item => item.slug === groupSlug) || null,
-    [groupSlug, groups],
-  )
+  const groupOptions = useMemo(() => {
+    const activeOptions = groups.map(group => ({
+      key: `active:${group.id}`,
+      name: group.name,
+      group,
+    }))
+    const activeNames = new Set(activeOptions.map(option => normaliseName(option.name)))
+    const additionalOptions = ministryNames
+      .filter(name => !activeNames.has(normaliseName(name)))
+      .map(name => ({ key: `ministry:${normaliseName(name)}`, name, group: null }))
+
+    return [...activeOptions, ...additionalOptions]
+      .sort((left, right) => left.name.localeCompare(right.name))
+  }, [groups])
+
+  const selectedOption = groupOptions.find(option => option.key === joinForm.group_choice) || null
+  const selectedName = joinForm.group_choice === 'other' ? joinForm.other_group.trim() : selectedOption?.name || ''
 
   useEffect(() => {
-    if (!group) {
+    if (!groupSlug || !groups.length) {
       return
     }
 
-    setJoinForm(current => ({
-      ...current,
-      subject: current.subject || `Joining ${group.name}`,
-    }))
-  }, [group])
+    const requestedGroup = groups.find(group => group.slug === groupSlug)
+    if (requestedGroup) {
+      setJoinForm(current => ({ ...current, group_choice: `active:${requestedGroup.id}` }))
+    }
+  }, [groupSlug, groups])
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -52,10 +98,12 @@ export default function GroupJoinPage() {
     } else if (name === 'email') {
       validateEmail(nextErrors, 'email', value)
     } else if (name === 'phone') {
-      validatePhone(nextErrors, 'phone', value)
-    } else if (name === 'subject') {
-      requireField(nextErrors, 'subject', value, 'Subject')
-      validateMaxLength(nextErrors, 'subject', value, 255, 'Subject')
+      validatePhone(nextErrors, 'phone', value, 'Phone number', true)
+    } else if (name === 'group_choice') {
+      requireField(nextErrors, 'group_choice', value, 'Group or ministry')
+    } else if (name === 'other_group') {
+      requireField(nextErrors, 'other_group', value, 'Group or ministry name')
+      validateMaxLength(nextErrors, 'other_group', value, 120, 'Group or ministry name')
     } else if (name === 'message') {
       requireField(nextErrors, 'message', value, 'Message')
       validateMaxLength(nextErrors, 'message', value, 5000, 'Message')
@@ -64,36 +112,31 @@ export default function GroupJoinPage() {
     setJoinForm(current => ({
       ...current,
       [name]: value,
+      ...(name === 'group_choice' && value !== 'other' ? { other_group: '' } : {}),
     }))
-    setJoinErrors(current => ({
-      ...current,
-      [name]: nextErrors[name],
-    }))
+    setJoinErrors(current => ({ ...current, [name]: nextErrors[name] }))
   }
 
   function validateForm() {
     const nextErrors = {}
-
     validateNameText(nextErrors, 'name', joinForm.name, 'Name', true)
     validateMaxLength(nextErrors, 'name', joinForm.name, 255, 'Name')
     validateEmail(nextErrors, 'email', joinForm.email)
-    validatePhone(nextErrors, 'phone', joinForm.phone)
-    requireField(nextErrors, 'subject', joinForm.subject, 'Subject')
-    validateMaxLength(nextErrors, 'subject', joinForm.subject, 255, 'Subject')
+    validatePhone(nextErrors, 'phone', joinForm.phone, 'Phone number', true)
+    requireField(nextErrors, 'group_choice', joinForm.group_choice, 'Group or ministry')
+
+    if (joinForm.group_choice === 'other') {
+      requireField(nextErrors, 'other_group', joinForm.other_group, 'Group or ministry name')
+      validateMaxLength(nextErrors, 'other_group', joinForm.other_group, 120, 'Group or ministry name')
+    }
+
     requireField(nextErrors, 'message', joinForm.message, 'Message')
     validateMaxLength(nextErrors, 'message', joinForm.message, 5000, 'Message')
-
     return nextErrors
   }
 
   async function handleSubmit(event) {
     event.preventDefault()
-
-    if (!group) {
-      setError('This parish group is not available for online joining right now.')
-      return
-    }
-
     const validationErrors = validateForm()
     setJoinErrors(validationErrors)
 
@@ -102,26 +145,33 @@ export default function GroupJoinPage() {
       return
     }
 
+    const activeGroup = selectedOption?.group || null
+    const isJoinRequest = joinForm.intent === 'join'
+    const subject = `${isJoinRequest ? 'Joining' : 'Enquiry about'} ${selectedName}`
+    const message = activeGroup
+      ? joinForm.message
+      : `Group or ministry: ${selectedName}\nRequest type: ${isJoinRequest ? 'Join the group' : 'More information'}\n\n${joinForm.message}`
+
     setLoading(true)
     setError('')
 
     try {
       const response = await fetch(getBackendUrl('/api/v1/contact'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
-          ...joinForm,
-          category: 'group_join',
-          group_id: group.id,
+          name: joinForm.name,
+          email: joinForm.email,
+          phone: joinForm.phone,
+          subject,
+          message,
+          category: activeGroup ? 'group_join' : 'general',
+          ...(activeGroup ? { group_id: activeGroup.id } : {}),
         }),
       })
 
       const rawBody = await response.text()
       let payload = null
-
       try {
         payload = rawBody ? JSON.parse(rawBody) : null
       } catch {
@@ -132,154 +182,126 @@ export default function GroupJoinPage() {
         const firstApiError = payload?.errors && typeof payload.errors === 'object'
           ? Object.values(payload.errors).flat().filter(Boolean)[0]
           : null
-
         if (payload?.errors && typeof payload.errors === 'object') {
           setJoinErrors(current => ({ ...current, ...payload.errors }))
         }
-
-        if (firstApiError) {
-          throw new Error(firstApiError)
-        }
-
-        if (response.status < 500 && payload?.message) {
-          throw new Error(payload.message)
-        }
-
-        console.error('Group join submission failed:', response.status, rawBody)
-        throw new Error('Unable to send your group registration right now. Please try again in a moment.')
+        throw new Error(firstApiError || (response.status < 500 && payload?.message) || 'Unable to send your group enquiry right now. Please try again in a moment.')
       }
 
-      setJoinForm({
-        ...initialJoinForm,
-        subject: `Joining ${group.name}`,
-      })
+      setSuccessMessage(`Your ${isJoinRequest ? 'request to join' : 'request for information about'} ${selectedName} has been sent to the parish team.`)
+      setJoinForm({ ...initialJoinForm, group_choice: groupSlug && activeGroup ? `active:${activeGroup.id}` : '' })
       setJoinErrors({})
       setSuccessDialogOpen(true)
     } catch (submitError) {
-      console.error('Group join submission error:', submitError)
-      setError(submitError?.message || 'Unable to send your group registration right now. Please try again in a moment.')
+      console.error('Group enquiry submission error:', submitError)
+      setError(submitError?.message || 'Unable to send your group enquiry right now. Please try again in a moment.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="contact-page-container">
-      <PageHero
-        title={group ? `Join ${group.name}` : 'Join a Parish Group'}
-        subtitle={group ? 'Send your details to the group team and we will help you get connected.' : 'Choose a parish group and send your registration enquiry online.'}
-        centered={true}
-      />
+    <div className="contact-page-container group-join-page">
+      <PageHero title="Join Group" subtitle="Choose a parish group or ministry to join, or ask for more information." centered={true} />
 
       <section className="section">
-        <div className="container">
-          {isLoadingGroup ? <p className="contact-feedback">Loading group details...</p> : null}
+        <div className="container group-join-layout">
+          <aside className="group-join-aside">
+            <p className="contact-kicker">Get connected</p>
+            <h2>Find the right group for you</h2>
+            <p>Select any listed group or ministry. If you cannot find the one you want, choose “Another group or ministry” and type its name.</p>
+            <ul>
+              <li>Join an active group</li>
+              <li>Ask for more information first</li>
+              <li>Tell us about another ministry</li>
+            </ul>
+            <Link to="/parish-groups" className="group-join-back-link">View all community opportunities</Link>
+          </aside>
 
-          {!isLoadingGroup && !group ? (
-            <div className="card" style={{ maxWidth: '760px', margin: '0 auto' }}>
-              <h2>Group not found</h2>
-              <p>The parish group you requested could not be found or is not currently active.</p>
-              <div className="form-actions-row" style={{ marginTop: '20px' }}>
-                <button type="button" className="btn-minimal-dark" onClick={() => navigate('/parish-groups')}>
-                  Back to Parish Groups
-                </button>
-                <Link to="/contact" className="btn-minimal-dark">Contact the Parish Office</Link>
-              </div>
+          <div className="group-join-form-card">
+            <div className="group-join-form-heading">
+              <p className="contact-kicker">Group enquiry</p>
+              <h2>How would you like to get involved?</h2>
             </div>
-          ) : null}
 
-          {group ? (
-            <div className="contact-bottom-grid two-columns">
-              <div className="contact-column">
-                <h3>About This Group</h3>
-                <p>{group.description || 'This active parish group is welcoming new enquiries and registrations.'}</p>
-                <div className="content-card" style={{ marginTop: '20px' }}>
-                  <h3>What happens next?</h3>
-                  <p>Your registration enquiry is sent directly into the parish admin system and routed to the right group team. They can then review it and contact you using the details you provide.</p>
+            {error ? <div className="contact-feedback error">{error}</div> : null}
+            {isLoadingGroups ? <div className="contact-feedback">Loading active groups…</div> : null}
+
+            <form className="contact-form-minimal" onSubmit={handleSubmit} noValidate>
+              <fieldset className="group-intent-fieldset">
+                <legend>What would you like to do?</legend>
+                <label className="radio-option">
+                  <input type="radio" name="intent" value="join" checked={joinForm.intent === 'join'} onChange={handleChange} />
+                  Join the group
+                </label>
+                <label className="radio-option">
+                  <input type="radio" name="intent" value="learn" checked={joinForm.intent === 'learn'} onChange={handleChange} />
+                  Ask for more information
+                </label>
+              </fieldset>
+
+              <div className="form-group">
+                <label htmlFor="group-choice">Which group or ministry?</label>
+                <select id="group-choice" name="group_choice" value={joinForm.group_choice} onChange={handleChange} aria-invalid={Boolean(joinErrors.group_choice)}>
+                  <option value="">Select a group or ministry</option>
+                  {groupOptions.map(option => <option key={option.key} value={option.key}>{option.name}</option>)}
+                  <option value="other">Another group or ministry</option>
+                </select>
+                {joinErrors.group_choice ? <span className="field-error">{joinErrors.group_choice[0]}</span> : null}
+              </div>
+
+              {joinForm.group_choice === 'other' ? (
+                <div className="form-group">
+                  <label htmlFor="other-group">Group or ministry name</label>
+                  <input id="other-group" name="other_group" value={joinForm.other_group} onChange={handleChange} placeholder="Type the group or ministry" aria-invalid={Boolean(joinErrors.other_group)} />
+                  {joinErrors.other_group ? <span className="field-error">{joinErrors.other_group[0]}</span> : null}
                 </div>
-                <div className="content-card" style={{ marginTop: '20px' }}>
-                  <h3>Prefer a general enquiry?</h3>
-                  <p>If you are not sure whether this is the right group, you can also <Link to="/contact" className="click-here-link">contact the parish office here</Link>.</p>
+              ) : null}
+
+              <div className="contact-form-grid">
+                <div className="form-group">
+                  <label htmlFor="join-name">Name</label>
+                  <input id="join-name" name="name" value={joinForm.name} onChange={handleChange} aria-invalid={Boolean(joinErrors.name)} />
+                  {joinErrors.name ? <span className="field-error">{joinErrors.name[0]}</span> : null}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="join-email">Email</label>
+                  <input id="join-email" type="email" name="email" value={joinForm.email} onChange={handleChange} aria-invalid={Boolean(joinErrors.email)} />
+                  {joinErrors.email ? <span className="field-error">{joinErrors.email[0]}</span> : null}
                 </div>
               </div>
 
-              <div className="contact-column">
-                <h3>Join {group.name}</h3>
-                {error ? <div className="contact-feedback error">{error}</div> : null}
-
-                <form className="contact-form-minimal" onSubmit={handleSubmit} noValidate>
-                  <div className="grid-2" style={{ gap: '15px' }}>
-                    <div className="form-group">
-                      <label>Name</label>
-                      <input name="name" value={joinForm.name} onChange={handleChange} aria-invalid={Boolean(joinErrors.name)} />
-                      {joinErrors.name ? <span className="field-error">{joinErrors.name[0]}</span> : null}
-                    </div>
-                    <div className="form-group">
-                      <label>Email</label>
-                      <input type="email" name="email" value={joinForm.email} onChange={handleChange} aria-invalid={Boolean(joinErrors.email)} />
-                      {joinErrors.email ? <span className="field-error">{joinErrors.email[0]}</span> : null}
-                    </div>
-                  </div>
-
-                  <div className="grid-2" style={{ gap: '15px', marginTop: '15px' }}>
-                    <div className="form-group">
-                      <label>Phone Number</label>
-                      <input name="phone" value={joinForm.phone} onChange={handleChange} aria-invalid={Boolean(joinErrors.phone)} />
-                      {joinErrors.phone ? <span className="field-error">{joinErrors.phone[0]}</span> : null}
-                    </div>
-                    <div className="form-group">
-                      <label>Subject</label>
-                      <input name="subject" value={joinForm.subject} onChange={handleChange} aria-invalid={Boolean(joinErrors.subject)} />
-                      {joinErrors.subject ? <span className="field-error">{joinErrors.subject[0]}</span> : null}
-                    </div>
-                  </div>
-
-                  <div className="form-group" style={{ marginTop: '15px' }}>
-                    <label>Why would you like to join?</label>
-                    <textarea
-                      name="message"
-                      rows={6}
-                      value={joinForm.message}
-                      onChange={handleChange}
-                      placeholder={`Tell us a little about your interest in ${group.name}, your availability, or anything the group team should know.`}
-                      aria-invalid={Boolean(joinErrors.message)}
-                    />
-                    {joinErrors.message ? <span className="field-error">{joinErrors.message[0]}</span> : null}
-                  </div>
-
-                  <div className="form-actions-row">
-                    <button
-                      type="button"
-                      className="btn-minimal-dark"
-                      style={{ background: '#777' }}
-                      onClick={() => {
-                        setJoinForm({
-                          ...initialJoinForm,
-                          subject: group ? `Joining ${group.name}` : '',
-                        })
-                        setJoinErrors({})
-                        setError('')
-                      }}
-                    >
-                      Clear
-                    </button>
-                    <button type="submit" className="btn-minimal-dark" disabled={loading}>
-                      {loading ? 'Sending...' : 'Send Registration'}
-                    </button>
-                  </div>
-                </form>
+              <div className="form-group">
+                <label htmlFor="join-phone">Phone Number</label>
+                <input id="join-phone" name="phone" value={joinForm.phone} onChange={handleChange} aria-invalid={Boolean(joinErrors.phone)} />
+                {joinErrors.phone ? <span className="field-error">{joinErrors.phone[0]}</span> : null}
               </div>
-            </div>
-          ) : null}
+
+              <div className="form-group">
+                <label htmlFor="join-message">Message</label>
+                <textarea id="join-message" name="message" rows={6} value={joinForm.message} onChange={handleChange} placeholder="Tell us about your interest, availability, or what you would like to know." aria-invalid={Boolean(joinErrors.message)} />
+                {joinErrors.message ? <span className="field-error">{joinErrors.message[0]}</span> : null}
+              </div>
+
+              <div className="form-actions-row">
+                <button type="button" className="btn-form-secondary" onClick={() => {
+                  setJoinForm({ ...initialJoinForm, group_choice: groupSlug && selectedOption?.group ? selectedOption.key : '' })
+                  setJoinErrors({})
+                  setError('')
+                }}>Clear</button>
+                <button type="submit" className="btn-form-primary" disabled={loading}>{loading ? 'Sending…' : 'Send Enquiry'}</button>
+              </div>
+            </form>
+          </div>
         </div>
       </section>
 
       <FeedbackDialog
         open={successDialogOpen}
         tone="success"
-        title="Registration sent successfully"
-        message={group ? `Your request to join ${group.name} has been sent to the parish team.` : 'Your request has been sent successfully.'}
-        confirmLabel="Back to Parish Groups"
+        title="Group enquiry sent"
+        message={successMessage}
+        confirmLabel="Back to Community"
         secondaryLabel="Stay on This Page"
         onClose={() => setSuccessDialogOpen(false)}
         onConfirm={() => navigate('/parish-groups')}

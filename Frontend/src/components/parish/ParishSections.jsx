@@ -126,10 +126,10 @@ export function ParishCTA({ title, description, buttons }) {
 export function RelatedParishLinks({ current }) {
     const links = [
         { name: 'Our Parish', path: '/parish', icon: '⛪' },
-        { name: 'Parish Council', path: '/parish-council', icon: '👥' },
+        { name: 'Pastoral Parish Council', path: '/parish-council', icon: '👥' },
         { name: 'Parish Groups', path: '/parish-groups', icon: '♡' },
         { name: 'Building Project', path: '/building-project', icon: '🏢' },
-        { name: 'Fundraising', path: '/fundraising', icon: '💰' },
+        { name: 'Fundraising & Income Generation', path: '/fundraising', icon: '💰' },
         { name: 'Safeguarding', path: '/safeguarding', icon: '🛡️' },
     ].filter(l => l.name !== current)
 

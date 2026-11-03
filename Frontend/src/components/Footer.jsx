@@ -66,10 +66,9 @@ export default function Footer() {
                         <li><a href="https://www.wrexhamdiocese.org.uk/" target="_blank" rel="noopener noreferrer">Diocese of Wrexham</a></li>
                     </ul>
                     <div className="footer-social">
-                        <a href="#" aria-label="Facebook" className="social-link">f</a>
-                        <a href="#" aria-label="Instagram" className="social-link">📷</a>
+                        <a href="https://www.facebook.com/wrexhamcathedral/" target="_blank" rel="noopener noreferrer" aria-label="St Mary's Cathedral on Facebook" className="social-link">f</a>
+                        <a href="https://www.instagram.com/dioceseofwrexham/" target="_blank" rel="noopener noreferrer" aria-label="Diocese of Wrexham on Instagram" className="social-link">IG</a>
                         <a href="mailto:secretarywrexhamcathedral@rcdwxm.org.uk" aria-label="Email" className="social-link">✉</a>
-                        <a href="#" aria-label="LinkedIn" className="social-link">in</a>
                     </div>
                 </div>
             </div>

@@ -1,110 +1,121 @@
-import { useMemo } from 'react'
-import { ParishHero, ParishIntro, ParishInfoCards, ParishCTA, RelatedParishLinks } from '../components/parish/ParishSections'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { ParishHero, ParishIntro, ParishCTA, RelatedParishLinks } from '../components/parish/ParishSections'
 import { publicQueries } from '../lib/publicData'
+import './ParishGroupsPage.css'
 
-const groupIcons = ['Choir', 'Prayer', 'Youth', 'Faith', 'Care', 'Serve']
-
-const fallbackCards = [
+const ministryCategories = [
   {
-    icon: 'Choir',
-    title: 'Choir and Musicians',
-    content: 'The parish includes music, singing, and liturgical service opportunities for parishioners who want to share their gifts.',
+    icon: 'FF',
+    title: 'Faith & Spiritual Formation',
+    description: 'Grow in faith through prayer, learning, preparation, and shared reflection.',
+    groups: ['Spiritual Formation', 'Prayer Groups', 'Catechists'],
   },
   {
-    icon: 'Prayer',
-    title: 'Prayer Groups',
-    content: 'Prayer groups, rosary gatherings, and devotional life remain part of the parish rhythm throughout the year.',
+    icon: 'LW',
+    title: 'Liturgy & Worship',
+    description: 'Help the parish celebrate Mass prayerfully, reverently, and with full participation.',
+    groups: ['Extraordinary Ministers', 'Choir', 'Altar Servers', 'Readers'],
   },
   {
-    icon: 'Youth',
-    title: 'Youth and Young Adults',
-    content: 'Children, teenagers, and young adults can find formation, friendship, and support through parish life.',
+    icon: 'CO',
+    title: 'Community & Outreach',
+    description: 'Build friendship, welcome others, and serve people within the parish and across Wrexham.',
+    groups: ['Community Cohesion', 'Youth Group', 'SVP', 'Hospitality Volunteers', 'Tour Guides'],
   },
-  { icon: 'Serve', title: 'SVP and Pastoral Care', content: 'Support parishioners and neighbours through practical care, visits, and outreach.' },
-  { icon: 'Music', title: 'Choir, Readers and Altar Servers', content: 'Help lead worship through music, proclamation, serving, and liturgical ministry.' },
-  { icon: 'Help', title: 'Hospitality, Maintenance and Safety', content: 'Welcome visitors and help care for the Cathedral through hospitality, gardening, cleaning, building, maintenance, and safety.' },
+  {
+    icon: 'CC',
+    title: 'Caring for Our Cathedral',
+    description: 'Use practical skills and shared stewardship to care for our buildings, grounds, and future.',
+    groups: ['Cleaning Teams', 'Gardeners', 'Building & Maintenance', 'Safety & Security', 'Fundraising Group'],
+  },
 ]
 
 export default function ParishGroupsPage() {
   const { data: groups = [], isPending: isLoading } = useQuery(publicQueries.groups)
 
-  const groupCards = useMemo(() => {
-    if (!groups.length) {
-      return fallbackCards
-    }
-
-    return groups.map((group, index) => ({
-      icon: groupIcons[index % groupIcons.length],
-      title: group.name,
-      content: group.description || 'This parish group is active and welcoming new enquiries through the cathedral office.',
-      link: `/parish-groups/${group.slug}/join`,
-    }))
-  }, [groups])
-
-  const featuredJoinLink = useMemo(() => {
-    const youthGroup = groups.find(group => /youth/i.test(group.name) || /youth/i.test(group.slug))
-
-    return youthGroup ? `/parish-groups/${youthGroup.slug}/join` : '/contact?subject=Joining%20a%20Group'
-  }, [groups])
-
   return (
-    <div className="parish-page">
+    <div className="parish-page parish-groups-page">
       <ParishHero
-        title="Parish Groups"
-        subtitle="Join a group and become part of our vibrant cathedral community"
+        title="Community"
+        subtitle="Pray, learn, serve, and build friendships through parish life"
         image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1600"
-        breadcrumb="Parish Groups"
+        breadcrumb="Community"
       />
 
       <ParishIntro
-        title="Faith in Fellowship"
-        text="Parish life at St Mary's Cathedral is vibrant, welcoming, supportive, and full of life. The parish brings together Catholics from many countries and cultures, and there are many ways to pray, serve, learn, and build friendship."
+        title="Find Your Place in Parish Life"
+        text="St Mary's Cathedral brings together people of many ages, backgrounds, cultures, and gifts. Whether you want to deepen your faith, support worship, help others, or care for the Cathedral, there is a welcoming way to get involved."
       />
 
-      <ParishInfoCards cards={groupCards} columns={3} />
-
-      <section className="section" style={{ background: '#fcfaf6' }}>
+      <section className="section ministry-categories-section">
         <div className="container">
-          <h2 className="section-title">Ways to Serve and Connect</h2>
-          <p className="section-subtitle">
-            {isLoading
-              ? 'Loading active parish groups...'
-              : groups.length
-                ? 'These highlights now reflect the active groups managed in the admin dashboard.'
-                : 'The parish office can help you find the right place to get involved.'}
-          </p>
-
-          <div className="content-grid" style={{ marginTop: '40px' }}>
-            <div className="content-card">
-              <h3>Our parish groups</h3>
-              <p>Our groups include Spiritual Formation, Community Cohesion, Prayer Groups, Youth Group, SVP, Extraordinary Ministers, Choir, Altar Servers, Readers, Cleaning Teams, Gardeners, Hospitality Volunteers, Building and Maintenance, Safety and Security, Fundraising, Catechists, and Tour Guides.</p>
-            </div>
-
-            <div className="content-card">
-              <h3>Joining a group</h3>
-              <p>Choose “Join Group” and tell us which group you would like to join or learn more about. Your enquiry will be routed to the right parish team.</p>
-            </div>
-
-            <div className="content-card">
-              <h3>Serving together</h3>
-              <p>Parish life includes prayer, liturgy, service, music, outreach, and support for families. Even if you are new to the parish, there is usually a welcoming place to begin.</p>
-            </div>
-
-            <div className="content-card">
-              <h3>Need help choosing?</h3>
-              <p>If you are unsure where to start, the parish office can help you find a suitable group based on your interests, availability, and the kind of support or service you are looking for.</p>
-            </div>
+          <div className="community-section-heading">
+            <p className="community-kicker">Ways to take part</p>
+            <h2>Groups & Ministries</h2>
+            <p>Activities are organised below by their main area of parish life, making it easier to find the right place for your interests.</p>
+          </div>
+          <div className="ministry-category-grid">
+            {ministryCategories.map((category) => (
+              <article key={category.title} className="ministry-category-card">
+                <span className="ministry-category-icon" aria-hidden="true">{category.icon}</span>
+                <h3>{category.title}</h3>
+                <p>{category.description}</p>
+                <ul>
+                  {category.groups.map((group) => <li key={group}>{group}</li>)}
+                </ul>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
+      <section className="section active-groups-section">
+        <div className="container">
+          <div className="community-section-heading">
+            <p className="community-kicker">Currently listed online</p>
+            <h2>Active Parish Groups</h2>
+            <p>{isLoading ? 'Loading active parish groups…' : 'Select an active group for more information, or use the general Join Group form for any ministry listed above.'}</p>
+          </div>
+
+          {!isLoading && groups.length ? (
+            <div className="active-groups-grid">
+              {groups.map((group) => (
+                <article key={group.id} className="active-group-card">
+                  <h3>{group.name}</h3>
+                  <p>{group.description || 'This parish group welcomes new enquiries through the parish office.'}</p>
+                  <Link to={`/parish-groups/${group.slug}/join`} className="active-group-link">Join or enquire <span aria-hidden="true">→</span></Link>
+                </article>
+              ))}
+            </div>
+          ) : null}
+
+          {!isLoading && !groups.length ? (
+            <div className="community-empty-card">
+              <p>The parish office can help you connect with any group or ministry.</p>
+              <Link to="/parish-groups/join">Open the Join Group form</Link>
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="section join-group-explainer-section">
+        <div className="container join-group-explainer">
+          <div>
+            <p className="community-kicker">Not sure where to begin?</p>
+            <h2>Join a Group or Ask for More Information</h2>
+            <p>Choose the group or ministry you are interested in, tell us whether you want to join or simply know more, and your enquiry will be passed to the appropriate parish team.</p>
+          </div>
+          <Link to="/parish-groups/join" className="join-group-button">Join Group</Link>
+        </div>
+      </section>
+
       <ParishCTA
-        title="Want to Join a Group?"
-        description="We would love to help you find the right group for your interests and schedule. Reach out to us today to get connected."
+        title="Become Part of Our Community"
+        description="Choose a group, ask a question, or tell us where you would like to help."
         buttons={[
-          { text: 'Join a Parish Group', link: featuredJoinLink, primary: true },
-          { text: 'Enquire Online', link: '/contact' },
+          { text: 'Join Group', link: '/parish-groups/join', primary: true },
+          { text: 'Contact Parish Office', link: '/contact' },
         ]}
       />
 

@@ -27,7 +27,7 @@ const categoryOptions = [
     { value: 'safeguarding', label: 'Safeguarding', hint: 'Safeguarding concerns or requests for the safeguarding team.' },
     { value: 'cathedral_hire', label: 'Cathedral Hire / Facilities', hint: 'Venue, facility, or hire-related enquiries.' },
     { value: 'cathedral_tours', label: 'Cathedral Tours', hint: 'Questions about visiting or arranging a Cathedral tour.' },
-    { value: 'donations', label: 'Donations / Fundraising', hint: 'Giving, donations, fundraising, or support enquiries.' },
+    { value: 'donations', label: 'Donations / Fundraising', hint: 'Giving, donations, fundraising, income generation, or support enquiries.' },
     { value: 'schools', label: 'Schools / Education', hint: 'School links, education, or children and family-related enquiries.' },
     { value: 'group_join', label: 'Join a Group', hint: 'Choose this if you want your message routed to a parish group.' },
     { value: 'other', label: 'Other', hint: 'Anything not covered by the options above.' },
@@ -197,30 +197,36 @@ export default function ContactPage() {
                     <div className="contact-hero-grid">
                         <div className="contact-map-wrapper">
                             <iframe
-                                title="Cathedral Location"
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2402.0460492866634!2d-2.9964526841753!3d53.04566497991732!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487ad39f9b5c3b5d%3A0x8e8e8e8e8e8e8e8e!2sSt%20Mary&#39;s%20Cathedral%2C%20Wrexham!5e0!3m2!1sen!2suk!4v1620000000000!5m2!1sen!2suk"
+                                title="Map showing St Mary's Cathedral, Wrexham"
+                                src="https://www.google.com/maps?q=St+Mary%27s+Cathedral,+Regent+Street,+Wrexham+LL11+1RB&output=embed"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}
                                 allowFullScreen=""
                                 loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
                             ></iframe>
                         </div>
                         <div className="contact-intro-content">
                             <p className="contact-kicker">Parish Office</p>
                             <h2>Find us in the heart of Wrexham</h2>
-                            <p>
-                                Thank you for your interest in St Mary's Cathedral. Please use the form below or the parish office contact details for enquiries about worship, parish life, sacramental preparation, or pastoral support.
+                            <p className="contact-intro-lead">
+                                Our parish brings together St Mary's Cathedral in Wrexham and the Church of the Holy Family in Coedpoeth.
                             </p>
-                            <p>
-                                St Mary's Cathedral Parish includes the Cathedral in Wrexham and the Church of the Holy Family in Coedpoeth. We are always happy to help parishioners, visitors, and those exploring the Catholic faith.
+                            <p className="contact-intro-support">
+                                We welcome enquiries about worship, parish life, sacramental preparation, visits, and pastoral support.
                             </p>
-                            <p>
-                                To learn more about St Mary's, please <Link to="/about" className="click-here-link">click here</Link>.
-                            </p>
-                            <p>
-                                For more directions via Google Maps, please <a href="https://goo.gl/maps/8nN7F1H1R3J2" target="_blank" rel="noopener noreferrer" className="click-here-link">click here</a>.
-                            </p>
+                            <div className="contact-intro-actions">
+                                <a
+                                    href="https://www.google.com/maps/search/?api=1&query=St+Mary%27s+Cathedral%2C+Regent+Street%2C+Wrexham+LL11+1RB"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="contact-directions-link contact-directions-link-primary"
+                                >
+                                    Get directions
+                                </a>
+                                <Link to="/about" className="contact-about-link">About St Mary's</Link>
+                            </div>
                             <div className="contact-photo-wrap">
                                 <img src={siteImageUrl('gallery/IMG_4301.jpeg')} alt="Entrance to St Mary's Cathedral" />
                             </div>
@@ -250,18 +256,43 @@ export default function ContactPage() {
                             </span>
                         </div>
                     </div>
-                    <div className="contact-coedpoeth-map" style={{ marginTop: '32px' }}>
-                        <p className="contact-kicker">Our Parish Community</p>
-                        <h2>Church of the Holy Family, Coedpoeth</h2>
-                        <div className="contact-map-wrapper" style={{ height: '300px', marginTop: '16px' }}>
+
+                    <div className="contact-social-row" aria-label="St Mary's Cathedral social media">
+                        <span>Follow parish life and news</span>
+                        <a href="https://www.facebook.com/wrexhamcathedral/" target="_blank" rel="noopener noreferrer">
+                            <span className="contact-social-icon" aria-hidden="true">f</span>
+                            Facebook
+                        </a>
+                        <a href="https://www.instagram.com/dioceseofwrexham/" target="_blank" rel="noopener noreferrer">
+                            <span className="contact-social-icon contact-social-icon-instagram" aria-hidden="true">IG</span>
+                            Instagram
+                        </a>
+                    </div>
+
+                    <div className="contact-coedpoeth-map">
+                        <div className="contact-location-copy">
+                            <p className="contact-kicker">Our Parish Community</p>
+                            <h2>Church of the Holy Family, Coedpoeth</h2>
+                            <p>Park Road, Queen's Place, Coedpoeth, Wrexham, LL11 3SE</p>
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query=Holy+Family+Church%2C+Park+Road%2C+Coedpoeth%2C+Wrexham+LL11+3SE"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="contact-directions-link"
+                            >
+                                Get directions to Holy Family Church
+                            </a>
+                        </div>
+                        <div className="contact-map-wrapper contact-map-wrapper-secondary">
                             <iframe
-                                title="Church of the Holy Family Coedpoeth location"
-                                src="https://www.google.com/maps?q=Church+of+the+Holy+Family+Coedpoeth&output=embed"
+                                title="Map showing the Church of the Holy Family, Coedpoeth"
+                                src="https://www.google.com/maps?q=Holy+Family+Church,+Park+Road,+Coedpoeth,+Wrexham+LL11+3SE&output=embed"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}
                                 allowFullScreen=""
                                 loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
                             ></iframe>
                         </div>
                     </div>
@@ -295,15 +326,26 @@ export default function ContactPage() {
                                 </div>
                                 <div className="address-item">
                                     <span className="address-icon" aria-hidden="true">T</span>
-                                    <div className="address-text">01978 263943</div>
+                                    <div className="address-text">
+                                        <strong>Telephone</strong>
+                                        <a className="address-link" href="tel:01978263943">01978 263943</a>
+                                    </div>
                                 </div>
                                 <div className="address-item">
                                     <span className="address-icon" aria-hidden="true">@</span>
                                     <div className="address-text">
-                                        secretarywrexhamcathedral@rcdwxm.org.uk<br />
-                                        Office hours: Tuesday, Wednesday and Friday, 9:30 AM - 2:30 PM<br />
-                                        To subscribe to our emails,<br />
-                                        please <Link to="/newsletter" className="click-here-link">click here</Link>.
+                                        <strong>Email</strong>
+                                        <a className="address-link address-email" href="mailto:secretarywrexhamcathedral@rcdwxm.org.uk">
+                                            secretarywrexhamcathedral@rcdwxm.org.uk
+                                        </a>
+                                    </div>
+                                </div>
+                                <div className="address-item">
+                                    <span className="address-icon" aria-hidden="true">N</span>
+                                    <div className="address-text">
+                                        <strong>Parish Newsletter</strong>
+                                        <span className="address-note">Receive parish news and updates by email.</span>
+                                        <Link to="/newsletter" className="address-link">Subscribe to our emails</Link>
                                     </div>
                                 </div>
                             </div>

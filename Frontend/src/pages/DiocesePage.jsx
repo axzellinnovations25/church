@@ -13,7 +13,7 @@ export default function DiocesePage() {
         {
             icon: 'PL',
             title: 'Pastoral Leadership',
-            content: 'Learn more about the bishop, Cathedral clergy, deacons, and the pastoral mission that serves communities across North Wales.',
+            content: 'Learn more about Bishop Peter Brignall, Canon Nicholas Enzama, the Cathedral deacons, and the pastoral mission serving communities across North Wales.',
             link: '/about'
         },
         {
@@ -39,7 +39,7 @@ export default function DiocesePage() {
         },
         {
             icon: 'PC',
-            title: 'Parish Pastoral Council',
+            title: 'Pastoral Parish Council',
             content: 'The Pastoral Parish Council supports building, finance, formation, pastoral care, communications, fundraising, community cohesion, and youth ministry.',
             link: '/parish-council'
         },

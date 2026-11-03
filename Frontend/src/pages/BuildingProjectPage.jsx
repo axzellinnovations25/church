@@ -19,7 +19,7 @@ const projectCards = [
     {
         icon: 'P4',
         title: 'Professional Oversight',
-        content: 'Architects, engineers, surveyors, the Parish Pastoral Council, and the Cathedral Dean are working together to manage the programme responsibly.'
+        content: 'Architects, engineers, surveyors, the Pastoral Parish Council, and the Cathedral Dean are working together to manage the programme responsibly.'
     }
 ]
 

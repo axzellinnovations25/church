@@ -45,11 +45,11 @@ const navItems = [
         path: '/parish',
         children: [
             { label: 'Our Parish', path: '/parish' },
-            { label: 'Parish Council', path: '/parish-council' },
+            { label: 'Pastoral Parish Council', path: '/parish-council' },
             { label: 'Parish Groups', path: '/parish-groups' },
             { label: 'Photo Gallery', path: '/gallery' },
             { label: 'Building Project', path: '/building-project' },
-            { label: 'Fundraising', path: '/fundraising' },
+            { label: 'Fundraising & Income Generation', path: '/fundraising' },
             { label: 'Policies & Safeguarding', path: '/safeguarding' },
             { label: 'Pastoral Care', path: '/pastoral-care' },
             { label: 'Schools Links', path: '/schools' },

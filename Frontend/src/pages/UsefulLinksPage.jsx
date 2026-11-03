@@ -23,22 +23,33 @@ const categories = [
         ],
     },
     {
-        title: 'Prayer & Formation',
-        icon: 'PF',
+        title: 'Church & Mission',
+        icon: 'CM',
         links: [
-            { title: 'Universalis', desc: 'Daily Mass readings, Liturgy of the Hours, and spiritual resources.', url: 'https://universalis.com/' },
-            { title: 'EWTN', desc: 'Global Catholic television, radio, and news network.', url: 'https://www.ewtn.com/' },
-            { title: 'CatholicCulture.org', desc: 'Resources for liturgy, Church history, saints, and Catholic life.', url: 'https://www.catholicculture.org/' },
+            { title: "Catholic Bishops' Conference", desc: 'Official news, teaching, and resources from the Catholic Church in England and Wales.', url: 'https://www.cbcew.org.uk/' },
+            { title: 'Missio', desc: "The Pope's charity for world mission, supporting missionaries and young Churches worldwide.", url: 'https://missio.org.uk/' },
+            { title: 'Aid to the Church in Need', desc: 'Prayer, information, and practical support for persecuted and suffering Christians.', url: 'https://acnuk.org/' },
+            { title: 'Stella Maris', desc: 'Catholic pastoral care and practical support for seafarers and fishers.', url: 'https://stellamaris.org.uk/' },
         ],
     },
     {
         title: 'Charities & Organisations',
         icon: 'CO',
         links: [
-            { title: 'CAFOD', desc: 'Catholic Agency for Overseas Development supporting global relief and development.', url: 'https://cafod.org.uk/' },
-            { title: "Catholic Children's Society", desc: 'Supporting disadvantaged children and families.', url: 'https://www.cathchild.org.uk/' },
+            { title: 'CAFOD', desc: 'The official Catholic aid agency for England and Wales, working to overcome poverty and injustice.', url: 'https://cafod.org.uk/' },
             { title: 'St Vincent de Paul Society', desc: 'Voluntary organisation dedicated to tackling poverty and supporting those in need.', url: 'https://www.svp.org.uk/' },
-            { title: 'CHARIS', desc: 'Charismatic renewal resource referenced in the parish prayer material.', url: 'https://www.charisuk.com/' },
+            { title: 'Caritas Social Action Network', desc: 'The domestic social action agency of the Catholic Church in England and Wales.', url: 'https://www.csan.org.uk/' },
+            { title: "Mary's Meals", desc: 'Working with local communities to provide school meals to children living in poverty.', url: 'https://www.marysmeals.org.uk/' },
+        ],
+    },
+    {
+        title: 'Prayer & Formation',
+        icon: 'PF',
+        links: [
+            { title: 'Universalis', desc: 'Daily Mass readings, Liturgy of the Hours, and spiritual resources.', url: 'https://universalis.com/' },
+            { title: 'EWTN', desc: 'Global Catholic television, radio, and news network.', url: 'https://www.ewtn.com/' },
+            { title: 'CatholicCulture.org', desc: 'Resources for liturgy, Church history, saints, and Catholic life.', url: 'https://www.catholicculture.org/' },
+            { title: 'CHARIS', desc: 'Resources for Catholic Charismatic Renewal and prayer communities.', url: 'https://www.charisuk.com/' },
         ],
     },
 ]
@@ -79,13 +90,23 @@ export default function UsefulLinksPage() {
                                 <ul className="links-list">
                                     {cat.links.map((link) => (
                                         <li key={link.title} className="links-item">
-                                            <a href={link.url} className="links-link" target="_blank" rel="noopener noreferrer">
-                                                <div className="link-external-icon">↗</div>
-                                                <div className="link-content">
-                                                    <h3 className="link-title">{link.title}</h3>
-                                                    <p className="link-desc">{link.desc}</p>
-                                                </div>
-                                            </a>
+                                            {link.url.startsWith('/') ? (
+                                                <Link to={link.url} className="links-link">
+                                                    <div className="link-external-icon" aria-hidden="true">→</div>
+                                                    <div className="link-content">
+                                                        <h3 className="link-title">{link.title}</h3>
+                                                        <p className="link-desc">{link.desc}</p>
+                                                    </div>
+                                                </Link>
+                                            ) : (
+                                                <a href={link.url} className="links-link" target="_blank" rel="noopener noreferrer">
+                                                    <div className="link-external-icon" aria-hidden="true">↗</div>
+                                                    <div className="link-content">
+                                                        <h3 className="link-title">{link.title}</h3>
+                                                        <p className="link-desc">{link.desc}</p>
+                                                    </div>
+                                                </a>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>
