@@ -193,6 +193,93 @@
     line-height: 1.55;
 }
 
+.religious-communities {
+    margin-top: 28px;
+    padding: clamp(24px, 4vw, 40px);
+}
+
+.religious-communities-heading {
+    max-width: 760px;
+    margin-bottom: 26px;
+}
+
+.religious-communities-heading h3,
+.cathedral-people-card h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--navy);
+    margin-bottom: 10px;
+}
+
+.religious-communities-heading p,
+.religious-community p,
+.cathedral-people-card p {
+    color: var(--text-mid);
+    line-height: 1.7;
+}
+
+.religious-communities-kicker {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--gold-dark);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.religious-community-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.religious-community {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 16px;
+    padding: 22px;
+    border: 1px solid rgba(30, 58, 95, 0.1);
+    border-radius: var(--radius-lg);
+    background: var(--off-white);
+}
+
+.religious-community-mark {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--gold);
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+}
+
+.religious-community h4 {
+    color: var(--navy);
+    line-height: 1.35;
+    margin-bottom: 8px;
+}
+
+.religious-community a {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 14px;
+    color: var(--navy);
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.cathedral-people-card {
+    margin-top: 18px;
+}
+
+.cathedral-people-card p + p {
+    margin-top: 12px;
+}
+
 .about-timeline {
     margin-top: 34px;
     display: grid;
@@ -245,6 +332,19 @@
     margin-top: 18px;
 }
 
+.about-quote p {
+    margin: 0;
+}
+
+.about-quote cite {
+    display: block;
+    margin-top: 12px;
+    color: var(--navy);
+    font-size: 0.82rem;
+    font-style: normal;
+    font-weight: 800;
+}
+
 .about-page .quote-panel {
     background: var(--white);
     border: 1px solid var(--border);
@@ -285,6 +385,16 @@
 
     .diocese-image {
         order: -1;
+    }
+
+    .religious-community-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .religious-community {
+        grid-template-columns: 1fr;
     }
 }
 

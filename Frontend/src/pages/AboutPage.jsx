@@ -18,7 +18,6 @@ const staff = [
     { role: 'Cathedral Dean', name: 'Canon Nicholas Enzama', title: 'Cathedral Dean and Parish Priest', bio: 'Pastoral leadership for the Cathedral parish and Coedpoeth from 13 October 2026.', image: siteImageUrl('leadership/fr-nicolas-enzama.jpg') },
     { role: 'Permanent Deacon', name: 'Deacon Michael Schoonjans', title: 'Serving the Cathedral parish and Coedpoeth', bio: 'Supporting liturgy, pastoral care, and parish outreach.', initials: 'MS' },
     { role: 'Permanent Deacon', name: 'Deacon Steve Davies', title: 'Serving the Cathedral parish and Coedpoeth', bio: 'Supporting liturgy, pastoral care, and parish outreach.', initials: 'SD' },
-    { role: 'Religious Sisters', name: 'Sisters of the Holy Family and the Evangelising Sisters of Mary', title: 'Part of Cathedral parish life', bio: 'A longstanding presence of prayer, service, and community support.', image: siteImageUrl('leadership/person-6.jpg') },
 ]
 
 const historyTimeline = [
@@ -35,7 +34,7 @@ const historyTimeline = [
     {
         date: '1857',
         title: "St Mary's Opens",
-        content: "Edward Welby Pugin designed the church on Regent Street, which opened on 19 November 1857 and was dedicated to Our Lady of Sorrows. Richard Thompson funded the building, and the rose window was donated by his daughter. The original Wrexham Advertiser quotation will be added when the parish supplies the confirmed wording.",
+        content: "Edward Welby Pugin designed the church on Regent Street, which opened on 19 November 1857 and was dedicated to Our Lady of Sorrows. Richard Thompson funded the building, and the rose window was donated by his daughter.",
     },
     {
         date: '1907–1987',
@@ -103,25 +102,39 @@ export default function AboutPage() {
                             </div>
                         ))}
                     </div>
-                    <div className="content-grid" style={{ marginTop: '24px' }}>
-                        <div className="content-card">
+                    <div className="religious-communities content-card">
+                        <div className="religious-communities-heading">
+                            <span className="religious-communities-kicker">Prayer, presence and service</span>
                             <h3>Religious Communities</h3>
-                            <p>
-                                The Sisters of the Holy Family Convent have been part of the cathedral parish for over 75 years. Visit <a href="https://www.holyfamilybordeaux.org" target="_blank" rel="noopener noreferrer">holyfamilybordeaux.org</a> to learn more about their community. Sr Maria, Sr Celine and Sr Sheila serve alongside the parish.
-                            </p>
-                            <p>
-                                In 2025 the parish welcomed the Sisters from the Missionary Congregation of the Evangelising Sisters of Mary (MCESMM): Sr Triphosa, Sr Jacqueline and Sr Annalydia.
-                            </p>
-                            <p>
-                                Named sisters in the presentation include Sr Maria, Sr Celine, Sr Sheila, Sr Triphosa, Sr Jacqueline, and Sr Annlydia.
-                            </p>
+                            <p>Two religious communities share in the prayer, pastoral life and mission of the Cathedral parish and Coedpoeth.</p>
                         </div>
-                        <div className="content-card">
-                            <h3>People Of The Cathedral</h3>
-                            <p>
-                                Cathedral life has been shaped by clergy, deacons, religious sisters, schools, volunteers, and families from many backgrounds, including Polish, Italian, Filipino, and other international communities who have enriched the parish over time.
-                            </p>
+                        <div className="religious-community-grid">
+                            <article className="religious-community">
+                                <div className="religious-community-mark" aria-hidden="true">HF</div>
+                                <div>
+                                    <h4>Sisters of the Holy Family of Bordeaux</h4>
+                                    <p>The Sisters of the Holy Family Convent have been part of the Cathedral parish for over 75 years. The present community includes Sr Maria, Sr Celine and Sr Sheila.</p>
+                                    <a href="https://www.holyfamilybordeaux.org/" target="_blank" rel="noopener noreferrer">Visit the Holy Family of Bordeaux website <span aria-hidden="true">→</span></a>
+                                </div>
+                            </article>
+                            <article className="religious-community">
+                                <div className="religious-community-mark" aria-hidden="true">ESM</div>
+                                <div>
+                                    <h4>Missionary Congregation of the Evangelizing Sisters of Mary</h4>
+                                    <p>In 2025, the parish welcomed Sr Triphosa, Sr Jacqueline and Sr Annalydia from the Missionary Congregation of the Evangelizing Sisters of Mary (MCESM).</p>
+                                    <a href="https://www.mcesmm.org/" target="_blank" rel="noopener noreferrer">Visit the MCESM website <span aria-hidden="true">→</span></a>
+                                </div>
+                            </article>
                         </div>
+                    </div>
+                    <div className="content-card cathedral-people-card">
+                        <h3>People of the Cathedral</h3>
+                        <p>
+                            The Cathedral is much more than a building. It is a community of clergy, deacons, religious sisters, families, schools, parish groups, volunteers and visitors who bring faith to life through worship, welcome and service.
+                        </p>
+                        <p>
+                            Generations of local families worship alongside people who have made Wrexham their home from Poland, Italy, the Philippines and many other places. Readers, altar servers, musicians, catechists, extraordinary ministers, the SVP, hospitality teams, cleaners, gardeners and many others each contribute to the life and mission of the parish.
+                        </p>
                     </div>
                 </Container>
             </Section>
@@ -140,22 +153,23 @@ export default function AboutPage() {
                             </li>
                         ))}
                     </ol>
-                    <div className="quote-panel about-quote">
-                        "This beautiful structure, which has attracted so much attention and caused so much admiration in the town, is one of the most beautiful specimens of church architecture in the Principality."
-                    </div>
+                    <blockquote className="quote-panel about-quote">
+                        <p>“This beautiful structure, which has attracted so much attention and caused so much admiration in the town, is one of the most beautiful specimens of church architecture in the Principality.”</p>
+                        <cite>Wrexham Advertiser, 1857</cite>
+                    </blockquote>
                 </Container>
             </Section>
 
             <Section id="artefacts" className="about-band">
                 <Container>
-                    <h2 className="section-title">Art And Artefacts</h2>
+                    <h2 className="section-title">Art and Artefacts</h2>
                     <div className="about-gallery">
                         <PhotoGallery images={galleryImages.filter((img) => (
                             [
                                 'Pieta Statue',
                                 'Stained Glass Panel',
                                 'Saint Richard Gwyn Artwork',
-                                'Our Lady and Child Artwork',
+                                'Icon of Our Lady of Częstochowa',
                                 'Santo Nino Display',
                             ].includes(img.title)
                         ))} />
@@ -170,7 +184,7 @@ export default function AboutPage() {
                         <div className="content-card">
                             <h3>Memorials And Sacred Objects</h3>
                             <p>
-                                Highlights mentioned in the PowerPoint include the tomb of Ellen Thompson, a relic shrine of Saint Richard Gwyn, a memorial to Flight Lieutenant David Lord VC, the Polish icon of Our Lady of Czestochowa, a statue of Santo Nino, and the Baptismal font.
+                                Highlights include the tomb of Ellen Thompson, a relic shrine of Saint Richard Gwyn, a memorial to Flight Lieutenant David Lord VC, the Polish icon of Our Lady of Częstochowa, a statue of Santo Niño, and the baptismal font.
                             </p>
                         </div>
                     </div>

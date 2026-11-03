@@ -30,8 +30,8 @@ export const galleryImages = [
   },
   {
     src: publicAsset('gallery/IMG_3836.jpeg'),
-    title: 'Visitor Book',
-    caption: 'A visitor book set out for parishioners and guests to sign.',
+    title: 'Book of Condolence for Pope Francis',
+    caption: 'The Cathedral book of condolence and memorial display for Pope Francis.',
   },
   {
     src: publicAsset('gallery/thumbnail_IMG_7226.jpg'),
@@ -50,8 +50,8 @@ export const galleryImages = [
   },
   {
     src: publicAsset('gallery/IMG_4043.jpeg'),
-    title: 'Community Visit',
-    caption: 'A special visit and community moment outside the cathedral.',
+    title: 'Civic Guests at the Cathedral',
+    caption: 'Civic representatives and guests welcomed at the Cathedral entrance.',
   },
   {
     src: publicAsset('gallery/IMG_4144.jpeg'),
@@ -65,13 +65,13 @@ export const galleryImages = [
   },
   {
     src: publicAsset('gallery/IMG_5234.jpeg'),
-    title: 'Our Lady and Child Artwork',
-    caption: 'A framed devotional image displayed in the cathedral.',
+    title: 'Icon of Our Lady of Częstochowa',
+    caption: 'The Polish icon of Our Lady of Częstochowa displayed in the Cathedral.',
   },
   {
     src: publicAsset('gallery/IMG_5238.jpeg'),
-    title: 'Chapel Information Plaque',
-    caption: 'An information plaque describing the chapel and its history.',
+    title: 'Our Lady of Sorrows and Saint Richard Gwyn Chapel',
+    caption: 'The bilingual plaque explaining the chapel, its Pietà and its connection with Saint Richard Gwyn.',
   },
   {
     src: publicAsset('gallery/bc306027-0afa-411b-9e3a-49be6c553f45 Santo Nino.jfif'),

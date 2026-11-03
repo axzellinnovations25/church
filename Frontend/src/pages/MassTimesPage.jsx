@@ -5,9 +5,10 @@ import PageHero from '../components/PageHero'
 import { publicQueries } from '../lib/publicData'
 import './MassTimesPage.css'
 
-const confessionTimes = [
-    'Saturday: 10.30am to 11.30am',
-    'Additional confession times, including seasonal evening services, are announced in the weekly newsletter',
+const confirmedSundayMasses = [
+    { id: 'cathedral-sunday-1030', day: 'Sunday', start_time: '10.30am', location: "St Mary's Cathedral" },
+    { id: 'cathedral-sunday-1900', day: 'Sunday', start_time: '7.00pm', location: "St Mary's Cathedral" },
+    { id: 'coedpoeth-sunday-0900', day: 'Sunday', start_time: '9.00am', location: 'Holy Family Church, Coedpoeth' },
 ]
 
 const sacramentCards = [
@@ -30,7 +31,8 @@ export default function MassTimesPage() {
     const { data: massTimes = [] } = useQuery(publicQueries.massTimes)
     const [locationFilter, setLocationFilter] = useState('cathedral')
 
-    const normalized = massTimes
+    const publishedMassTimes = massTimes.length ? massTimes : confirmedSundayMasses
+    const normalized = publishedMassTimes
         .map(item => ({
             ...item,
             location: item.location || "St Mary's Cathedral",
@@ -109,11 +111,9 @@ export default function MassTimesPage() {
 
                     <div className="contact-strip" style={{ marginTop: '32px' }}>
                         <h3 style={{ marginBottom: '12px', fontFamily: 'Playfair Display, serif' }}>Confession Times</h3>
-                        <ul className="bullet-list" style={{ color: 'var(--white)' }}>
-                            {confessionTimes.map((item) => (
-                                <li key={item}>{item}</li>
-                            ))}
-                        </ul>
+                        <p style={{ color: 'var(--white)', margin: 0 }}>
+                            Confession times and seasonal services can change. Please see the <Link to="/newsletter" style={{ color: 'var(--white)', textDecoration: 'underline', fontWeight: 800 }}>latest weekly newsletter</Link> for the current schedule.
+                        </p>
                     </div>
 
                     <div className="text-center mt-48 newsletter-cta">
@@ -155,6 +155,7 @@ export default function MassTimesPage() {
 
                 <section className="section">
                     <h2 className="section-title">Prayer And Devotion</h2>
+                    <p className="section-subtitle">Regular times may change during Holy Days and parish events; please check the weekly newsletter before travelling.</p>
 
                     <div className="grid-2 other-services-grid">
                         {prayerSchedule.map((service) => (
